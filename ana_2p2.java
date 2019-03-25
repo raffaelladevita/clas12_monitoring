@@ -103,6 +103,7 @@ public class ana_2p2 {
 			reader.close();
 		}
 		System.out.println("Total : " + count + " events");
+		ana_mon.ratio_to_trigger();
 		ana_mon.plot();
 		ana_mon.write();
 		ana_cen.plot();
@@ -112,6 +113,7 @@ public class ana_2p2 {
 		ana_tof.write();
 		ana_occ.plot();
 		ana_htc.plot();
+		ana_htc.write();
 		ana_cnd.fit();
 		ana_cnd.plot();
 		ana_cnd.write();

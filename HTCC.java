@@ -98,7 +98,7 @@ public class HTCC{
 					String histitle = String.format("HTCC ADC S%d, Ring %d, %s",s+1,r+1,stringSide);
 					H_HTCC_adc[counter] = new H1F(String.format("H_HTCC_adc%d",s+1),histitle,100,0,10000);
 					histitle = String.format("HTCC NPHE S%d, Ring %d, %s",s+1,r+1,stringSide);
-					H_HTCC_nphe[counter] = new H1F(String.format("H_HTCC_nphe%d",s+1),histitle,100,0,50);
+					H_HTCC_nphe[counter] = new H1F(String.format("H_HTCC_nphe_s%d_r%d_side%d",s+1,r+1,side+1),histitle,100,0,50); //title ch
 					histitle = String.format("HTCC UNMATCHED NPHE S%d, Ring %d, %s",s+1,r+1,stringSide);
 					H_HTCC2_nphe[counter] = new H1F(String.format("H_HTCC2_nphe%d",s+1),histitle,100,0,50);
 				}
@@ -499,5 +499,23 @@ public class HTCC{
                 }   
                 System.out.println("Total : " + count + " events");
                 ana.plot();
+		ana.write();
         }   
+
+	public void write() {
+		TDirectory dirout = new TDirectory();
+		dirout.mkdir("/HTCC/");
+		dirout.cd("/HTCC/");
+		for(int s=0;s<48;s++){
+						dirout.addDataSet(H_HTCC_nphe[s]);
+		}
+
+		if(!write_volatile){
+				if(runNum>0)dirout.writeFile("plots"+runNum+"/out_HTCC_"+runNum+".hipo");
+				else dirout.writeFile("plots/out_HTCC.hipo");
+		}
+	}
+
+
+
 }
