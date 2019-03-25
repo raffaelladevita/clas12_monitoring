@@ -21,7 +21,7 @@ import org.jlab.groot.base.GStyle;
 public class monitor2p2GeV {
 	boolean userTimeBased, write_volatile;
 	int Nevts, Nelecs, Ntrigs, runNum;
-        public int Nmuons, Nmuontrigs; 
+        int Nmuons, Nmuontrigs; 
 	int[] Nmuonpairs, Ntrackspair, Nmuonpairs_v8, Ntrackspair_v8;
 	boolean[] trigger_bits;
 	public float EB, Ebeam;
@@ -146,13 +146,11 @@ public class monitor2p2GeV {
 		found_eTraj = 0;
 		found_eHTCC = 0;
 		trigger_bits = new boolean[32];
-		//Ebeam = 2.22f;
-                //if(reqEB>0 && reqEB<4)Ebeam=2.22f;
-                //if(reqEB>4 && reqEB<7.1)Ebeam=6.42f;
-                //if(reqEB>7.1 && reqEB<9)Ebeam=7.55f;
-                //if(reqEB>9)Ebeam=10.6f;
-                Ebeam = EB;
-System.out.println("Beam energy = "+Ebeam);
+		Ebeam = 2.22f;
+                if(reqEB>0 && reqEB<4)Ebeam=2.22f;
+                if(reqEB>4 && reqEB<7.1)Ebeam=6.42f;
+                if(reqEB>7.1 && reqEB<9)Ebeam=7.55f;
+                if(reqEB>9)Ebeam=10.6f;
 		String choiceTracking = " warning! Unspecified tracking";
 		if(userTimeBased)choiceTracking=" using TIME BASED tracking";
 		if(!userTimeBased)choiceTracking=" using HIT BASED tracking";
@@ -275,7 +273,7 @@ System.out.println("Beam energy = "+Ebeam);
 		H_trig_sector_count = new H1F("H_trig_sector_count","H_trig_sector_count",6,0.5,6.5);
 		H_trig_sector_count.setTitle("N trigs per sect");
 		H_trig_sector_count.setTitleX("Sector number");
-                H_muon_trig_sector_count = new H1F("H_muon_trig_sector_count","H_muon_trig_sector_count",3,0.5,3.5);
+                H_muon_trig_sector_count = new H1F("H_muon_trig_sector_count","H_muon_trig_sector_count",6,0.5,6.5);
                 H_muon_trig_sector_count.setTitle("N muon trigs per sect-pair");
                 H_muon_trig_sector_count.setTitleX("Sector-pair number");
 		H_rand_trig_sector_count = new H1F("H_rand_trig_sector_count","H_rand_trig_sector_count",7,0.5,7.5);
@@ -284,19 +282,19 @@ System.out.println("Beam energy = "+Ebeam);
 		H_trig_sector_elec = new H1F("H_trig_sector_elec","H_trig_sector_elec",6,0.5,6.5);
 		H_trig_sector_elec.setTitle("N elec per sect");
 		H_trig_sector_elec.setTitleX("Sector number");
-                H_trig_sector_muon = new H1F("H_trig_sector_muon","H_trig_sector_muon",3,0.5,3.5);
+                H_trig_sector_muon = new H1F("H_trig_sector_muon","H_trig_sector_muon",6,0.5,6.5);
                 H_trig_sector_muon.setTitle("N muon per sect");
                 H_trig_sector_muon.setTitleX("Sector number");
-                H_trig_sector_muontrack = new H1F("H_trig_sector_muontrack","H_trig_sector_muontrack",3,0.5,3.5);
+                H_trig_sector_muontrack = new H1F("H_trig_sector_muontrack","H_trig_sector_muontrack",6,0.5,6.5);
                 H_trig_sector_muontrack.setTitle("N muonpairs trigger per sect");
                 H_trig_sector_muontrack.setTitleX("Sector number");
 		H_trig_sector_elec_rat = new H1F("H_trig_sector_elec_rat","H_trig_sector_elec_rat",6,0.5,6.5);
 		H_trig_sector_elec_rat.setTitle("N elec / trig vs sector");
 		H_trig_sector_elec_rat.setTitleX("Sector number");
-                H_trig_sector_muon_rat = new H1F("H_trig_sector_muon_rat","H_trig_sector_muon_rat",3,0.5,3.5);
+                H_trig_sector_muon_rat = new H1F("H_trig_sector_muon_rat","H_trig_sector_muon_rat",6,0.5,6.5);
                 H_trig_sector_muon_rat.setTitle("N muon / trig vs sector");
                 H_trig_sector_muon_rat.setTitleX("Sector-pair number");
-                H_trig_sector_muontrack_rat = new H1F("H_trig_sector_muontrack_rat","H_trig_sector_muontrack_rat",3,0.5,3.5);
+                H_trig_sector_muontrack_rat = new H1F("H_trig_sector_muontrack_rat","H_trig_sector_muontrack_rat",6,0.5,6.5);
                 H_trig_sector_muontrack_rat.setTitle("N muon trig / N muon vs sector");
                 H_trig_sector_muontrack_rat.setTitleX("Sector-pair number");
 
@@ -909,7 +907,6 @@ System.out.println("Beam energy = "+Ebeam);
 		H_o_vt.setTitleX("t (ns)");
 
         	VB = new LorentzVector(0,0,Ebeam,Ebeam);
-System.out.println("Beam energy = "+Ebeam);
 		VT = new LorentzVector(0,0,0,0.93827);
 		H_e_theta_phi = new H2F("H_e_theta_phi","H_e_theta_phi",100,-180,180,100,0,40);
 		H_e_theta_phi.setTitle("electron theta vs phi");
@@ -1986,7 +1983,7 @@ System.out.println("Beam energy = "+Ebeam);
         }
         
 
-	public int makeMuonPairTrigPurity(DataBank bank, DataEvent event){
+	public int makeMuonPairTrigPurity_v5(DataBank bank, DataEvent event){
                 int[] sectorp;
                 int[] sectorn;
                 sectorn = new int[6];
@@ -1995,8 +1992,8 @@ System.out.println("Beam energy = "+Ebeam);
 		int tbit;
 
                 for (int j=0; j<3; j++) {
-			Ntrackspair[j]=0;
 			Nmuonpairs[j]=0;
+			Ntrackspair[j]=0;
                 }   
 
                	for(int k = 0; k < bank.rows(); k++){
@@ -2004,9 +2001,7 @@ System.out.println("Beam energy = "+Ebeam);
                        	byte q = bank.getByte("charge", k);
                        	int status = bank.getShort("status", k);
                        	boolean inDC = (status>=2000 && status<4000);//Only forward detectors; CND is >=4000
-			if(inDC && isDCmatch(event,k)>0) {
-				sect = isDCmatch(event, k);
-                        //if(inDC && isFTOFmatch(event,k)>0 && isECALmatch(event,k)>0 && isDCmatch(event,k)>0){
+                        if(inDC && isFTOFmatch(event,k)>0 && isECALmatch(event,k)>0 && isDCmatch(event,k)>0){
 				//System.out.println("charge="+q+" pid="+pid+" tofsect="+isFTOFmatch(event,k)+" ecalsect="+isECALmatch(event,k)+" dcsect="+isDCmatch(event,k)+" "+trigger_bits[7]+ " " +trigger_bits[8]+ " " +trigger_bits[9]);
                                 float energy_ecal_E=0;
 				float energy_pcal_E=0;
@@ -2017,8 +2012,7 @@ System.out.println("Beam energy = "+Ebeam);
                                                 	if(ECALbank.getInt("layer",l)==1) {sect=ECALbank.getByte("sector",l);energy_pcal_E=ECALbank.getFloat("energy",l);}
 							if(ECALbank.getInt("layer",l)==4 || ECALbank.getInt("layer",l)==7) {energy_ecal_E += ECALbank.getFloat("energy",l);}
                                         }
-				//if (energy_ecal_E > 0.04 && energy_pcal_E > 0.01 && sect > 0) {
-				if (energy_ecal_E  >= 0.0 && energy_pcal_E >= 0.) {
+				if (energy_ecal_E > 0.04 && energy_pcal_E > 0.01 && sect > 0) {
 				
 				//System.out.println("charge="+q+" pid="+pid+" tofsect="+isFTOFmatch(event,k)+" ecalsect="+isECALmatch(event,k)+" dcsect="+isDCmatch(event,k)+" pcalsect="+sect+ " " +trigger_bits[7]+ " " +trigger_bits[8]+ " " +trigger_bits[9]);
 					if(q==1) sectorp[sect-1]++;
@@ -2031,32 +2025,92 @@ System.out.println("Beam energy = "+Ebeam);
                 
                 for (int kk = 0;kk < 3;kk++) {
 			tbit = kk+7;
-			if (runNum <=6296) { 
-				if (trigger_bits[tbit]) {
-					if ((sectorp[kk]+sectorn[kk]) >=1 && (sectorp[kk+3]+sectorn[kk+3]) >=1) {
-						H_trig_sector_muon.fill(kk+1);
-						H_trig_sector_muon_rat.fill(kk+1);
-						Nmuonpairs[kk]++; 
-						Nmuons++;
-                                		Ntrackspair[kk] = sectorp[kk]+sectorn[kk+3];
-					}
+			if (trigger_bits[tbit]) {
+				if ((sectorp[kk]+sectorn[kk]) >=1 && (sectorp[kk+3]+sectorn[kk+3]) >=1) {
+					H_trig_sector_muon.fill(kk+1);
+					H_trig_sector_muon_rat.fill(kk+1);
+					Nmuonpairs[kk]++; 
+                                	Ntrackspair[kk] = sectorp[kk]+sectorn[kk+3];
+					return 1;
 				}
 			}
-			else if (runNum > 6296) {
-                                if (trigger_bits[tbit] || trigger_bits[tbit+3]) {
-					 //if ((sectorp[kk]>=1 && sectorn[kk+3]>=1) || (sectorn[kk]>=1 && sectorp[kk+3]>=1)) {
-                                        if ((sectorp[kk]+sectorn[kk]) >=1 && (sectorp[kk+3]+sectorn[kk+3]) >=1) {
-                                                H_trig_sector_muon.fill(kk+1);
-                                                H_trig_sector_muon_rat.fill(kk+1);
-                                                Nmuonpairs[kk]++;
-						Nmuons++;
-                                                Ntrackspair[kk] = sectorp[kk]+sectorn[kk+3];
+                }
+                return -1;
+	}
+
+        public int makeMuonPairTrigPurity_v8(DataBank bank, DataEvent event){
+                int[] sectorp;
+                int[] sectorn;
+                sectorn = new int[6];
+                sectorp = new int[6];
+                int sect = -1;
+                int tbit;
+
+                for (int j=0; j<6; j++) {
+                        Nmuonpairs_v8[j]=0;
+                        Ntrackspair_v8[j]=0;
+                }
+
+                for(int k = 0; k < bank.rows(); k++){
+                        int pid = bank.getInt("pid", k);
+                        byte q = bank.getByte("charge", k);
+                        int status = bank.getShort("status", k);
+                        boolean inDC = (status>=2000 && status<4000);//Only forward detectors; CND is >=4000
+                        if(inDC && isFTOFmatch(event,k)>0 && isECALmatch(event,k)>0 && isDCmatch(event,k)>0){
+                                //System.out.println("charge="+q+" pid="+pid+" tofsect="+isFTOFmatch(event,k)+" ecalsect="+isECALmatch(event,k)+" dcsect="+isDCmatch(event,k)+" "+trigger_bits[7]+ " " +trigger_bits[8]+ " " +trigger_bits[9]);
+                                float energy_ecal_E=0;
+                                float energy_pcal_E=0;
+                                if(userTimeBased && event.hasBank("REC::Calorimeter")){
+                                        DataBank ECALbank = event.getBank("REC::Calorimeter");
+                                        for(int l = 0; l < ECALbank.rows(); l++)
+                                                if(ECALbank.getShort("pindex",l)==k){
+                                                        if(ECALbank.getInt("layer",l)==1) {sect=ECALbank.getByte("sector",l);energy_pcal_E=ECALbank.getFloat("energy",l);}
+                                                        if(ECALbank.getInt("layer",l)==4 || ECALbank.getInt("layer",l)==7) {energy_ecal_E += ECALbank.getFloat("energy",l);}
+							//System.out.println("ECal row = "+l+ " E_pcal = "+energy_pcal_E+" "+energy_ecal_E+" "+ECALbank.getInt("layer",l));
                                         }
+                                if (energy_ecal_E > 0.04 && energy_pcal_E > 0.01 && sect > 0) {
+
+                                //System.out.println("charge="+q+" pid="+pid+" tofsect="+isFTOFmatch(event,k)+" ecalsect="+isECALmatch(event,k)+" dcsect="+isDCmatch(event,k)+" pcalsect="+sect+ " " +trigger_bits[7]+ " " +trigger_bits[8]+ " " +trigger_bits[9]+ " " +trigger_bits[10]+ " " +trigger_bits[11]+ " " +trigger_bits[12]);
+                                        if(q==1) sectorp[sect-1]++;
+                                        if(q==-1) sectorn[sect-1]++;
+                                //System.out.println("sector = "+sect+" Number of+ = "+sectorp[sect-1]+" Number of - = "+sectorn[sect-1]);
+                                }
                                 }
                         }
                 }
+
+                for (int kk = 0;kk < 6;kk++) {
+                        tbit = kk+7;
+			int jj = -1;
+			if ((trigger_bits[7] || trigger_bits[8] || trigger_bits[9] || trigger_bits[10] || trigger_bits[11] || trigger_bits[12]) && tbit <= 9) {
+                        //if ((trigger_bits[tbit]) && tbit <= 9) {
+				if (kk <=2) jj = kk;
+                                	if ((sectorn[jj]) >=1 && sectorp[jj+3] >=1) {
+                                        	H_trig_sector_muon.fill(kk+1);
+                                        	H_trig_sector_muon_rat.fill(kk+1);
+                                        	Nmuonpairs_v8[kk]++;
+                                        	Ntrackspair_v8[kk] = sectorn[jj]+sectorp[jj+3];
+						//System.out.println("kk = " +kk+ " tbit= " +tbit+ " jj= " +jj+ " Nnegatives=" +sectorn[jj]+ "Npositives= " +sectorp[jj+3]+ " " +Nmuonpairs_v8[kk]);  
+                                	}
+                        	}
+			if ((trigger_bits[7] || trigger_bits[8] || trigger_bits[9] || trigger_bits[10] || trigger_bits[11] || trigger_bits[12]) && tbit > 9) {
+			//if ((trigger_bits[tbit]) && tbit > 9) {
+				if (kk > 2) jj = kk-3;
+                                if ((sectorp[jj]) >=1 && sectorn[jj+3] >=1) {
+                                        H_trig_sector_muon.fill(kk+1);
+                                        H_trig_sector_muon_rat.fill(kk+1);
+                                        Nmuonpairs_v8[kk]++;
+                                        Ntrackspair_v8[kk] = sectorp[jj]+sectorn[jj+3];
+					//System.out.println("kk = " +kk+ " tbit= " +tbit+ " jj= " +jj+ " Nnegatives=" +sectorp[jj]+ "Npositives= " +sectorn[jj+3]+ " " +Nmuonpairs_v8[kk]);
+                                }
+                        }
+                }
+		//System.out.println("End event");
+		//System.out.println(" ");
                 return 1;
-	}
+        }
+
+
 
 	public void getTBTrack(DataBank bank){ 
 		if(e_track_ind>-1 && e_track_ind<bank.rows()){
@@ -2779,9 +2833,12 @@ System.out.println("Beam energy = "+Ebeam);
 		}
 		else if (runNum > 6296) {
 			if(trigger_bits[7]||trigger_bits[8]||trigger_bits[9] || trigger_bits[10] || trigger_bits[11] || trigger_bits[12]) Nmuontrigs++;
-                        if(trigger_bits[7] || trigger_bits[10])H_muon_trig_sector_count.fill(1);
-                        if(trigger_bits[8] || trigger_bits[11])H_muon_trig_sector_count.fill(2);
-                        if(trigger_bits[9] || trigger_bits[12])H_muon_trig_sector_count.fill(3);
+                        if(trigger_bits[7])H_muon_trig_sector_count.fill(1);
+                        if(trigger_bits[8])H_muon_trig_sector_count.fill(2);
+                        if(trigger_bits[9])H_muon_trig_sector_count.fill(3);
+			if(trigger_bits[10])H_muon_trig_sector_count.fill(4);
+                        if(trigger_bits[11])H_muon_trig_sector_count.fill(5);
+                        if(trigger_bits[12])H_muon_trig_sector_count.fill(6);
 		}
 
 		DataBank eventBank = null, partBank = null, trackBank = null, trackDetBank = null, ecalBank = null, cherenkovBank = null, scintillBank = null, crossBank = null;
@@ -2820,7 +2877,10 @@ System.out.println("Beam energy = "+Ebeam);
 		if(event.hasBank("ECAL::clusters"))fillTrigECAL(event.getBank("ECAL::clusters"));
 		if(trackBank!=null&&trackDetBank!=null)getTrigTBTrack(trackDetBank,trackBank);
 		if(partBank!=null)makeTrigOthers(partBank,event);
-		if(partBank!=null)makeMuonPairTrigPurity(partBank,event);
+		if(partBank!=null) {
+			if (runNum <= 6296) makeMuonPairTrigPurity_v5(partBank,event);	
+			else if (runNum > 6296) makeMuonPairTrigPurity_v8(partBank,event);	
+		}
 
 		if(event.hasBank("ECAL::clusters"))fillECAL(event.getBank("ECAL::clusters"));
 		if(trackDetBank!=null && event.hasBank("HTCC::rec"))checkTrigECAL(trackDetBank,event.getBank("HTCC::rec"));
@@ -3031,7 +3091,7 @@ System.out.println("Beam energy = "+Ebeam);
 				H_epip_e_W_Q2.fill(e_W,e_Q2);
 				float[] elec_4v = {(float)Ve.e(),(float)Ve.px(),(float)Ve.py(),(float)Ve.pz()};
 				float[] neut_4v = {(float)VNeutr.e(),(float)VNeutr.px(),(float)VNeutr.py(),(float)VNeutr.pz()};
-				float epip_phi = Phi_Calculator(elec_4v,neut_4v, Ebeam);
+				float epip_phi = Phi_Calculator(elec_4v,neut_4v, 10.6f);
 				VNeutr.sub(VT);
 				float epip_t = (float) -VNeutr.mass2();
 				H_epip_e_t_phi.fill(epip_phi,epip_t);
@@ -4230,7 +4290,7 @@ System.out.println("Beam energy = "+Ebeam);
 		if(args.length>1)filelist = args[1];
                 long maxevents = 50000000L;
                 if(args.length>2)maxevents=Integer.parseInt(args[2]);
-                float Eb = 10.2f;
+                float Eb = 10.6f;
                 if(args.length>3)Eb=Float.parseFloat(args[3]);
 		if(args.length>4)if(Integer.parseInt(args[4])==0)useTB=false;
 		monitor2p2GeV ana = new monitor2p2GeV(runNum,Eb,useTB,useVolatile);
@@ -4266,9 +4326,7 @@ System.out.println("Beam energy = "+Ebeam);
 					int ntrigs = ana.getNtrigs();
 					int nelecs = ana.getNelecs();
 					float ratio = 0f;if(ntrigs>0)ratio=100f*nelecs/ntrigs;
-					//float muonratio = 0f; if(Nmuontrigs > 0)muonratio=100f*Nmuons/Nmuontrigs;
 					String diagnost = String.format("N elecs=%d N trigs=%d , ratio %1.2f%% ; progress : %d/%d",nelecs,ntrigs,ratio,progresscount,filetot);
-					//System.out.println("N muon triggers = "+Nmuontrigs+ "N muon pairs (TBT) = "+Nmuons+ " Ratio = "+muonratio);
 					//System.out.println(count/1000 + "k events, file "+(fileN+1)+" (monitor2p2GeV running on "+runstrg+") "+diagnost);
 					System.out.println(count/1000 + "k events, (monitor2p2GeV running on "+runstrg+") "+diagnost);
 				}
