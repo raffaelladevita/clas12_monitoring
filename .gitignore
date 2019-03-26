@@ -1,0 +1,4 @@
+*.class
+plots*
+list*
+.DS_Store
