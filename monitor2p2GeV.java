@@ -2781,19 +2781,19 @@ System.out.println("Beam energy = "+Ebeam);
                 for(int k=0;k<rawScaler.rows();k++){
                         if(rawScaler.getShort("channel",k)==chan && rawScaler.getByte("slot",k)==0){
                                 if(isLong)foundGatedFCup = (float)rawScaler.getLong("value",k);
-				else foundGatedFCup = (float)rawScaler.getInt("value",k);
+				else foundGatedFCup = (float)rawScaler.getLong("value",k);
                         }   
                         if(rawScaler.getShort("channel",k)==chan && rawScaler.getByte("slot",k)==1){
                                 if(isLong)foundFCup = rawScaler.getLong("value",k);
-				else foundFCup = rawScaler.getInt("value",k);
+				else foundFCup = rawScaler.getLong("value",k);
                         }   
                         if(rawScaler.getShort("channel",k)==chan2 && rawScaler.getByte("slot",k)==0){
                                 if(isLong)foundGatedClock = rawScaler.getLong("value",k);
-				else foundGatedClock = rawScaler.getInt("value",k);
+				else foundGatedClock = rawScaler.getLong("value",k);
                         }   
                         if(rawScaler.getShort("channel",k)==chan2 && rawScaler.getByte("slot",k)==1){
                                 if(isLong)foundClock = rawScaler.getLong("value",k);
-				else foundClock = rawScaler.getInt("value",k);
+				else foundClock = rawScaler.getLong("value",k);
                         }   
                 }
 		if( ! (foundFCup>0 && foundGatedFCup>0) ){
@@ -2801,11 +2801,11 @@ System.out.println("Beam energy = "+Ebeam);
 			for(int k=0;k<rawScaler.rows();k++){
 				if(rawScaler.getShort("channel",k)==chan && rawScaler.getByte("slot",k)==0){
 					if(isLong)foundGatedFCup = (float)rawScaler.getLong("value",k);
-					else foundGatedFCup = (float)rawScaler.getInt("value",k);
+					else foundGatedFCup = (float)rawScaler.getLong("value",k);
 				}   
 				if(rawScaler.getShort("channel",k)==chan && rawScaler.getByte("slot",k)==1){
 					if(isLong)foundFCup = rawScaler.getLong("value",k);
-					else foundFCup = rawScaler.getInt("value",k);
+					else foundFCup = rawScaler.getLong("value",k);
 				}
 			}	
 		}
