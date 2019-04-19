@@ -31,6 +31,7 @@ public class occupancies {
 	H2F H_BMT_occ;
 	H1F[][] H_BMT_occ_LS;
 	H2F H_BMT_R1_phi_z, H_BMT_R2_phi_z, H_BMT_R3_phi_z;
+	H2F[] H_BMT_occ_StripLayer;
 	
 	H2F H_BST_R1_theta, H_BST_R2_theta, H_BST_R3_theta;
 	H2F H_BMT_R1_theta, H_BMT_R2_theta, H_BMT_R3_theta;
@@ -96,6 +97,7 @@ public class occupancies {
 		H_BMT_occ.setTitleX("strip");
 		H_BMT_occ.setTitleY("detector");
 		H_BMT_occ_LS = new H1F[6][3];
+		H_BMT_occ_StripLayer = new H2F[3];
 		int[] maxStripDet = {900,700,700,1100,800,1200};
 		for(int l=0;l<6;l++){
 			for(int s=0;s<3;s++){
@@ -103,6 +105,12 @@ public class occupancies {
 				H_BMT_occ_LS[l][s].setTitle(String.format("BMT occ Layer %d Sector %d",l+1,s+1));
 				H_BMT_occ_LS[l][s].setTitleX(String.format("strip L%d S%d",l+1,s+1));
 			}
+		}
+		for(int s=0;s<3;s++){
+			H_BMT_occ_StripLayer[s] = new H2F(String.format("H_BMT_occ_S%d",s+1),String.format("H_BMT_occ_S%d",s+1),1200,0.5,1200.5,6,0.5,6.5);
+			H_BMT_occ_StripLayer[s].setTitle(String.format("BMT occ Sector %d",s+1));
+			H_BMT_occ_StripLayer[s].setTitleX("strip");
+			H_BMT_occ_StripLayer[s].setTitleY("layer");
 		}
 		H_BMT_R1_phi_z = new H2F("H_BMT_R1_phi_z","H_BMT_R1_phi_z",100,-25,25,100,-180,180);
 		H_BMT_R1_phi_z.setTitle("BMT R1 #phi vs z");
@@ -188,6 +196,8 @@ public class occupancies {
 			//System.out.println(S + " , " + l + " , " + s);
 			H_BMT_occ.fill(s,S+(l-1)*3);
 			if( S>0 && S<4 && l>0 && l<7 )H_BMT_occ_LS[l-1][S-1].fill(s);
+			if( S>0 && S<4 && l>0 && l<7 ) H_BMT_occ_StripLayer[S-1].fill(s,l);
+			
 			else{System.out.println("BMT numbering error S="+S+" l="+l);}
 			/*
 			if(l==1)H_BST_R1B.fill(s,S);
@@ -323,17 +333,16 @@ public class occupancies {
 		}
 
 		EmbeddedCanvas can_BMT = new EmbeddedCanvas();
-		can_BMT.setSize(1500,3000);
-		can_BMT.divide(3,6);
+		can_BMT.setSize(1500,500);
+		can_BMT.divide(3,1);
 		can_BMT.setAxisTitleSize(24);
 		can_BMT.setAxisFontSize(24);
 		can_BMT.setTitleSize(24);
-		//can_BMT.draw(H_BMT_occ);
-		for(int l=0;l<6;l++)for(int s=0;s<3;s++){
-			//System.out.println("draw layer " + (l+1) + " sector " + (s+1) + " into canevas "+(3*(5-l) + (2-s)));
-			can_BMT.cd( 3*(5-l) + (2-s) );
-			can_BMT.draw(H_BMT_occ_LS[l][s]);
+		for (int s =0; s<3;s++) {
+			//can_BMT.getPad(s).getAxisZ().setLog(true);
+			can_BMT.cd(s);can_BMT.draw(H_BMT_occ_StripLayer[s]);
 		}
+		
 		if(runNum>0){
 			if(!write_volatile)can_BMT.save(String.format("plots"+runNum+"/bmt_occ.png"));
 			if(write_volatile)can_BMT.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/bmt_occ.png"));
