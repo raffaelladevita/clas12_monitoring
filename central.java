@@ -108,6 +108,7 @@ public class central {
 			H_CVT_t[p].setTitle(String.format("pad %d CTOF vertex t - STT, neg. tracks",p+1));
 			H_CVT_t[p].setTitleX("Delta_t (ns)");
 		}
+<<<<<<< HEAD
                 H_CVT_t_pos = new H1F("H_CVT_t_pos","H_CVT_t_pos",250,MinCTOF,MaxCTOF);
                 H_CVT_t_pos.setTitle("All CTOF pads, CTOF vertex t - STT, pos. tracks");
                 H_CVT_t_pos.setTitleX("CTOF vertex t - STT (ns)");
@@ -115,6 +116,16 @@ public class central {
                 H_CVT_t_neg = new H1F("H_CVT_t_neg","H_CVT_t_neg",250,MinCTOF,MaxCTOF);
                 H_CVT_t_neg.setTitle("All CTOF pads, CTOF vertex t - STT, neg. tracks");
                 H_CVT_t_neg.setTitleX("CTOF vertex t - STT (ns)");
+=======
+
+		H_CVT_t_pos = new H1F("H_CVT_t_pos","H_CVT_t_pos",250,MinCTOF,MaxCTOF);
+		H_CVT_t_pos.setTitle("integrated over all pads CTOF time, positive");
+		H_CVT_t_pos.setTitleX("t (ns)");
+
+		H_CVT_t_neg = new H1F("H_CVT_t_neg","H_CVT_t_neg",250,MinCTOF,MaxCTOF);
+		H_CVT_t_neg.setTitle("integrated over all pads CTOF time, negative");
+		H_CVT_t_neg.setTitleX("t (ns)");
+>>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 
 	}
 	public double Vangle(Vector3 v1, Vector3 v2){ 
@@ -153,7 +164,11 @@ public class central {
 					float cy = CVTbank.getFloat("c_y",iCVT)*0.1f;
 					float cz = CVTbank.getFloat("c_z",iCVT)*0.1f;
 					float cphi = (float)Math.toDegrees(Math.atan2(cy,cx));
+<<<<<<< HEAD
                                         int charge = CVTbank.getInt("q",iCVT);
+=======
+					int charge = CVTbank.getInt("q",iCVT);
+>>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 					int pad = CTOFbank.getInt("component",iCTOF);
 					float x = CTOFbank.getFloat("x",iCTOF)*0.1f;
 					float y = CTOFbank.getFloat("y",iCTOF)*0.1f;
@@ -177,6 +192,7 @@ public class central {
 						H_CTOF_path_mom.fill(mom,p);
 						float CTOFTime = t - p/29.92f/beta;
 						//float CTOFTime = t - p/29.92f/beta - CTOF_shft[pad];
+<<<<<<< HEAD
 						if (charge < 0) {
 							H_CVT_t_STT.fill(STT,CTOFTime);
 							H_CVT_t_pad.fill(pad,CTOFTime-STT);
@@ -191,6 +207,14 @@ public class central {
 							H_CTOF_edep_pad_neg.fill(pad,e);
 							H_CVT_t_neg.fill(CTOFTime-STT);
 						}
+=======
+						H_CVT_t_STT.fill(STT,t - p/29.92f/beta);
+						H_CVT_t_pad.fill(pad,CTOFTime-STT);
+						H_CVT_t[pad].fill(CTOFTime-STT);
+						H_CVT_t[49].fill(CTOFTime-STT);
+						if (charge>0) H_CVT_t_pos.fill(CTOFTime-STT);
+						if (charge<0) H_CVT_t_neg.fill(CTOFTime-STT);
+>>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 						matched = true;
 					}
 				}
@@ -216,15 +240,24 @@ public class central {
 	}
 	public void plot() {
 		EmbeddedCanvas can_central  = new EmbeddedCanvas();
+<<<<<<< HEAD
                 can_central.setSize(5000,3000);
                 can_central.divide(5,3);
                 can_central.setAxisTitleSize(30);
                 can_central.setAxisFontSize(30);
                 can_central.setTitleSize(30);
+=======
+                can_central.setSize(2000,3000);
+                can_central.divide(4,7);
+                can_central.setAxisTitleSize(18);
+                can_central.setAxisFontSize(18);
+                can_central.setTitleSize(18);
+>>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 		can_central.cd(0);can_central.draw(H_CTOF_pos);
 		can_central.cd(1);can_central.draw(H_CVT_CTOF_phi);
 		can_central.cd(2);can_central.draw(H_CVT_CTOF_z);
 		can_central.cd(3);can_central.draw(H_CTOF_path_mom);
+<<<<<<< HEAD
 		can_central.cd(4);can_central.draw(H_CTOF_edep_phi);
 		can_central.cd(5);can_central.draw(H_CTOF_edep_z);
 		can_central.cd(6);can_central.draw(H_CTOF_edep_pad_pos);
@@ -237,6 +270,22 @@ public class central {
 		can_central.cd(12);can_central.draw(H_CVT_t_pos);
                 can_central.cd(13);can_central.draw(H_CVT_t_neg);
 
+=======
+		can_central.cd(4);can_central.draw(H_CVT_CTOF_phi);
+		can_central.cd(5);can_central.draw(H_CVT_CTOF_z);
+		can_central.cd(6);can_central.draw(H_vz_DC_CVT);
+		can_central.cd(7);can_central.draw(H_phi_DC_CVT);
+		can_central.cd(8);can_central.draw(H_CVT_t_STT);
+		can_central.cd(9);can_central.draw(H_CVT_t_pad);
+		can_central.cd(10);can_central.draw(H_CVT_t[1]);for(int p=1;p<49;p++)can_central.draw(H_CVT_t[p],"same");
+		can_central.getPad(10).getAxisX().setRange(MinCTOF,MaxCTOF);
+		can_central.cd(11);can_central.draw(H_CVT_t[49]);
+		can_central.cd(12);can_central.draw(H_CVT_t_pos);//test drawing for CTOF time for positive
+		can_central.cd(13);can_central.draw(H_CVT_t_neg);//test drawing for CTOF time for negative
+		for(int p=0;p<12;p++){
+			can_central.cd(12+2+p);can_central.draw(H_CVT_t[16+p]);
+		}
+>>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 		if(runNum>0){
 			if(!write_volatile)can_central.save(String.format("plots"+runNum+"/central.png"));
 			if(write_volatile)can_central.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/central.png"));
@@ -263,8 +312,12 @@ public class central {
                 dirout.cd("/ctof/");
                 dirout.addDataSet(H_CVT_t_pad,H_CTOF_edep_phi);
                 for(int p=0;p<50;p++)dirout.addDataSet(H_CVT_t[p]);
+<<<<<<< HEAD
 		dirout.addDataSet(H_CVT_t_pos, H_CVT_t_neg);
                 
+=======
+                dirout.addDataSet(H_CVT_t_pos, H_CVT_t_neg);
+>>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 		if(write_volatile)if(runNum>0)dirout.writeFile("/volatile/clas12/rga/spring18/plots"+runNum+"/out_CTOF_"+runNum+".hipo");
                 
 		if(!write_volatile){

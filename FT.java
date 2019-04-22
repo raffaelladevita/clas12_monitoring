@@ -121,9 +121,15 @@ public class FT {
         	hi_cal_theta_ch.setFillColor(2);
         	hi_cal_phi_ch = new H1F("hi_cal_phi_ch", "#phi (deg)", "Counts", 100, -180,180);
         	hi_cal_phi_ch.setFillColor(2);
+<<<<<<< HEAD
         	hi_cal_time_ch = new H1F("hi_cal_time_ch", "T-T_RF(ns)", "Counts", 200, -rfPeriod/2,rfPeriod/2);
         	hi_cal_time_ch.setFillColor(33);
         	hi_cal_time_cut_ch = new H1F("hi_cal_time_cut_ch", "T-T_RF(ns)", "Counts", 200, -rfPeriod/2,rfPeriod/2);
+=======
+        	hi_cal_time_ch = new H1F("hi_cal_time_ch", "T-T_RF(ns)", "Counts", 100, -rfPeriod/2,rfPeriod/2);
+        	hi_cal_time_ch.setFillColor(33);
+        	hi_cal_time_cut_ch = new H1F("hi_cal_time_cut_ch", "T-T_RF(ns)", "Counts", 100, -rfPeriod/2,rfPeriod/2);
+>>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
         	hi_cal_time_cut_ch.setFillColor(3);
         	ftime_ch = new F1D("ftime_ch", "[amp]*gaus(x,[mean],[sigma])", -1., 1.);
         	ftime_ch.setParameter(0, 0.0);
@@ -412,6 +418,7 @@ public class FT {
         public void plot() {
                 EmbeddedCanvas can_FT = new EmbeddedCanvas();
                 can_FT.setSize(3000,5000);
+<<<<<<< HEAD
                 can_FT.divide(4,7);
                 can_FT.setAxisTitleSize(30);
                 can_FT.setAxisFontSize(30);
@@ -436,6 +443,32 @@ public class FT {
 		can_FT.cd(20);can_FT.draw(hi_cal_time_neu);can_FT.draw(hi_cal_time_cut_neu,"same");can_FT.draw(ftime_neu,"same");
 		can_FT.cd(21);can_FT.draw(hi_cal_time_e_neu);
 		can_FT.cd(22);can_FT.draw(hi_cal_time_theta_neu);
+=======
+                can_FT.divide(3,10);
+                can_FT.setAxisTitleSize(18);
+                can_FT.setAxisFontSize(18);
+                can_FT.setTitleSize(18);
+               	can_FT.cd(0);can_FT.draw(hi_hodo_eall[0]);can_FT.draw(hi_hodo_ematch[0],"same");can_FT.draw(f_charge_landau[0],"same");
+		can_FT.cd(1);can_FT.getPad(1).getAxisZ().setLog(true);can_FT.draw(hi_hodo_ematch_2D[0]);
+		can_FT.cd(3);can_FT.draw(hi_hodo_eall[1]);can_FT.draw(hi_hodo_ematch[1],"same");can_FT.draw(f_charge_landau[1],"same");
+		can_FT.cd(4);can_FT.getPad(4).getAxisZ().setLog(true);can_FT.draw(hi_hodo_ematch_2D[1]);
+		can_FT.cd(6);can_FT.draw(hi_hodo_tmatch[0]);
+		can_FT.cd(7);can_FT.getPad(7).getAxisZ().setLog(true);can_FT.draw(hi_hodo_tmatch_2D[0]);
+		can_FT.cd(9);can_FT.draw(hi_hodo_tmatch[1]);
+		can_FT.cd(10);can_FT.getPad(10).getAxisZ().setLog(true);can_FT.draw(hi_hodo_tmatch_2D[1]);	
+		can_FT.cd(12);can_FT.getPad(12).getAxisY().setLog(true);can_FT.draw(hi_cal_nclusters);
+		can_FT.cd(13);can_FT.getPad(13).getAxisY().setLog(true);can_FT.draw(hi_cal_clsize);can_FT.draw(hi_cal_clsize_ch,"same");
+		can_FT.cd(14);can_FT.getPad(14).getAxisZ().setLog(true);can_FT.draw(hi_cal_clsize_en);
+		can_FT.cd(15);can_FT.draw(hi_cal_e_all);can_FT.draw(hi_cal_e_ch,"same");can_FT.draw(hi_cal_e_neu,"same");
+		can_FT.cd(16);can_FT.draw(hi_cal_theta_ch);
+		can_FT.cd(17);can_FT.draw(hi_cal_phi_ch);
+		can_FT.cd(18);can_FT.draw(hi_cal_time_ch);can_FT.draw(hi_cal_time_cut_ch,"same");can_FT.draw(ftime_ch,"same");
+		can_FT.cd(19);can_FT.draw(hi_cal_time_e_ch);
+		can_FT.cd(20);can_FT.draw(hi_cal_time_theta_ch);
+		can_FT.cd(21);can_FT.draw(hi_cal_time_neu);can_FT.draw(hi_cal_time_cut_neu,"same");can_FT.draw(ftime_neu,"same");
+		can_FT.cd(22);can_FT.draw(hi_cal_time_e_neu);
+		can_FT.cd(23);can_FT.draw(hi_cal_time_theta_neu);
+>>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 		can_FT.cd(24);can_FT.draw(hpi0sum);can_FT.draw(fpi0,"same");
 		can_FT.cd(25);can_FT.draw(hmassangle);
 		
