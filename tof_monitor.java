@@ -146,13 +146,9 @@ public class tof_monitor {
 			float time = DCB.getFloat("time",r);
 			float field = DCB.getFloat("B",r);
 			if(s>-1&&s<6&&sl>-1&&sl<6){
-<<<<<<< HEAD
 				boolean otherregions = (sl<2 || sl>3);
 				boolean region2 = ((sl==2||sl==3) && field<0.5);
 				if (otherregions||region2) {
-=======
-				if (field < 0.5) {
->>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 					DC_residuals_trkDoca[s][sl].fill(trkDoca,timeResidual);
 					DC_residuals[s][sl].fill(timeResidual);
 					DC_time[s][sl].fill(time);
@@ -284,11 +280,7 @@ public class tof_monitor {
 	}
 
 	public void initInvertedSFitPar(int slayer, F1D function) {
-<<<<<<< HEAD
 		double min = 100.;
-=======
-		double min = 100.; 
->>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 		double max = 220.;
 		if (slayer == 1) {
 			min = 100.; max = 240.;
