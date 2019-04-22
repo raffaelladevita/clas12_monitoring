@@ -29,7 +29,8 @@ public class tof_monitor {
 		public H2F[] p1a_pad_edep, p1b_pad_edep, p2_pad_edep;
 		public H2F[] p1a_pad_dt, p1b_pad_dt, p2_pad_dt;
 		public H2F[][] DC_residuals_trkDoca;
-		public H1F[][] DC_residuals;
+		public H1F[][] DC_residuals, DC_time;
+		public F1D[][] f_time_invertedS;
 	public tof_monitor(int reqrunNum, boolean reqTimeBased, boolean reqwrite_volatile) {
 			runNum = reqrunNum;userTimeBased=reqTimeBased;
 			write_volatile = reqwrite_volatile;
@@ -69,6 +70,8 @@ public class tof_monitor {
 			p2_pad_dt = new H2F[6];
 			DC_residuals_trkDoca = new H2F[6][6];
 			DC_residuals = new H1F[6][6];
+			DC_time = new H1F[6][6];
+			f_time_invertedS = new F1D[6][6];
 		for(int s=0;s<6;s++){
 			p1a_pad_vt[s] = new H2F(String.format("p1a_pad_vt_S%d",s+1),String.format("p1a_pad_vt_S%d",s+1),25,0,25,100,-1.002,1.002);
 			p1a_pad_vt[s].setTitle(String.format("p1a S%d time",s+1));
@@ -117,6 +120,13 @@ public class tof_monitor {
 				DC_residuals[s][sl] = new H1F(String.format("DC_residuals_%d_%d",s+1,sl+1),String.format("DC_residuals_%d_%d",s+1,sl+1),100,-1,1);
 				DC_residuals[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
 				DC_residuals[s][sl].setTitleX("residual (cm)");
+				DC_time[s][sl] = new H1F(String.format("DC_Time_%d_%d",s+1,sl+1),String.format("DC_Time_%d_%d",s+1,sl+1),200,-100,1000);
+                                DC_time[s][sl].setTitle(String.format("DC Time S%d SL%d",s+1,sl+1));
+                                DC_time[s][sl].setTitleX("time (ns)");
+				//DC_time[s][sl].setOptStat(1111111);
+                        	DC_time[s][sl].setLineWidth(4);
+				f_time_invertedS[s][sl] = new F1D(String.format("Inverted_S_%d_%d",s+1,sl+1),"[p0]/(1+exp(-[p1]*(x-[p2])))",-100,1000);
+				f_time_invertedS[s][sl].setOptStat("111111");
 			}
 		}
 	}
@@ -133,9 +143,16 @@ public class tof_monitor {
 			int sl = DCB.getInt("superlayer",r)-1;
 			float trkDoca = DCB.getFloat("trkDoca",r);
 			float timeResidual = DCB.getFloat("timeResidual",r);
+			float time = DCB.getFloat("time",r);
+			float field = DCB.getFloat("B",r);
 			if(s>-1&&s<6&&sl>-1&&sl<6){
-				DC_residuals_trkDoca[s][sl].fill(trkDoca,timeResidual);
-				DC_residuals[s][sl].fill(timeResidual);
+				boolean otherregions = (sl<2 || sl>3);
+				boolean region2 = ((sl==2||sl==3) && field<0.5);
+				if (otherregions||region2) {
+					DC_residuals_trkDoca[s][sl].fill(trkDoca,timeResidual);
+					DC_residuals[s][sl].fill(timeResidual);
+					DC_time[s][sl].fill(time);
+				}
 			}
 			else System.out.println("sector "+(s+1)+" superlayer "+(sl+1));
 		}
@@ -249,7 +266,7 @@ public class tof_monitor {
 		DataBank trackDetBank = null, hitBank = null;
 		if(userTimeBased){
 			if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
-			if(event.hasBank("TimeBasedTrkg::TBHits"))hitBank = event.getBank("TimeBasedTrkg::TBHits");
+			if(event.hasBank("TimeBasedTrkg::TBHits")){hitBank = event.getBank("TimeBasedTrkg::TBHits");}
 		}
 		if(!userTimeBased){
 			if(event.hasBank("HitBasedTrkg::HBTracks"))trackDetBank = event.getBank("HitBasedTrkg::HBTracks");
@@ -261,40 +278,82 @@ public class tof_monitor {
 		if(userTimeBased && hitBank!=null)fillDC(hitBank);
 
 	}
+
+	public void initInvertedSFitPar(int slayer, F1D function) {
+		double min = 100.;
+		double max = 220.;
+		if (slayer == 1) {
+			min = 100.; max = 240.;
+			function.setParameter(1,-0.038); function.setParLimits(1,-0.01,-0.06);
+			function.setParameter(2,118.); function.setParLimits(2,100.,150.);
+		}
+		if (slayer == 2) {
+			min = 120.; max = 240.;
+			function.setParameter(1,-0.040); function.setParLimits(1,-0.01,-0.06);
+			function.setParameter(2,136.); function.setParLimits(2,100.,200.);
+		}
+		if (slayer == 3) {
+			min = 200.; max = 450.;
+			function.setParameter(1,-0.030);function.setParLimits(1,-0.01,-0.05);
+			function.setParameter(2,320.); function.setParLimits(2,200.,500.);
+		}
+		if (slayer == 4) {
+			min = 200.; max = 500.;
+			function.setParameter(1,-0.023); function.setParLimits(1,-0.01,-0.05);
+			function.setParameter(2,350.); function.setParLimits(2,200.,500.);
+		}
+		if (slayer == 5) {
+			min = 400.; max = 700.;
+			function.setParameter(1,-0.024);function.setParLimits(1,-0.01,-0.05);
+			function.setParameter(2,623.); function.setParLimits(2,500.,700.);
+		}
+		if (slayer == 6) {
+			min = 480.; max = 700.;
+			function.setParameter(1,-0.034); function.setParLimits(1,-0.01,-0.05);
+			function.setParameter(2,683.); function.setParLimits(2,500.,750.);
+		}
+		function.setRange(min,max);
+		function.setLineColor(2);
+		function.setLineWidth(4);
+	}
+
+	public void analyze() {
+		for(int sl=1;sl<=6;sl++) {
+			for (int l=0;l<6;l++) {
+				initInvertedSFitPar(sl,f_time_invertedS[l][sl-1]);
+				DataFitter.fit(f_time_invertedS[l][sl-1],DC_time[l][sl-1],"QL");
+				//System.out.println("Fit DC Time for sector "+l+ " superlayer " +sl+ "complete");
+				//System.out.println(" ");System.out.println(" ");
+				DC_time[l][sl-1].setFunction(null);
+			}
+		}
+	}
+
         public void plot() {
                 EmbeddedCanvas can_TOF_occ = new EmbeddedCanvas();
                 can_TOF_occ.setSize(3000,5000);
-                can_TOF_occ.divide(6,10);
+                can_TOF_occ.divide(6,9);
                 can_TOF_occ.setAxisTitleSize(18);
                 can_TOF_occ.setAxisFontSize(18);
                 can_TOF_occ.setTitleSize(18);
-                can_TOF_occ.cd(0);can_TOF_occ.draw(p1a_pad_occ);
-                can_TOF_occ.cd(1);can_TOF_occ.draw(p1b_pad_occ);
-                can_TOF_occ.cd(2);can_TOF_occ.draw(p2_pad_occ);
-                can_TOF_occ.cd(3);can_TOF_occ.draw(p1a_pad_XY);
-		can_TOF_occ.getPad(3).getAxisZ().setLog(true);
-                can_TOF_occ.cd(4);can_TOF_occ.draw(p1b_pad_XY);
-		can_TOF_occ.getPad(4).getAxisZ().setLog(true);
-                can_TOF_occ.cd(5);can_TOF_occ.draw(p2_pad_XY);
-		can_TOF_occ.getPad(5).getAxisZ().setLog(true);
                 for(int s=0;s<6;s++){
-			can_TOF_occ.cd(6+s);can_TOF_occ.draw(p1a_pad_vt[s]);
+			can_TOF_occ.cd(s);can_TOF_occ.draw(p1a_pad_vt[s]);
 			//can_TOF_occ.getPad(6+s).getAxisZ().setLog(true);
-			can_TOF_occ.cd(12+s);can_TOF_occ.draw(p1b_pad_vt[s]);
+			can_TOF_occ.cd(6+s);can_TOF_occ.draw(p1b_pad_vt[s]);
 			//can_TOF_occ.getPad(12+s).getAxisZ().setLog(true);
-			can_TOF_occ.cd(18+s);can_TOF_occ.draw(p2_pad_vt[s]);
+			can_TOF_occ.cd(12+s);can_TOF_occ.draw(p2_pad_vt[s]);
 			//can_TOF_occ.getPad(12+s).getAxisZ().setLog(true);
-			can_TOF_occ.cd(24+s);can_TOF_occ.draw(p1a_pad_edep[s]);
+			can_TOF_occ.cd(18+s);can_TOF_occ.draw(p1a_pad_edep[s]);
 			//can_TOF_occ.getPad(24+s).getAxisZ().setLog(true);
-			can_TOF_occ.cd(30+s);can_TOF_occ.draw(p1b_pad_edep[s]);
+			can_TOF_occ.cd(24+s);can_TOF_occ.draw(p1b_pad_edep[s]);
 			//can_TOF_occ.getPad(30+s).getAxisZ().setLog(true);
-			can_TOF_occ.cd(36+s);can_TOF_occ.draw(p2_pad_edep[s]);
+			can_TOF_occ.cd(30+s);can_TOF_occ.draw(p2_pad_edep[s]);
 			//can_TOF_occ.getPad(36+s).getAxisZ().setLog(true);
-			can_TOF_occ.cd(42+s);can_TOF_occ.draw(p1a_pad_dt[s]);
+			can_TOF_occ.cd(36+s);can_TOF_occ.draw(p1a_pad_dt[s]);
 			//can_TOF_occ.getPad(42+s).getAxisZ().setLog(true);
-			can_TOF_occ.cd(48+s);can_TOF_occ.draw(p1b_pad_dt[s]);
+			can_TOF_occ.cd(42+s);can_TOF_occ.draw(p1b_pad_dt[s]);
 			//can_TOF_occ.getPad(48+s).getAxisZ().setLog(true);
-			can_TOF_occ.cd(54+s);can_TOF_occ.draw(p2_pad_dt[s]);
+			can_TOF_occ.cd(48+s);can_TOF_occ.draw(p2_pad_dt[s]);
 			//can_TOF_occ.getPad(54+s).getAxisZ().setLog(true);
 		}
 		if(runNum>0){
@@ -327,7 +386,7 @@ public class tof_monitor {
 			can_DC_resd_trkDoca.save(String.format("plots/DC_resd_trkDoca.png"));
 			System.out.println(String.format("saved plots/DC_resd_trkDoca.png"));
 		}
-	
+
 		EmbeddedCanvas can_DC_resd  = new EmbeddedCanvas();
 		can_DC_resd.setSize(3000,3000);
 		can_DC_resd.divide(6,6);
@@ -347,7 +406,28 @@ public class tof_monitor {
 			can_DC_resd.save(String.format("plots/DC_resd.png"));
 			System.out.println(String.format("saved plots/DC_resd.png"));
 		}
+
+		EmbeddedCanvas can_DC_time  = new EmbeddedCanvas();
+                can_DC_time.setSize(3000,3000);
+                can_DC_time.divide(6,6);
+                can_DC_time.setAxisTitleSize(18);
+                can_DC_time.setAxisFontSize(18);
+                can_DC_time.setTitleSize(18);
+                for(int s=0;s<6;s++)for(int sl=0;sl<6;sl++){
+                        can_DC_time.cd(sl + 6*s);
+                        can_DC_time.draw(DC_time[s][sl]);can_DC_time.draw(f_time_invertedS[s][sl],"same");
+                }
+                if(runNum>0){
+                        if(!write_volatile)can_DC_time.save(String.format("plots"+runNum+"/DC_time.png"));
+                        if(write_volatile)can_DC_time.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/DC_time.png"));
+                        System.out.println(String.format("saved plots"+runNum+"/DC_time.png"));
+                }
+                else{
+                        can_DC_time.save(String.format("plots/DC_time.png"));
+                        System.out.println(String.format("saved plots/DC_time.png"));
+                }
 	}
+
         public void write() {
                 TDirectory dirout = new TDirectory();
                 dirout.mkdir("/tof/");
@@ -358,10 +438,10 @@ public class tof_monitor {
 		dirout.mkdir("/dc/");
 		dirout.cd("/dc/");
 		for(int s=0;s<6;s++)for(int sl=0;sl<6;sl++){
-			dirout.addDataSet(DC_residuals_trkDoca[s][sl]);
+			dirout.addDataSet(DC_residuals_trkDoca[s][sl],DC_time[s][sl]);
 		}
                 if(write_volatile)if(runNum>0)dirout.writeFile("/volatile/clas12/rga/spring18/plots"+runNum+"/out_TOF_"+runNum+".hipo");
-                
+
 		if(!write_volatile){
 			if(runNum>0)dirout.writeFile("plots"+runNum+"/out_TOF_"+runNum+".hipo");
 			else dirout.writeFile("plots/out_TOF.hipo");
@@ -385,13 +465,13 @@ public class tof_monitor {
                 Scanner read;
                 try {
                         read = new Scanner(file);
-                        do { 
+                        do {
                                 String filename = read.next();
                                 toProcessFileNames.add(filename);
 
                         }while (read.hasNext());
                         read.close();
-                }catch(IOException e){ 
+                }catch(IOException e){
                         e.printStackTrace();
                 }
 		int maxevents = 50000000;
@@ -415,7 +495,8 @@ public class tof_monitor {
 			reader.close();
 		}
 		System.out.println("Total : " + count + " events");
+		ana.analyze();
 		ana.plot();
+		ana.write();
         }
 }
-
