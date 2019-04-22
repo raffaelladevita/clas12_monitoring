@@ -126,11 +126,7 @@ public class cndCheckPlots {
 						H_CND_edep_phi[iL].setTitle("CND Edep vs paddle (negative tracks)(layer "+(iL+1)+")");
 						H_CND_edep_phi[iL].setTitleX("paddle");
 						H_CND_edep_phi[iL].setTitleY("E (MeV)");
-<<<<<<< HEAD
 						H_CVT_CND_z[iL] = new H2F(String.format("H_CVT_CND_z_L%d",iL+1),"H_CVT_CND_z",80,0,40,80,0,40);
-=======
-						H_CVT_CND_z[iL] = new H2F("H_CVT_CND_z","H_CVT_CND_z",80,0,40,80,0,40);
->>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 						H_CVT_CND_z[iL].setTitle("CND z vs CVT z (positive tracks)(layer "+(iL+1)+")");
 						H_CVT_CND_z[iL].setTitleX("CND z (cm)");
 						H_CVT_CND_z[iL].setTitleY("CVT z (cm)");
@@ -146,12 +142,8 @@ public class cndCheckPlots {
 						H_CND_time_z_neutral[iL].setTitle("CND time vs z for neutral (layer "+(iL+1)+")");
 						H_CND_time_z_neutral[iL].setTitleX("CND z");
 						H_CND_time_z_neutral[iL].setTitleY("CND time");
-<<<<<<< HEAD
 						H_CND_time_z_charged[iL] = new H2F(String.format("H_CND_time_z_charged_L%d",iL+1),"H_CND_time_z_charged",50,0,40,100,-3,3);
 
-=======
-						H_CND_time_z_charged[iL] = new H2F("H_CND_time_z_charged","H_CND_time_z_charged",50,0,40,100,-3,3);
->>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 						H_CND_time_z_charged[iL].setTitle("CND vt vs z (negative tracks) (layer "+(iL+1)+")");
 						H_CND_time_z_charged[iL].setTitleX("CND z");
 						H_CND_time_z_charged[iL].setTitleY("CND vt");
@@ -161,11 +153,7 @@ public class cndCheckPlots {
 						H_CND_z_pad[iL].setTitleX("CND counter #");
 						H_CND_z_pad[iL].setTitleY("CND z (cm)");
 
-<<<<<<< HEAD
 						H_CVT_CND_z1[iL] = new H2F(String.format("H_CVT_CND_z1_L%d",iL+1),"H_CVT_CND_z1",80,0,40,80,0,40);
-=======
-						H_CVT_CND_z1[iL] = new H2F("H_CVT_CND_z1","H_CVT_CND_z1",80,0,40,80,0,40);
->>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 						H_CVT_CND_z1[iL].setTitle("CND z vs CVT z (negative tracks) (layer "+(iL+1)+")");
 						H_CVT_CND_z1[iL].setTitleX("CND z (cm)");
 						H_CVT_CND_z1[iL].setTitleY("CVT z (cm)");
@@ -174,17 +162,10 @@ public class cndCheckPlots {
 						H_CND_res[iL].setTitle("CND resolution");
 						H_CND_res[iL].setTitleX("vertex time");
 
-<<<<<<< HEAD
 						DiffZCVT[iL] = new H2F(String.format("Diff Z CVT_L%d",iL+1),"Diff Z CVT",50,0,45,150,-10,10);
 						DiffZCVT[iL].setTitle("DiffZ vs zCVT (negative tracks) (layer "+(iL+1)+")");
 
 						DiffZCND[iL] = new H2F(String.format("Diff Z CND_L%d",iL+1),50,0,45,150,-10,10);	
-=======
-						DiffZCVT[iL] = new H2F("Diff Z CVT","Diff Z CVT",50,0,45,150,-10,10);
-						DiffZCVT[iL].setTitle("DiffZ vs zCVT (negative tracks) (layer "+(iL+1)+")");
-
-						DiffZCND[iL] = new H2F("Diff Z CND","Diff Z CND",50,0,45,150,-10,10);
->>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 						DiffZCND[iL].setTitle("DiffZ vs zCND (negative tracks) (layer "+(iL+1)+")");
 
 						pathlength[iL] = new H2F("pathlength","pathlength",48,0,48,100,30,40);
@@ -261,11 +242,7 @@ public class cndCheckPlots {
 				for(int layer=0;layer<3;layer++){
 						for(int sector=0;sector<24;sector++){
 								for(int comp=0;comp<2;comp++){
-<<<<<<< HEAD
 										H_CND_alignE[(comp*3)+layer+(sector*6)] = new H1F(String.format("CND_alignE_L%d_S%d_C%d",layer+1,sector+1,comp+1),"CND_alignE",40,0,6);
-=======
-										H_CND_alignE[(comp*3)+layer+(sector*6)] = new H1F("CND_alignE","CND_alignE",40,0,6);
->>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 										H_CND_alignE[(comp*3)+layer+(sector*6)].setTitle("layer "+(layer+1)+" sector "+(sector+1)+" comp "+(comp+1));
 										H_CND_alignE[(comp*3)+layer+(sector*6)].setTitleX("dE/dz");
 								}
@@ -761,12 +738,7 @@ public class cndCheckPlots {
 								can_cnd.setAxisFontSize(18);
 								can_cnd.setTitleSize(18);
 								can_cnd.cd(0);can_cnd.draw(H_CND_time);can_cnd.draw(IntRes,"same");
-<<<<<<< HEAD
 								can_cnd.cd(1);can_cnd.draw(H_CND_layer_pad);
-=======
-								can_cnd.cd(1);can_cnd.draw(H_CND_phi_pad);
-								can_cnd.cd(2);can_cnd.draw(H_CND_layer_pad);
->>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 								for(int iL=0;iL<3;iL++){
 										can_cnd.cd(3+iL);can_cnd.draw(H_CND_vt_pad[iL]);
 										can_cnd.cd(6+iL);can_cnd.draw(H_CND_edep_z[iL]);
@@ -934,7 +906,6 @@ public class cndCheckPlots {
 								TDirectory dirout = new TDirectory();
 								dirout.mkdir("/cnd/");
 								dirout.cd("/cnd/");
-<<<<<<< HEAD
 								dirout.addDataSet(H_CND_beta_energy, H_CND_beta_e_neutral);
 
 								for(int layer=0;layer<3;layer++){
@@ -946,8 +917,6 @@ public class cndCheckPlots {
 								}
 								for(int iL=0;iL<3;iL++) dirout.addDataSet(H_CND_time_z_charged[iL],H_CVT_CND_z[iL],H_CVT_CND_z1[iL],DiffZCVT[iL],DiffZCND[iL]);
 
-=======
->>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 								if(write_volatile)if(runNum>0)dirout.writeFile("/volatile/clas12/rgb/spring19/plots"+runNum+"/out_CND_"+runNum+".hipo");
 
 								if(!write_volatile){
