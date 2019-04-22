@@ -1,3 +1,4 @@
+
 import java.io.*;
 import java.util.*;
 import java.text.SimpleDateFormat;
@@ -45,11 +46,7 @@ public class ana_2p2 {
 		cndCheckPlots ana_cnd = new cndCheckPlots(runNum,useTB,useVolatile);		
 		FT ana_ft = new FT(runNum,useTB,useVolatile);
 		dst_mon ana_dst_mon = new dst_mon(runNum,EB);
-<<<<<<< HEAD
 		//deuterontarget ana_deuteron = new deuterontarget(runNum,EB,useTB,useVolatile);
-=======
-		deuterontarget ana_deuteron = new deuterontarget(runNum,EB,useTB,useVolatile);
->>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
                 List<String> toProcessFileNames = new ArrayList<String>();
                 File file = new File(filelist);
                 Scanner read;
@@ -90,11 +87,7 @@ public class ana_2p2 {
 				ana_cnd.processEvent(event);
 				ana_ft.processEvent(event);
 				ana_dst_mon.processEvent(event);
-<<<<<<< HEAD
 				//ana_deuteron.processEvent(event);
-=======
-				ana_deuteron.processEvent(event);
->>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
 				filecount++;count++;
 				if(count%10000 == 0){
 					long nowTime = System.currentTimeMillis();
@@ -129,10 +122,6 @@ public class ana_2p2 {
 		ana_ft.write();
 		ana_dst_mon.plot();
 		ana_dst_mon.write();
-<<<<<<< HEAD
 		//ana_deuteron.plot();
-=======
-		ana_deuteron.plot();
->>>>>>> 66dd804b22513829ae9546a0a141570a76564af3
         }
 }
