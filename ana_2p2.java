@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.util.*;
 import java.text.SimpleDateFormat;
@@ -29,7 +28,7 @@ public class ana_2p2 {
 		int runNum = 0;
 		String filelist = "list_of_files.txt";
 		int maxevents = 500000;
-		float EB = 7;
+		float EB = 10.2f;
 		boolean useTB=true;
 		boolean useVolatile = false;
 		if(args.length>0)runNum=Integer.parseInt(args[0]);
@@ -43,7 +42,10 @@ public class ana_2p2 {
 		central ana_cen = new central(runNum,useTB,useVolatile);
 		occupancies ana_occ = new occupancies(runNum,useVolatile);
 		HTCC ana_htc = new HTCC(runNum,EB,useTB,useVolatile);
-		cnd ana_cnd = new cnd(runNum,useTB,useVolatile);
+		cndCheckPlots ana_cnd = new cndCheckPlots(runNum,useTB,useVolatile);		
+		FT ana_ft = new FT(runNum,useTB,useVolatile);
+		dst_mon ana_dst_mon = new dst_mon(runNum,EB);
+		//deuterontarget ana_deuteron = new deuterontarget(runNum,EB,useTB,useVolatile);
                 List<String> toProcessFileNames = new ArrayList<String>();
                 File file = new File(filelist);
                 Scanner read;
@@ -82,6 +84,9 @@ public class ana_2p2 {
 				ana_occ.processEvent(event);
 				ana_htc.processEvent(event);
 				ana_cnd.processEvent(event);
+				ana_ft.processEvent(event);
+				ana_dst_mon.processEvent(event);
+				//ana_deuteron.processEvent(event);
 				filecount++;count++;
 				if(count%10000 == 0){
 					long nowTime = System.currentTimeMillis();
@@ -97,15 +102,25 @@ public class ana_2p2 {
 			reader.close();
 		}
 		System.out.println("Total : " + count + " events");
+		ana_mon.ratio_to_trigger();
 		ana_mon.plot();
 		ana_mon.write();
 		ana_cen.plot();
 		ana_cen.write();
+		ana_tof.analyze();
 		ana_tof.plot();
 		ana_tof.write();
 		ana_occ.plot();
 		ana_htc.plot();
+		ana_htc.write();
+		ana_cnd.fit();
 		ana_cnd.plot();
 		ana_cnd.write();
+		ana_ft.analyze();
+		ana_ft.plot();
+		ana_ft.write();
+		ana_dst_mon.plot();
+		ana_dst_mon.write();
+		//ana_deuteron.plot();
         }
 }
