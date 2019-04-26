@@ -129,7 +129,7 @@ public class central {
 		H_CTOF_neg_mass = new H1F("H_CTOF_neg_mass","H_CTOF_neg_mass",100,-0.5,2.0);
 		H_CTOF_neg_mass.setTitle("neg Mass^2");
 		H_CTOF_neg_mass.setTitleX("M^2 (GeV^2)");
-		H_CTOF_vt_pim = new H2F("H_CTOF_vt_pim","H_CTOF_vt_pim",250,-5,5,250,-5,5);
+		H_CTOF_vt_pim = new H2F("H_CTOF_vt_pim","H_CTOF_vt_pim",100,-1.002,1.002,250,-5,5);
 		H_CTOF_vt_pim.setTitle("CTOF MIP (pi-) vertex time");
 		H_CTOF_vt_pim.setTitleX("vertex time - RFTime (ns)");
 		H_CTOF_vt_pim.setTitleY("vertex time - STTime (ns)");
@@ -212,7 +212,10 @@ public class central {
 							H_CTOF_neg_mass.fill(CTOFmass);
 							//pi- fiducial cut borrowing from Pierre's CND
 							if (Math.sqrt(Math.abs(CTOFmass))<0.38 && CTOFmass>-0.35*0.35){
-								H_CTOF_vt_pim.fill(CTOFTime-RFT,CTOFTime-STT);
+								float thisTime =CTOFTime-RFT;
+								thisTime = (thisTime+1.002f) % 2.004f;
+								thisTime = thisTime - 1.002f;		
+								H_CTOF_vt_pim.fill(thisTime,CTOFTime-STT);
 								H_CTOF_edep_pim.fill(e);
 							}			
 						}
