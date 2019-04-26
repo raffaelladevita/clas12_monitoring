@@ -786,7 +786,7 @@ public class dst_mon {
 				thisTime = (thisTime+1.002f) % 2.004f;
 				thisTime = thisTime - 1.002f;
 				p1a_pad_vt_pion[s].fill(thisTime,pip_FTOF1a_vt);
-				p1a_pad_edep_pion[s].fill(bank.getFloat("path",r));
+				p1a_pad_edep_pion[s].fill(bank.getFloat("energy",r));
 			}
 			if( bank.getShort("pindex",r)==pip_part_ind && bank.getByte("layer",r)==2 ){
 				pip_FTOF_pad1b = bank.getShort("component",r);
@@ -798,7 +798,7 @@ public class dst_mon {
 				thisTime = (thisTime+1.002f) % 2.004f;
 				thisTime = thisTime - 1.002f;
 				p1b_pad_vt_pion[s].fill(thisTime, pip_FTOF1b_vt);
-				p1b_pad_edep_pion[s].fill(bank.getFloat("path",r));
+				p1b_pad_edep_pion[s].fill(bank.getFloat("energy",r));
 			}
 
 			//pi minus at p1a, p1b
@@ -811,7 +811,7 @@ public class dst_mon {
 				thisTime = (thisTime+1.002f) % 2.004f;
 				thisTime = thisTime - 1.002f;
 				p1a_pad_vt_pion[s].fill(thisTime, pim_FTOF1a_vt);
-				p1a_pad_edep_pion[s].fill(bank.getFloat("path",r));
+				p1a_pad_edep_pion[s].fill(bank.getFloat("energy",r));
 			}
 			if( bank.getShort("pindex",r)==pim_part_ind && bank.getByte("layer",r)==2 ){
 				pim_FTOF1b_t = bank.getFloat("time",r);
@@ -822,7 +822,7 @@ public class dst_mon {
 				thisTime = (thisTime+1.002f) % 2.004f;
 				thisTime = thisTime - 1.002f;
 				p1b_pad_vt_pion[s].fill(thisTime, pim_FTOF1b_vt);
-				p1b_pad_edep_pion[s].fill(bank.getFloat("path",r));
+				p1b_pad_edep_pion[s].fill(bank.getFloat("energy",r));
 			}
 
 			//all particles at p2
