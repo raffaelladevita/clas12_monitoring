@@ -1625,8 +1625,8 @@ public class dst_mon {
 		dirout.cd("/FTOF/");
 		for(int s=0;s<6;s++){
 			dirout.addDataSet(H_FTOF_pos_mass_mom_pad1a[s], H_FTOF_neg_mass_mom_pad1a[s], H_FTOF_pos_mass_mom_pad1b[s], H_FTOF_neg_mass_mom_pad1b[s]);
-			dirout.addDataSet(p1a_pad_vt_elec[s],p1a_pad_edep_elec[s],p1b_pad_vt_elec[s],p1b_pad_vt_elec[s],p2_pad_vt[s]);
-			dirout.addDataSet(p1a_pad_edep_elec[s],p1a_pad_edep_elec[s],p1b_pad_edep_elec[s],p1b_pad_edep_elec[s],p2_pad_edep[s]);
+			dirout.addDataSet(p1a_pad_vt_elec[s],p1a_pad_vt_pion[s],p1b_pad_vt_elec[s],p1b_pad_vt_pion[s],p2_pad_vt[s]);
+			dirout.addDataSet(p1a_pad_edep_elec[s],p1a_pad_edep_pion[s],p1b_pad_edep_elec[s],p1b_pad_edep_pion[s],p2_pad_edep[s]);
 		}
                 if(runNum>0)dirout.writeFile("plots"+runNum+"/dst_mon_"+runNum+".hipo");
                 else dirout.writeFile("plots/dst_mon.hipo");
