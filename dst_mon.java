@@ -20,13 +20,13 @@ import org.jlab.clas.physics.LorentzVector;
 import org.jlab.groot.base.GStyle;
 
 public class dst_mon {
-        public int Nevts, Nelecs, Ntrigs, runNum;
-        boolean[] trigger_bits;
+	public int Nevts, Nelecs, Ntrigs, runNum;
+	boolean[] trigger_bits;
 	public int[] Ntrigs_sect, Nelecs_sect;
-        public float EB, Eb, Mp;
-        public float RFT, STT;
+	public float EB, Eb, Mp;
+	public float RFT, STT;
 	public long TriggerWord;
-        
+
 	public LorentzVector VB, VT, Ve, VGS, Vprot, Vpip, VG1, VG2, VPI0;
 	public boolean found_eTraj, found_eECAL, found_eFTOF1a, found_eFTOF1b, found_eLTCC, found_eHTCC;
 	public int e_part_ind, e_sect, e_FTOF_pad1a, e_FTOF_pad1b, e_HTCC_bin_phi, e_HTCC_bin_theta;
@@ -43,12 +43,16 @@ public class dst_mon {
 	public int prot_part_ind;
 	public float prot_mom, prot_the, prot_phi, prot_vx, prot_vy, prot_vz, prot_beta;
 
-	public int pip_part_ind, pip_FTOF_pad1b;
+	public int pim_part_ind, pip_part_ind, pip_FTOF_pad1b;
 	public float pip_mom, pip_the, pip_phi, pip_vx, pip_vy, pip_vz, pip_beta, pip_FTOF1b_t, pip_FTOF1b_path, pip_FTOF1b_vt;
+	public float pip_FTOF1a_t, pip_FTOF1a_path, pip_FTOF1a_vt;
+	public float pim_mom, pim_FTOF1a_t, pim_FTOF1a_path, pim_FTOF1a_vt;
+	public float pim_FTOF1b_t, pim_FTOF1b_path, pim_FTOF1b_vt;
+	public float thisTime;
 
 	public int G1_part_ind, G2_part_ind, G1_pcal_ind, G2_pcal_ind, G1_cal_layers, G2_cal_layers;
 	public float G1_mom, G1_the, G1_phi, G2_mom, G2_the, G2_phi;
-        public float G1_pcal_X, G1_pcal_Y, G1_pcal_Z, G1_pcal_t, G1_pcal_R, G1_pcal_vt, G2_pcal_X, G2_pcal_Y, G2_pcal_Z, G2_pcal_t, G2_pcal_R, G2_pcal_vt;
+	public float G1_pcal_X, G1_pcal_Y, G1_pcal_Z, G1_pcal_t, G1_pcal_R, G1_pcal_vt, G2_pcal_X, G2_pcal_Y, G2_pcal_Z, G2_pcal_t, G2_pcal_R, G2_pcal_vt;
 	public float G1_ein_t, G1_eout_t, G2_ein_t, G2_eout_t;
 
 	public float elast_dPhi, elast_EB;
@@ -57,7 +61,7 @@ public class dst_mon {
 
 	public H2F H_e_t_f, H_e_p_f, H_e_vz_f, H_e_vt_vz, H_e_vt_p, H_e_vt_t;
 	public H2F H_e_PCAL, H_e_FTOF, H_e_LTCC, H_e_DCSL6, H_e_DCSL5, H_e_DCSL4, H_e_DCSL3, H_e_DCSL2, H_e_DCSL1, H_e_HTCC;
-       	public H2F H_e_nphe_HTCC, H_e_bin_theta_HTCC, H_e_bin_phi_HTCC, H_e_theta_HTCC, H_e_phi_HTCC;
+    public H2F H_e_nphe_HTCC, H_e_bin_theta_HTCC, H_e_bin_phi_HTCC, H_e_theta_HTCC, H_e_phi_HTCC;
 	public H2F[] H_e_HTCC_cut; 
 	public H2F[] H_e_t_p, H_e_vz_t, H_e_vz_p;
 	public H2F[] H_e_EC_etot_p, H_e_EC_vt_theta, H_e_EC_XY;
@@ -66,6 +70,11 @@ public class dst_mon {
 	public H2F[] H_FTOF_pos_beta_mom_pad1a, H_FTOF_neg_beta_mom_pad1a, H_FTOF_pos_beta_mom_pad1b, H_FTOF_neg_beta_mom_pad1b;
 	public H2F[] H_FTOF_pos_mass_mom_pad1a, H_FTOF_pos_mass_the_pad1a, H_FTOF_neg_mass_mom_pad1a, H_FTOF_neg_mass_the_pad1a;
 	public H2F[] H_FTOF_pos_mass_mom_pad1b, H_FTOF_pos_mass_the_pad1b, H_FTOF_neg_mass_mom_pad1b, H_FTOF_neg_mass_the_pad1b;
+	//from tof_monitor.java for timing and gain calibration, but from Dan's comment
+	//use leptons/pions (both charges) for p1a, p1b and all particles (both charges) for p2.
+	public H2F[] p1a_pad_vt_elec, p1a_pad_vt_pion, p1b_pad_vt_elec, p1b_pad_vt_pion, p2_pad_vt;
+	public H1F[] p1a_pad_edep_elec, p1a_pad_edep_pion, p1b_pad_edep_elec, p1b_pad_edep_pion, p2_pad_edep;
+
 	public H2F[] H_e_LTCC_vt_theta, H_e_LTCC_nphe_theta, H_e_LTCC_XY;
 	public H2F[] H_e_HTCC_vt_theta, H_e_HTCC_nphe_theta, H_e_HTCC_XY;
 	public H1F[][][] H_e_bin_nphe_HTCC;
@@ -82,7 +91,7 @@ public class dst_mon {
 	public H2F H_pi0_G2_XY, H_pi0_G2_TR, H_pi0_G2_vt_evt, H_pi0_G2_layer_E;//8
 	public H2F H_pi0_G1_mom_the, H_pi0_G1_phi_the, H_pi0_G2_mom_the, H_pi0_G2_phi_the;//12
 	public H2F H_pi0_open_E, H_pi0_E_the, H_pi0_phi_the;//15
-        public H1F H_pi0_mass, H_pi0_G1_layers, H_pi0_G2_layers;//18
+    public H1F H_pi0_mass, H_pi0_G1_layers, H_pi0_G2_layers;//18
 
         public dst_mon(int reqrunNum, float reqEB){
 		runNum = reqrunNum;EB=reqEB;
@@ -141,6 +150,7 @@ public class dst_mon {
 		H_e_FTOF.setTitle("electron FTOF position");
 		H_e_FTOF.setTitleX("X (cm)");
 		H_e_FTOF.setTitleY("Y (cm)");
+
 		H_e_LTCC = new H2F("H_e_LTCC","H_e_LTCC",200,-400,400,200,-400,400);
 		H_e_LTCC.setTitle("electron LTCC position");
 		H_e_LTCC.setTitleX("X (cm)");
@@ -234,6 +244,17 @@ public class dst_mon {
 		H_FTOF_neg_mass_the_pad1b = new H2F[6];
 		H_e_FTOF_edep_pad1b = new H2F[6];
 		H_e_FTOF_XY_pad1b = new H2F[6];
+		p1a_pad_vt_elec = new H2F[6];
+		p1a_pad_vt_pion = new H2F[6];
+		p1b_pad_vt_elec = new H2F[6];
+		p1b_pad_vt_pion = new H2F[6];
+		p2_pad_vt = new H2F[6];
+		p1a_pad_edep_elec = new H1F[6];
+		p1a_pad_edep_pion = new H1F[6];
+		p1b_pad_edep_elec = new H1F[6];
+		p1b_pad_edep_pion = new H1F[6];
+		p2_pad_edep = new H1F[6];
+
 		H_e_LTCC_vt_theta = new H2F[6];
 		H_e_LTCC_nphe_theta = new H2F[6];
 		H_e_LTCC_XY = new H2F[6];
@@ -340,6 +361,45 @@ public class dst_mon {
 			H_e_FTOF_XY_pad1b[s].setTitle(String.format("FTOF1b Y vs X S%d",s+1));
 			H_e_FTOF_XY_pad1b[s].setTitleX("X (cm)");
 			H_e_FTOF_XY_pad1b[s].setTitleY("Y (cm)");
+			
+			//from tof_monitor
+			p1a_pad_vt_elec[s] = new H2F(String.format("p1a_pad_vt_elec_S%d",s+1),String.format("p1a_pad_vt_elec_S%d",s+1),100,-1.002,1.002,100,-4,4);
+			p1a_pad_vt_elec[s].setTitle(String.format("p1a S%d time_elec",s+1));
+			p1a_pad_vt_elec[s].setTitleX("vertex time - RFTime (ns)");
+			p1a_pad_vt_elec[s].setTitleY("vertex time - STTime (ns)");
+			p1a_pad_vt_pion[s] = new H2F(String.format("p1a_pad_vt_pion_S%d",s+1),String.format("p1a_pad_vt_pion_S%d",s+1),100,-1.002,1.002,100,-4,4);
+			p1a_pad_vt_pion[s].setTitle(String.format("p1a S%d time_pion",s+1));
+			p1a_pad_vt_pion[s].setTitleX("vertex time - RFTime (ns)");
+			p1a_pad_vt_pion[s].setTitleY("vertex time - STTime (ns)");
+			p1b_pad_vt_elec[s] = new H2F(String.format("p1b_pad_vt_elec_S%d",s+1),String.format("p1b_pad_vt_elec_S%d",s+1),100,-1.002,1.002,100,-4,4);
+			p1b_pad_vt_elec[s].setTitle(String.format("p1b S%d time_elec",s+1));
+			p1b_pad_vt_elec[s].setTitleX("vertex time - RFTime (ns)");
+			p1b_pad_vt_elec[s].setTitleY("vertex time - STTime (ns)");
+			p1b_pad_vt_pion[s] = new H2F(String.format("p1b_pad_vt_pion_S%d",s+1),String.format("p1b_pad_vt_pion_S%d",s+1),100,-1.002,1.002,100,-4,4);
+			p1b_pad_vt_pion[s].setTitle(String.format("p1b S%d time_pion",s+1));
+			p1b_pad_vt_pion[s].setTitleX("vertex time - RFTime (ns)");
+			p1b_pad_vt_pion[s].setTitleY("vertex time - STTime (ns)");
+			p2_pad_vt[s] = new H2F(String.format("p2_pad_vt_S%d",s+1),String.format("p2_pad_vt_S%d",s+1),100,-1.002,1.002,100,-4,4);
+			p2_pad_vt[s].setTitle(String.format("p2 S%d time",s+1));
+			p2_pad_vt[s].setTitleX("vertex time - RFTime (ns)");
+			p2_pad_vt[s].setTitleY("vertex time - STTime (ns)");
+			p1a_pad_edep_elec[s] = new H1F(String.format("p1a_pad_edep_elec_S%d",s+1),String.format("p1a_pad_edep_elec_S%d",s+1),100,0,50);
+			p1a_pad_edep_elec[s].setTitle(String.format("p1a S%d energy_elec",s+1));
+			p1a_pad_edep_elec[s].setTitleX("E (MeV)");
+			p1a_pad_edep_pion[s] = new H1F(String.format("p1a_pad_edep_pion_S%d",s+1),String.format("p1a_pad_edep_pion_S%d",s+1),100,0,50);
+			p1a_pad_edep_pion[s].setTitle(String.format("p1a S%d energy_pion",s+1));
+			p1a_pad_edep_pion[s].setTitleX("E (MeV)");
+			p1b_pad_edep_elec[s] = new H1F(String.format("p1b_pad_edep_elec_S%d",s+1),String.format("p1b_pad_edep_elec_S%d",s+1),100,0,50);
+			p1b_pad_edep_elec[s].setTitle(String.format("p1b S%d energy_elec",s+1));
+			p1b_pad_edep_elec[s].setTitleX("E (MeV)");
+			p1b_pad_edep_pion[s] = new H1F(String.format("p1b_pad_edep_pion_S%d",s+1),String.format("p1b_pad_edep_pion_S%d",s+1),100,0,50);
+			p1b_pad_edep_pion[s].setTitle(String.format("p1b S%d energy_pion",s+1));
+			p1b_pad_edep_pion[s].setTitleX("E (MeV)");
+			p2_pad_edep[s] = new H1F(String.format("p2_pad_edep_S%d",s+1),String.format("p2_pad_edep_S%d",s+1),100,0,50);
+			p2_pad_edep[s].setTitle(String.format("p2 S%d energy",s+1));
+			p2_pad_edep[s].setTitleX("E (MeV)");
+
+
 			//H_e_LTCC_vt_theta[s] = new H2F(String.format("H_e_LTCC_vt_theta_%d",s+1),String.format("H_e_LTCC_vt_theta_%d",s+1),100,0,40,100,-5,5);
 			H_e_LTCC_vt_theta[s] = new H2F(String.format("H_e_LTCC_vt_theta_%d",s+1),String.format("H_e_LTCC_vt_theta_%d",s+1),100,0,40,100,-200,150);
 			H_e_LTCC_vt_theta[s].setTitle(String.format("LTCC vt vs #theta S%d",s+1));
@@ -679,6 +739,9 @@ public class dst_mon {
 
 	public void fillFTOF(DataBank part, DataBank bank){
 		for(int r=0;r<bank.rows();r++)if(bank.getByte("detector",r)==12){
+			//from Dan's request use 1a - leptons/pions, all charges for p2
+			int s = bank.getInt("sector",r)-1;
+			//electrons at p1a, p1b
 			if(bank.getShort("pindex",r)==e_part_ind){
 				if(bank.getByte("layer",r)==1){
 					found_eFTOF1a = true;
@@ -690,6 +753,11 @@ public class dst_mon {
 					e_FTOF1a_t = bank.getFloat("time",r);
 					e_FTOF1a_path = bank.getFloat("path",r);
 					e_FTOF1a_vt = e_FTOF1a_t - e_FTOF1a_path/29.98f - STT;
+					thisTime = e_FTOF1a_t - e_FTOF1a_path/29.98f - RFT;
+					thisTime = (thisTime+1.002f) % 2.004f;
+					thisTime = thisTime - 1.002f;
+					p1a_pad_vt_elec[s].fill(thisTime,e_FTOF1a_vt);
+					p1a_pad_edep_elec[s].fill(e_FTOF1a_edep);
 				}
 				if(bank.getByte("layer",r)==2){
 					found_eFTOF1b = true;
@@ -701,7 +769,24 @@ public class dst_mon {
 					e_FTOF1b_t = bank.getFloat("time",r);
 					e_FTOF1b_path = bank.getFloat("path",r);
 					e_FTOF1b_vt = e_FTOF1b_t - e_FTOF1b_path/29.98f - STT;
+					thisTime = e_FTOF1b_t - e_FTOF1b_path/29.98f -  RFT;
+					thisTime = (thisTime+1.002f) % 2.004f;
+					thisTime = thisTime - 1.002f;
+					p1b_pad_vt_elec[s].fill(thisTime,e_FTOF1b_vt);
+					p1b_pad_edep_elec[s].fill(e_FTOF1b_edep);
 				}
+			}
+			//pi plus at p1a, p1b
+			if( bank.getShort("pindex",r)==pip_part_ind && bank.getByte("layer",r)==1 ){
+				pip_FTOF1a_t = bank.getFloat("time",r);
+				pip_FTOF1a_path = bank.getFloat("path",r);
+				float pip_beta = pip_mom/(float)Math.sqrt(pip_mom*pip_mom + 0.13957f*0.13957f);
+				pip_FTOF1a_vt = pip_FTOF1a_t - pip_FTOF1a_path / ( pip_beta * 29.98f ) - STT;
+				thisTime = pip_FTOF1a_t - pip_FTOF1a_path / ( pip_beta * 29.98f ) - RFT;
+				thisTime = (thisTime+1.002f) % 2.004f;
+				thisTime = thisTime - 1.002f;
+				p1a_pad_vt_pion[s].fill(thisTime,pip_FTOF1a_vt);
+				p1a_pad_edep_pion[s].fill(bank.getFloat("path",r));
 			}
 			if( bank.getShort("pindex",r)==pip_part_ind && bank.getByte("layer",r)==2 ){
 				pip_FTOF_pad1b = bank.getShort("component",r);
@@ -709,7 +794,46 @@ public class dst_mon {
 				pip_FTOF1b_path = bank.getFloat("path",r);
 				float pip_beta = pip_mom/(float)Math.sqrt(pip_mom*pip_mom + 0.13957f*0.13957f);
 				pip_FTOF1b_vt = pip_FTOF1b_t - pip_FTOF1b_path / ( pip_beta * 29.98f ) - STT;
+				thisTime = pip_FTOF1b_t - pip_FTOF1b_path / ( pip_beta * 29.98f ) - RFT;
+				thisTime = (thisTime+1.002f) % 2.004f;
+				thisTime = thisTime - 1.002f;
+				p1b_pad_vt_pion[s].fill(thisTime, pip_FTOF1b_vt);
+				p1b_pad_edep_pion[s].fill(bank.getFloat("path",r));
 			}
+
+			//pi minus at p1a, p1b
+			if( bank.getShort("pindex",r)==pim_part_ind && bank.getByte("layer",r)==1 ){
+				pim_FTOF1a_t = bank.getFloat("time",r);
+				pim_FTOF1a_path = bank.getFloat("path",r);
+				float pim_beta = pim_mom/(float)Math.sqrt(pim_mom*pim_mom + 0.13957f*0.13957f);
+				pim_FTOF1a_vt = pim_FTOF1a_t - pim_FTOF1a_path / ( pim_beta * 29.98f ) - STT;
+				thisTime = pim_FTOF1a_t - pim_FTOF1a_path / ( pim_beta * 29.98f ) -  RFT;
+				thisTime = (thisTime+1.002f) % 2.004f;
+				thisTime = thisTime - 1.002f;
+				p1a_pad_vt_pion[s].fill(thisTime, pim_FTOF1a_vt);
+				p1a_pad_edep_pion[s].fill(bank.getFloat("path",r));
+			}
+			if( bank.getShort("pindex",r)==pim_part_ind && bank.getByte("layer",r)==2 ){
+				pim_FTOF1b_t = bank.getFloat("time",r);
+				pim_FTOF1b_path = bank.getFloat("path",r);
+				float pim_beta = pim_mom/(float)Math.sqrt(pim_mom*pim_mom + 0.13957f*0.13957f);
+				pim_FTOF1b_vt = pim_FTOF1b_t - pim_FTOF1b_path / ( pim_beta * 29.98f ) - STT;
+				thisTime = pim_FTOF1b_t - pim_FTOF1b_path / ( pim_beta * 29.98f ) -  RFT;
+				thisTime = (thisTime+1.002f) % 2.004f;
+				thisTime = thisTime - 1.002f;
+				p1b_pad_vt_pion[s].fill(thisTime, pim_FTOF1b_vt);
+				p1b_pad_edep_pion[s].fill(bank.getFloat("path",r));
+			}
+
+			//all particles at p2
+			if(bank.getByte("layer",r)==3){
+				thisTime = bank.getFloat("time",r) - bank.getFloat("path",r)/29.98f - RFT;
+				thisTime = (thisTime+1.002f) % 2.004f;
+				thisTime = thisTime - 1.002f;		
+				p2_pad_vt[s].fill(thisTime, bank.getFloat("time",r) - bank.getFloat("path",r)/29.98f - STT);
+				p2_pad_edep[s].fill(bank.getFloat("energy",r));
+			}
+
 			if(bank.getShort("pindex",r)>-1 && bank.getShort("pindex",r)<part.rows()){
 				byte q = part.getByte("charge", bank.getShort("pindex",r)); 
 				float px = part.getFloat("px", bank.getShort("pindex",r)); 
@@ -720,7 +844,7 @@ public class dst_mon {
 				double TOFbeta = bank.getFloat("path",r)/(29.98f*(bank.getFloat("time",r)-STT));
 				//double TOFmass = mom * Math.sqrt( 1/(TOFbeta*TOFbeta) - 1);
 				double TOFmass = mom * mom * ( 1/(TOFbeta*TOFbeta) - 1);
-				int s = bank.getInt("sector",r)-1;
+				// int s = bank.getInt("sector",r)-1;
 				if(bank.getByte("layer",r)==1 && q>0 ){
 					H_FTOF_pos_beta_mom_pad1a[s].fill(mom,TOFbeta);
 					H_FTOF_pos_mass_mom_pad1a[s].fill(mom,TOFmass);
@@ -744,6 +868,7 @@ public class dst_mon {
 			}
 		}
 	}
+
 	public void fillCerenkov(DataBank bank){
 		for(int r=0;r<bank.rows();r++){
 			if(bank.getShort("pindex",r)==e_part_ind){
@@ -877,6 +1002,10 @@ public class dst_mon {
 				pip_beta = be;
                                 Vpip = new LorentzVector(px,py,pz,Math.sqrt(pip_mom*pip_mom+0.13957f*0.13957f));
 			}
+			if(pid == -211 && pim_part_ind==-1 && inDC && (mom>1.5||runNum<2600) ){
+				pim_part_ind = k;
+				pim_mom = mom;
+			}
 			if(pid == 2212 && prot_part_ind==-1){
 				prot_part_ind = k;
 				prot_mom = mom;
@@ -960,7 +1089,7 @@ public class dst_mon {
 
 	public void resetCounters(){
                 e_part_ind = -1;found_eTraj=false;found_eECAL=false;found_eFTOF1a=false;found_eFTOF1b=false;found_eLTCC=false;found_eHTCC=false;
-		pip_part_ind = -1;pip_FTOF_pad1b = -1;prot_part_ind = -1;G1_part_ind = -1;G2_part_ind = -1;G1_pcal_ind = -1;G2_pcal_ind = -1;
+		pim_part_ind = -1; pip_part_ind = -1;pip_FTOF_pad1b = -1;prot_part_ind = -1;G1_part_ind = -1;G2_part_ind = -1;G1_pcal_ind = -1;G2_pcal_ind = -1;
 		G1_cal_layers = 0;G2_cal_layers = 0;G1_mom = 0;G2_mom = 0;
 	}
         public void processEvent(DataEvent event) {
@@ -1494,7 +1623,11 @@ public class dst_mon {
 		dirout.addDataSet(H_elast_Dphi_phi,H_elast_dvz_vz,H_elast_dvz_theta_all);
 		dirout.mkdir("/FTOF/");
 		dirout.cd("/FTOF/");
-		for(int s=0;s<6;s++)dirout.addDataSet(H_FTOF_pos_mass_mom_pad1a[s], H_FTOF_neg_mass_mom_pad1a[s], H_FTOF_pos_mass_mom_pad1b[s], H_FTOF_neg_mass_mom_pad1b[s]);
+		for(int s=0;s<6;s++){
+			dirout.addDataSet(H_FTOF_pos_mass_mom_pad1a[s], H_FTOF_neg_mass_mom_pad1a[s], H_FTOF_pos_mass_mom_pad1b[s], H_FTOF_neg_mass_mom_pad1b[s]);
+			dirout.addDataSet(p1a_pad_vt_elec[s],p1a_pad_edep_elec[s],p1b_pad_vt_elec[s],p1b_pad_vt_elec[s],p2_pad_vt[s]);
+			dirout.addDataSet(p1a_pad_edep_elec[s],p1a_pad_edep_elec[s],p1b_pad_edep_elec[s],p1b_pad_edep_elec[s],p2_pad_edep[s]);
+		}
                 if(runNum>0)dirout.writeFile("plots"+runNum+"/dst_mon_"+runNum+".hipo");
                 else dirout.writeFile("plots/dst_mon.hipo");
 	}

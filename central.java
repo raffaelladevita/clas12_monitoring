@@ -22,13 +22,20 @@ public class central {
 	boolean userTimeBased, write_volatile;
 	public int runNum;
 	public boolean BackToBack;
-	public float STT, MinCTOF,MaxCTOF, minSTT, maxSTT;
+	public float STT, RFT, MinCTOF,MaxCTOF, minSTT, maxSTT;
 	public float[] CTOF_shft;
+
 	public H2F H_CTOF_pos, H_CTOF_edep_phi, H_CTOF_edep_z, H_CTOF_path_mom;
 	public H2F H_CTOF_edep_pad_neg, H_CTOF_edep_pad_pos;
 	public H2F H_vz_DC_CVT, H_phi_DC_CVT, H_CVT_CTOF_phi, H_CVT_CTOF_z, H_CVT_t_STT, H_CVT_t_pad;
 	public H1F[] H_CVT_t;
 	public H1F H_CVT_t_pos, H_CVT_t_neg;
+
+	//for timeline
+	public H1F H_CTOF_pos_mass, H_CTOF_neg_mass;
+	public H2F H_CTOF_vt_pim;
+	public H1F H_CTOF_edep_pim;
+
 	public central(int reqrunNum, boolean reqTimeBased, boolean reqwrite_volatile) {
 		runNum = reqrunNum;userTimeBased=reqTimeBased;
 		write_volatile = reqwrite_volatile;
@@ -116,6 +123,19 @@ public class central {
                 H_CVT_t_neg.setTitle("All CTOF pads, CTOF vertex t - STT, neg. tracks");
                 H_CVT_t_neg.setTitleX("CTOF vertex t - STT (ns)");
 
+		H_CTOF_pos_mass = new H1F("H_CTOF_pos_mass","H_CTOF_pos_mass",100,-0.5,3.5);
+		H_CTOF_pos_mass.setTitle("pos Mass^2");
+		H_CTOF_pos_mass.setTitleX("M^2 (GeV^2)");
+		H_CTOF_neg_mass = new H1F("H_CTOF_neg_mass","H_CTOF_neg_mass",100,-0.5,2.0);
+		H_CTOF_neg_mass.setTitle("neg Mass^2");
+		H_CTOF_neg_mass.setTitleX("M^2 (GeV^2)");
+		H_CTOF_vt_pim = new H2F("H_CTOF_vt_pim","H_CTOF_vt_pim",250,-5,5,250,-5,5);
+		H_CTOF_vt_pim.setTitle("CTOF MIP (pi-) vertex time");
+		H_CTOF_vt_pim.setTitleX("vertex time - RFTime (ns)");
+		H_CTOF_vt_pim.setTitleY("vertex time - STTime (ns)");
+		H_CTOF_edep_pim = new H1F("H_CTOF_edep_pim","H_CTOF_edep_pim",100,0,150);
+		H_CTOF_edep_pim.setTitle("CTOF MIP (pi-) Edep");
+		H_CTOF_edep_pim.setTitleX("E (MeV)");
 	}
 	public double Vangle(Vector3 v1, Vector3 v2){ 
 		double res = 0; 
@@ -153,7 +173,7 @@ public class central {
 					float cy = CVTbank.getFloat("c_y",iCVT)*0.1f;
 					float cz = CVTbank.getFloat("c_z",iCVT)*0.1f;
 					float cphi = (float)Math.toDegrees(Math.atan2(cy,cx));
-                                        int charge = CVTbank.getInt("q",iCVT);
+					int charge = CVTbank.getInt("q",iCVT);
 					int pad = CTOFbank.getInt("component",iCTOF);
 					float x = CTOFbank.getFloat("x",iCTOF)*0.1f;
 					float y = CTOFbank.getFloat("y",iCTOF)*0.1f;
@@ -165,6 +185,11 @@ public class central {
 					float beta =  mom/(float)Math.sqrt(mom*mom+0.13957061f*0.13957061f);
 					//float DelPhi = phi-cphi+190;
 					float DelPhi = phi-cphi;
+
+					//like FTOF in dst_mon
+					double CTOFbeta = p/(29.98f*(t-STT));
+					double CTOFmass = mom * mom * ( 1/(CTOFbeta*CTOFbeta) - 1);
+
 					while(DelPhi>180)DelPhi-=360;
 					while(DelPhi<-180)DelPhi+=360;
 					if( Math.abs(DelPhi)<30 && z<4.7){}
@@ -182,14 +207,19 @@ public class central {
 							H_CVT_t_pad.fill(pad,CTOFTime-STT);
 							H_CVT_t[pad].fill(CTOFTime-STT);
 							H_CVT_t[49].fill(CTOFTime-STT);
-						}
-                                                if (charge>0) {
-							H_CTOF_edep_pad_pos.fill(pad,e);
-							H_CVT_t_pos.fill(CTOFTime-STT);
-						}
-                                                if (charge<0) {
 							H_CTOF_edep_pad_neg.fill(pad,e);
 							H_CVT_t_neg.fill(CTOFTime-STT);
+							H_CTOF_neg_mass.fill(CTOFmass);
+							//pi- fiducial cut borrowing from Pierre's CND
+							if (Math.sqrt(Math.abs(CTOFmass))<0.38 && CTOFmass>-0.35*0.35){
+								H_CTOF_vt_pim.fill(CTOFTime-RFT,CTOFTime-STT);
+								H_CTOF_edep_pim.fill(e);
+							}			
+						}
+						if (charge>0) {
+							H_CTOF_edep_pad_pos.fill(pad,e);
+							H_CVT_t_pos.fill(CTOFTime-STT);
+							H_CTOF_pos_mass.fill(CTOFmass);
 						}
 						matched = true;
 					}
@@ -210,6 +240,7 @@ public class central {
                 }
 
 		if(eventBank!=null)STT = eventBank.getFloat("STTime",0);
+		if(eventBank!=null)RFT = eventBank.getFloat("RFTime",0);
 		else return;
 		if(trackDetBank != null && event.hasBank("CVTRec::Tracks"))FillTracks(trackDetBank,event.getBank("CVTRec::Tracks"));
 		if(BackToBack && event.hasBank("CVTRec::Tracks") && event.hasBank("CTOF::hits"))FillCVTCTOF(event.getBank("CVTRec::Tracks"),event.getBank("CTOF::hits"));
@@ -263,8 +294,9 @@ public class central {
                 dirout.cd("/ctof/");
                 dirout.addDataSet(H_CVT_t_pad,H_CTOF_edep_phi);
                 for(int p=0;p<50;p++)dirout.addDataSet(H_CVT_t[p]);
-		dirout.addDataSet(H_CVT_t_pos, H_CVT_t_neg);
-                
+                dirout.addDataSet(H_CVT_t_pos, H_CVT_t_neg);
+                dirout.addDataSet(H_CTOF_pos_mass, H_CTOF_neg_mass, H_CTOF_vt_pim, H_CTOF_edep_pim);
+
 		if(write_volatile)if(runNum>0)dirout.writeFile("/volatile/clas12/rga/spring18/plots"+runNum+"/out_CTOF_"+runNum+".hipo");
                 
 		if(!write_volatile){
