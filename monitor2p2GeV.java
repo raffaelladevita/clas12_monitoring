@@ -93,7 +93,8 @@ public class monitor2p2GeV {
 	public H1F H_CVT_p, H_CVT_t, H_CVT_f, H_CVT_z, H_CVT_chi2, H_CVT_ndf, H_CVT_pathlength;
 	public H1F H_CVT_z_pos, H_CVT_z_neg, H_CVT_chi2_pos, H_CVT_chi2_neg;
 	public H1F H_CVT_d0, H_CVT_charge;
-	public H2F H_CVT_vz_mom, H_CVT_vz_phi, H_CVT_vz_theta;
+	public H2F H_CVT_vz_mom, H_CVT_vz_phi, H_CVT_vz_theta, H_CVT_vx_vy, H_CVT_vx_vz, H_CVT_vz_vy;
+	public H1F H_CVT_mom, H_CVT_theta, H_CVT_phi, H_CVT_vz, H_CVT_vx, H_CVT_vy;
 	public H1F H_CD_vx, H_CD_vy, H_CD_vz;
 	public H2F H_CD_vz_mom, H_CD_vz_phi, H_CD_vz_theta, H_CD_vx_vy, H_CD_vx_vz, H_CD_vz_vy; 
 
@@ -427,6 +428,40 @@ System.out.println("Beam energy = "+Ebeam);
                 H_CD_vz_vy.setTitle("CD particle vertex vz vs vy");
                 H_CD_vz_vy.setTitleX("y (cm)");
                 H_CD_vz_vy.setTitleY("z (cm)");
+
+                H_CVT_vz_mom = new H2F("H_CVT_vz_mom","H_CVT_vz_mom",100,0,3.5,100,-25.,25.);
+                H_CVT_vz_mom.setTitle("CVT z vertex vs mom");
+                H_CVT_vz_mom.setTitleX("p (GeV/c");
+                H_CVT_vz_mom.setTitleY("z (cm)");
+                H_CVT_vz_theta = new H2F("H_CVT_vz_theta","H_CVT_vz_theta",100,0,180.,100, -25., 25.);
+                H_CVT_vz_theta.setTitle("CVT z vertex vs theta");
+                H_CVT_vz_theta.setTitleX("#theta (^o)");
+                H_CVT_vz_theta.setTitleY("z (cm)");
+                H_CVT_vz_phi = new H2F("H_CVT_vz_phi","H_CVT_vz_phi",200,-180.,180.,100, -25., 25.);
+                H_CVT_vz_phi.setTitle("CVT z vertex vs phi");
+                H_CVT_vz_phi.setTitleX("#phi (^o)");
+                H_CVT_vz_phi.setTitleY("z (cm)");
+                H_CVT_vx = new H1F("H_CVT_vx",200, -5.,5.);
+                H_CVT_vx.setTitle("CVT x vertex");
+                H_CVT_vx.setTitleX("x (cm)");
+                H_CVT_vz = new H1F("H_CVT_vz",200, -25.,25.);
+                H_CVT_vz.setTitle("CVT z vertex");
+                H_CVT_vz.setTitleX("z (cm)");
+                H_CVT_vy = new H1F("H_CVT_vy",200, -5.,5.);
+                H_CVT_vy.setTitle("CVT y vertex");
+                H_CVT_vy.setTitleX("y (cm)");
+                H_CVT_vx_vy = new H2F("H_CVT_vx_vy","H_CVT_vx_vy",100,-25.,25,100,-25.,25.);
+                H_CVT_vx_vy.setTitle("CVT vertex  y vs x");
+                H_CVT_vx_vy.setTitleX("x (cm)");
+                H_CVT_vx_vy.setTitleY("y (cm)");
+                H_CVT_vx_vz = new H2F("H_CVT_vx_vz","H_CVT_vx_vz",100,-25.,25,100,-25.,25.);
+                H_CVT_vx_vz.setTitle("CVT vertex z vs x");
+                H_CVT_vx_vz.setTitleX("x (cm)");
+                H_CVT_vx_vz.setTitleY("z (cm)");
+                H_CVT_vz_vy = new H2F("H_CVT_vz_vy","H_CVT_vz_vy",100,-25.,25,100,-25.,25.);
+                H_CVT_vz_vy.setTitle("CVT vertex z vs y");
+                H_CVT_vz_vy.setTitleX("y (cm)");
+                H_CVT_vz_vy.setTitleY("z (cm)");
 
 		PCAL_Thresh_S1 = new H1F("PCAL_Thresh_S1","PCAL_Thresh_S1",100,0,0.5);
 		PCAL_Thresh_S1.setTitle("PCAL E S1");
@@ -968,6 +1003,12 @@ System.out.println("Beam energy = "+Ebeam);
                 H_CVT_vz_phi.setTitle("CVT z vertex vs phi");
                 H_CVT_vz_phi.setTitleX("#phi (^o)");
                 H_CVT_vz_phi.setTitleY("z (cm)");
+		H_CVT_phi = new H1F("H_CVT_phi","H_CVT_phi",100,-180,180);
+                H_CVT_phi.setTitle("CVT #phi");
+                H_CVT_phi.setTitleX("#phi (^o)");
+		H_CVT_theta = new H1F("H_CVT_theta","H_CVT_theta",100,0,180);
+                H_CVT_theta.setTitle("CVT #theta");
+                H_CVT_theta.setTitleX("#theta (^o)");
 		
 
 	  	H_CVT_ndf = new H1F("H_CVT_ndf","H_CVT_ndf",10,0.5,10.5);
@@ -2627,13 +2668,20 @@ System.out.println("Beam energy = "+Ebeam);
 			float chi2 = bank.getFloat("chi2", k);
 			float pathlength = bank.getFloat("pathlength", k);
 			int ndf = bank.getInt("ndf", k);
+                	//double p = bank.getFloat("p", loop);
+                	//double pt = bank.getFloat("pt", loop);
+                	//double pz = pt * tandip;
+                	//double py = pt * Math.sin(phi0);
+                	//double px = pt * Math.cos(phi0);
+                	double vx = -d0 * Math.sin(phi0);
+                	double vy = d0 * Math.cos(phi0);
+
+			//double theta = Math.toDegrees(Math.acos(tandip * pt / p));
 
 			phi0 = (float)Math.toDegrees(phi0);
 			float pz = momt * tandip;
 			float theta = (float)Math.toDegrees(Math.acos(pz/Math.sqrt( pz*pz + momt*momt )));
 			//System.out.printf(" %f = %f\n",mom,Math.sqrt( pz*pz + momt*momt ));
-
-			//z0 = z0*0.1f;
 
 			//checkpoint_central
 			int q = bank.getInt("q", k);
@@ -2671,22 +2719,30 @@ System.out.println("Beam energy = "+Ebeam);
 			int bstOntrackLayers = 2 * bstOntrackCrosses;
 			hbstOnTrkLayers.fill(bstOntrackLayers);
 			hbmtOnTrkLayers.fill(bmtOntrackLayers);
+			H_CVT_phi.fill(phi0);
+			H_CVT_theta.fill(theta);
+			H_CVT_vz.fill(z0);
+			H_CVT_vx.fill(vx);
+			H_CVT_vy.fill(vy);
+			H_CVT_vx_vy.fill(vx,vy);
+			H_CVT_vx_vz.fill(vx,z0);
+			H_CVT_vz_vy.fill(vy,z0);
 			if(mom>0.15 && chi2<20000 && theta>0 && theta <180 && Math.abs(z0)<25 && ndf>2){}
 			if(mom>0.15 && chi2<20000 && theta>0 && theta <180 && Math.abs(z0)<25){
 				//electron
-				if(foundCVT==0){
-					foundCVT = 1;
-					CVT_mom = mom;
-					CVT_theta = theta;
-					CVT_phi = phi0;
-					CVT_vz = z0;
-					CVTcharge = bank.getInt("q",k);
-					CVT_chi2 = chi2;
-					CVT_ndf = ndf;
-					CVT_pathlength = pathlength;
-				}
+			if(foundCVT==0){
+				foundCVT = 1;
+				CVT_mom = mom;
+				CVT_theta = theta;
+				CVT_phi = phi0;
+				CVT_vz = z0;
+				CVTcharge = bank.getInt("q",k);
+				CVT_chi2 = chi2;
+				CVT_ndf = ndf;
+				CVT_pathlength = pathlength;
 			}
 		}
+	}
 		hpostrks.fill(tracksPos);//checkpoint_central
 		hnegtrks.fill(tracksNeg);
 		hpostrks_rat.fill(tracksPos);//checkpoint_central
@@ -3164,19 +3220,25 @@ System.out.println("Beam energy = "+Ebeam);
 
 
 		//checkpoint_central
-		if(event.hasBank("BSTRec::Hits")) {
-      DataBank bstHitBank = event.getBank("BSTRec::Hits");
-      int bstHits = bstHitBank.rows();
-      float bstOccupancy = 100 * bstHits/BSTCHANNELS;
-      hbstOccupancy.fill(bstOccupancy);
-    }
+		if(event.hasBank("BST::adc")) {
+      			DataBank bstHitBank = event.getBank("BST::adc");
+			int bstHits = 0;
+			for (int loop = 0; loop < bstHitBank.rows();loop++) {
+				if (bstHitBank.getInt("ADC", loop)!=-1) bstHits++;
+			}
+      			float bstOccupancy = 100 * bstHits/BSTCHANNELS;
+      			hbstOccupancy.fill(bstOccupancy);
+    		}
 
-    if(event.hasBank("BMTRec::Hits")) {
-      DataBank bmtHitBank = event.getBank("BMTRec::Hits");
-      int bmtHits = bmtHitBank.rows();
-      float bmtOccupancy = 100 * bmtHits/BMTCHANNELS;
-      hbmtOccupancy.fill(bmtOccupancy);
-    }
+    		if(event.hasBank("BMT::adc")) {
+      			DataBank bmtHitBank = event.getBank("BMT::adc");
+      			int bmtHits = 0;
+			for (int loop = 0; loop < bmtHitBank.rows();loop++) {
+                                if (bmtHitBank.getInt("ADC", loop) > 0) bmtHits++;
+                        }
+      			float bmtOccupancy = 100 * bmtHits/BMTCHANNELS;
+      			hbmtOccupancy.fill(bmtOccupancy);
+    		}
 
 
 		if(event.hasBank("CVTRec::Tracks"))makeCVT(event.getBank("CVTRec::Tracks"));
@@ -4020,16 +4082,12 @@ System.out.println("Beam energy = "+Ebeam);
 		can_CVT.cd(9);can_CVT.draw(H_CVT_vz_mom);
 		can_CVT.cd(10);can_CVT.draw(H_CVT_vz_phi);
 		can_CVT.cd(11);can_CVT.draw(H_CVT_vz_theta);
-		can_CVT.cd(12);can_CVT.draw(H_CD_vx);
-		can_CVT.cd(13);can_CVT.draw(H_CD_vy);
-		can_CVT.cd(14);can_CVT.draw(H_CD_vz);
-		can_CVT.cd(15);can_CVT.draw(H_CD_vx_vy);
-		can_CVT.cd(16);can_CVT.draw(H_CD_vx_vz);
-		can_CVT.cd(17);can_CVT.draw(H_CD_vz_vy);
-		can_CVT.cd(18);can_CVT.draw(H_CD_vz_vy);
-		can_CVT.cd(19);can_CVT.draw(H_CD_vz_mom);
-		can_CVT.cd(20);can_CVT.draw(H_CD_vz_theta);
-		can_CVT.cd(21);can_CVT.draw(H_CD_vz_phi);
+		can_CVT.cd(12);can_CVT.draw(H_CVT_vx);
+		can_CVT.cd(13);can_CVT.draw(H_CVT_vy);
+		can_CVT.cd(14);can_CVT.draw(H_CVT_vz);
+		can_CVT.cd(15);can_CVT.draw(H_CVT_vx_vy);
+		can_CVT.cd(16);can_CVT.draw(H_CVT_vx_vz);
+		can_CVT.cd(17);can_CVT.draw(H_CVT_vz_vy);
 
 		//can_CVT.cd(22);can_CVT.draw(H_CVT_z_pos);
                 //can_CVT.cd(23);can_CVT.draw(H_CVT_z_neg);

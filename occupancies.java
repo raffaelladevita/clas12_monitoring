@@ -32,14 +32,47 @@ public class occupancies {
 	H1F[][] H_BMT_occ_LS;
 	H2F H_BMT_R1_phi_z, H_BMT_R2_phi_z, H_BMT_R3_phi_z;
 	H2F[] H_BMT_occ_StripLayer;
+	H1F H_BST_occ_reg1_l1, H_BST_occ_reg1_l2, H_BST_occ_reg2_l1, H_BST_occ_reg2_l2, H_BST_occ_reg3_l1, H_BST_occ_reg3_l2;
+	H1F H_BST_multi;
 	
 	H2F H_BST_R1_theta, H_BST_R2_theta, H_BST_R3_theta;
 	H2F H_BMT_R1_theta, H_BMT_R2_theta, H_BMT_R3_theta;
 	H2F H_BST_R1_phi, H_BST_R2_phi, H_BST_R3_phi;
 	H2F H_BMT_R1_phi, H_BMT_R2_phi, H_BMT_R3_phi;
+
+	H1F H_BMT_multi;
+
 	public occupancies(int reqrunNum, boolean reqwrite_volatile) {
 		write_volatile = reqwrite_volatile;
 		runNum = reqrunNum;
+		H_BST_multi = new H1F("bst_multi", "bst_multi", 501, -0.5, 500.5);
+        	H_BST_multi.setTitleX("hit multiplicity");
+        	H_BST_multi.setTitleY("counts");
+        	H_BST_multi.setTitle("Multiplicity of BST channels");
+		H_BST_occ_reg1_l1 = new H1F("bst_occ_reg1_l1", "bst_occ_reg1_l1", 2560, 0.5, 2560.5);
+		H_BST_occ_reg1_l1.setTitleX("strip");
+        	H_BST_occ_reg1_l1.setTitleY("hits");
+        	H_BST_occ_reg1_l1.setTitle("region 1 - bottom layer");
+                H_BST_occ_reg1_l2 = new H1F("bst_occ_reg1_l2", "bst_occ_reg1_l2", 2560, 0.5, 2560.5);
+                H_BST_occ_reg1_l2.setTitleX("strip");
+                H_BST_occ_reg1_l2.setTitleY("hits");
+                H_BST_occ_reg1_l2.setTitle("region 1 - top layer");
+                H_BST_occ_reg2_l1 = new H1F("bst_occ_reg2_l1", "bst_occ_reg2_l1", 3584, 0.5, 3584.5);
+                H_BST_occ_reg2_l1.setTitleX("strip");
+                H_BST_occ_reg2_l1.setTitleY("hits");
+                H_BST_occ_reg2_l1.setTitle("region 2 - bottom layer");
+                H_BST_occ_reg2_l2 = new H1F("bst_occ_reg2_l2", "bst_occ_reg2_l2", 3584, 0.5, 3584.5);
+                H_BST_occ_reg2_l2.setTitleX("strip");
+                H_BST_occ_reg2_l2.setTitleY("hits");
+                H_BST_occ_reg2_l2.setTitle("region 2 - top layer");
+                H_BST_occ_reg3_l1 = new H1F("bst_occ_reg3", "bst_occ_reg3_l1", 4608, 0.5, 4608.5);
+                H_BST_occ_reg3_l1.setTitleX("strip");
+                H_BST_occ_reg3_l1.setTitleY("hits");
+                H_BST_occ_reg3_l1.setTitle("region 3 - bottom layer");
+                H_BST_occ_reg3_l2 = new H1F("bst_occ_reg3_l2", "bst_occ_reg3_l2", 4608, 0.5, 4608.5);
+                H_BST_occ_reg3_l2.setTitleX("strip");
+                H_BST_occ_reg3_l2.setTitleY("hits");
+                H_BST_occ_reg3_l2.setTitle("region 3 - top layer");
 		H_occ_e_th_ph = new H2F("H_occ_e_th_ph","H_occ_e_th_ph",100,-180,180,100,5,35);
 		H_occ_e_th_ph.setTitle("e^- #theta vs #phi");
 		H_occ_e_th_ph.setTitleX("#phi (^o)");
@@ -92,6 +125,11 @@ public class occupancies {
 		H_BST_R3_phi_z.setTitle("BST R3 #phi vs z");
 		H_BST_R3_phi_z.setTitleX("z (mm)");
 		H_BST_R3_phi_z.setTitleY("#phi (^o)");
+
+		H_BMT_multi = new H1F("bmt_multi", "bmt_multi", 501, -0.5, 500.5);
+                H_BMT_multi.setTitleX("hit multiplicity");
+                H_BMT_multi.setTitleY("counts");
+                H_BMT_multi.setTitle("Multiplicity of BMT channels");
 		H_BMT_occ = new H2F("H_BMT_occ","H_BMT_occ",1400,0,1400,18,0.5,18.5);
 		H_BMT_occ.setTitle("BMT occ");
 		H_BMT_occ.setTitleX("strip");
@@ -175,24 +213,30 @@ public class occupancies {
 		H_BMT_R3_phi.setTitleY("R1 #phi (^o)");
 	}
 	public void MakeBST_hits(DataBank bank){
+		H_BST_multi.fill(bank.rows());
 		for(int k=0;k<bank.rows();k++){
-			int S = bank.getInt("sector",k);
-			int l = bank.getInt("layer",k);
-			int s = bank.getInt("strip",k);
+			int S = bank.getByte("sector",k);
+			int l = bank.getByte("layer",k);
+			int comp = bank.getShort("component",k);
+			int ADC = bank.getInt("ADC",k);
+			if (ADC != -1) {
+				if (l == 1) H_BST_occ_reg1_l1.fill((S-1)*256+comp);
+				if (l == 3) H_BST_occ_reg2_l1.fill((S-1)*256+comp);
+				if (l == 5) H_BST_occ_reg3_l1.fill((S-1)*256+comp);
+				if (l == 2) H_BST_occ_reg1_l2.fill((S-1)*256+comp);
+				if (l == 4) H_BST_occ_reg2_l2.fill((S-1)*256+comp);
+				if (l == 6) H_BST_occ_reg3_l2.fill((S-1)*256+comp);
+					
+			}
 			//System.out.println(S + " , " + l + " , " + s);
-			if(l==1)H_BST_R1B.fill(s,S);
-			if(l==3)H_BST_R2B.fill(s,S);
-			if(l==5)H_BST_R3B.fill(s,S);
-			if(l==2)H_BST_R1T.fill(s,S);
-			if(l==4)H_BST_R2T.fill(s,S);
-			if(l==6)H_BST_R3T.fill(s,S);
 		}
 	}
 	public void MakeBMT_hits(DataBank bank){
+		H_BMT_multi.fill(bank.rows());
 		for(int k=0;k<bank.rows();k++){
-			int S = bank.getInt("sector",k);
-			int l = bank.getInt("layer",k);
-			int s = bank.getInt("strip",k);
+			int S = bank.getByte("sector",k);
+			int l = bank.getByte("layer",k);
+			int s = bank.getShort("component",k);
 			//System.out.println(S + " , " + l + " , " + s);
 			H_BMT_occ.fill(s,S+(l-1)*3);
 			if( S>0 && S<4 && l>0 && l<7 )H_BMT_occ_LS[l-1][S-1].fill(s);
@@ -303,25 +347,25 @@ public class occupancies {
         public void processEvent(DataEvent event) {
 		found_elec = 0;
 		if(event.hasBank("REC::Particle"))MakeElectron(event.getBank("REC::Particle"));
-		if(event.hasBank("BSTRec::Hits"))MakeBST_hits(event.getBank("BSTRec::Hits"));
-		if(event.hasBank("BMTRec::Hits"))MakeBMT_hits(event.getBank("BMTRec::Hits"));
+		if(event.hasBank("BST::adc"))MakeBST_hits(event.getBank("BST::adc"));
+		if(event.hasBank("BMT::adc"))MakeBMT_hits(event.getBank("BMT::adc"));
 		if(event.hasBank("BSTRec::Crosses"))MakeBST_crosses(event.getBank("BSTRec::Crosses"));
 		if(event.hasBank("BMTRec::Crosses"))MakeBMT_crosses(event.getBank("BMTRec::Crosses"));
 	}
         public void plot(){
                 EmbeddedCanvas can_BST = new EmbeddedCanvas();
                 can_BST.setSize(1500,1000);
-                can_BST.divide(3,2);
+                can_BST.divide(3,3);
                 can_BST.setAxisTitleSize(24);
                 can_BST.setAxisFontSize(24);
                 can_BST.setTitleSize(24);
-                //can_BST.cd(0);can_BST.draw(H_BST_sect_rec_occ);
-		can_BST.cd(0);can_BST.draw(H_BST_R1B);
-		can_BST.cd(1);can_BST.draw(H_BST_R2B);
-		can_BST.cd(2);can_BST.draw(H_BST_R3B);
-		can_BST.cd(3);can_BST.draw(H_BST_R1T);
-		can_BST.cd(4);can_BST.draw(H_BST_R2T);
-		can_BST.cd(5);can_BST.draw(H_BST_R3T);
+		can_BST.cd(0);can_BST.draw(H_BST_occ_reg1_l1);
+		can_BST.cd(1);can_BST.draw(H_BST_occ_reg2_l1);
+		can_BST.cd(2);can_BST.draw(H_BST_occ_reg3_l1);
+                can_BST.cd(3);can_BST.draw(H_BST_occ_reg1_l2);
+                can_BST.cd(4);can_BST.draw(H_BST_occ_reg2_l2);
+                can_BST.cd(5);can_BST.draw(H_BST_occ_reg3_l2);
+		can_BST.cd(6);can_BST.draw(H_BST_multi);
 		if(runNum>0){
 			if(!write_volatile)can_BST.save(String.format("plots"+runNum+"/bst_occ.png"));
 			if(write_volatile)can_BST.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/bst_occ.png"));
@@ -333,15 +377,18 @@ public class occupancies {
 		}
 
 		EmbeddedCanvas can_BMT = new EmbeddedCanvas();
-		can_BMT.setSize(1500,500);
-		can_BMT.divide(3,1);
+		can_BMT.setSize(1500,3000);
+		can_BMT.divide(3,7);
 		can_BMT.setAxisTitleSize(24);
 		can_BMT.setAxisFontSize(24);
 		can_BMT.setTitleSize(24);
-		for (int s =0; s<3;s++) {
-			//can_BMT.getPad(s).getAxisZ().setLog(true);
-			can_BMT.cd(s);can_BMT.draw(H_BMT_occ_StripLayer[s]);
+		for(int l=0;l<6;l++){
+                        for(int s=0;s<3;s++){
+				can_BMT.cd( 3*(5-l) + (2-s) );
+                        	can_BMT.draw(H_BMT_occ_LS[l][s]);
+			}
 		}
+		can_BMT.cd(18);can_BMT.draw(H_BMT_multi);
 		
 		if(runNum>0){
 			if(!write_volatile)can_BMT.save(String.format("plots"+runNum+"/bmt_occ.png"));
