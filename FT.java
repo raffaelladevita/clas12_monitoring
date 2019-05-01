@@ -20,11 +20,16 @@ import org.clas.viewer.AnalysisMonitor;
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.physics.Particle;
 import org.jlab.groot.group.DataGroup;
+import org.jlab.utils.groups.IndexedTable;
+import org.jlab.detector.calib.utils.CalibrationConstants;
+import org.jlab.detector.calib.utils.ConstantsManager;
 
 public class FT {
 	boolean userTimeBased, write_volatile;
 	boolean[] trigger_bits;
 	public int runNum, trigger;
+    public int crate;
+
 	public boolean hasRF;
 	public double startTime, rfTime;
 
@@ -36,6 +41,10 @@ public class FT {
                public F1D[] f_charge_landau;
                public H2F[] hi_hodo_ematch_2D, hi_hodo_tmatch_2D;
 
+    //Hodoscope by mezzanine board
+               public H1F[] hi_hodo_ematch_board, hi_hodo_tmatch_board;
+               public F1D[] f_charge_landau_board;
+
 	//Calorimeter
 	public H1F hi_cal_nclusters, hi_cal_clsize, hi_cal_clsize_ch, hi_cal_e_all, hi_cal_e_ch, hi_cal_e_neu, hi_cal_theta_ch, hi_cal_phi_ch, hi_cal_time_ch, hi_cal_time_cut_ch, hi_cal_time_neu, hi_cal_time_cut_neu; 
 	public H2F hi_cal_clsize_en, hi_cal_time_e_ch, hi_cal_time_theta_ch, hi_cal_time_e_neu, hi_cal_time_theta_neu;
@@ -45,8 +54,11 @@ public class FT {
 	public H1F hpi0sum;
 	public F1D fpi0;
 	public H2F hmassangle;
-		
-		
+	
+    public IndexedTable InverseTranslationTable;
+    public IndexedTable calibrationTranslationTable;
+    public ConstantsManager ccdb;
+
 	public FT(int reqrunNum, boolean reqTimeBased, boolean reqwrite_volatile) {
 		runNum = reqrunNum;
 		userTimeBased=reqTimeBased;
@@ -71,7 +83,10 @@ public class FT {
 		hi_hodo_ematch_2D = new H2F[2];
 		hi_hodo_tmatch_2D = new H2F[2];
 		f_charge_landau = new F1D[2];
-
+        hi_hodo_ematch_board = new H1F[30];
+        hi_hodo_tmatch_board = new H1F[30];
+        f_charge_landau_board = new F1D[30];
+        int counter=0;
 		for(int layer=0; layer < 2; layer++) {
 			hi_hodo_eall[layer] = new H1F(String.format("hi_hodo_eall_l%d",layer+1), String.format("hi_hodo_eall_l%d",layer+1), 200, 0, 10);
 			hi_hodo_eall[layer].setTitleX("E (MeV)");
@@ -82,27 +97,47 @@ public class FT {
 			hi_hodo_ematch[layer].setTitleY(String.format("Counts"));
 			hi_hodo_ematch[layer].setFillColor(3);
 			f_charge_landau[layer] = new F1D(String.format("Landau_%d",layer+1),"[amp]*landau(x,[mean],[sigma])+[p0]+[p1]*x", 0.5*(layer+1), 10.0);
-        		f_charge_landau[layer].setParameter(0,0.0);
-                        f_charge_landau[layer].setParameter(1,0.0);
-                        f_charge_landau[layer].setParameter(2,1.0);
-                        f_charge_landau[layer].setParameter(3,0.0);
-                        f_charge_landau[layer].setParameter(4,0.0);
-                        f_charge_landau[layer].setOptStat(1111111);
-                        f_charge_landau[layer].setLineWidth(2);
+            f_charge_landau[layer].setParameter(0,0.0);
+            f_charge_landau[layer].setParameter(1,0.0);
+            f_charge_landau[layer].setParameter(2,1.0);
+            f_charge_landau[layer].setParameter(3,0.0);
+            f_charge_landau[layer].setParameter(4,0.0);
+            f_charge_landau[layer].setOptStat(1111111);
+            f_charge_landau[layer].setLineWidth(2);
 			hi_hodo_ematch_2D[layer] = new H2F(String.format("hi_hodo_ematch_2D_l%d",layer+1), String.format("hi_hodo_ematch_2D_l%d",layer+1), 100, 0, 10 , 118, 0, 118);
-            		hi_hodo_ematch_2D[layer].setTitleX("E (MeV)");
-            		hi_hodo_ematch_2D[layer].setTitleY("Tile");
+            hi_hodo_ematch_2D[layer].setTitleX("E (MeV)");
+            hi_hodo_ematch_2D[layer].setTitleY("Tile");
 			hi_hodo_tmatch[layer] = new H1F(String.format("hi_hodo_tmatch_l%d",layer+1),  String.format("hi_hodo_tmatch_l%d",layer+1), 100, -50, 50);
 			hi_hodo_tmatch[layer].setTitleX(String.format("T-T_start (ns)"));
 			hi_hodo_tmatch[layer].setTitleY(String.format("Counts"));
-            		hi_hodo_tmatch[layer].setFillColor(3);
-            		hi_hodo_tmatch_2D[layer] = new H2F(String.format("hi_hodo_tmatch_2D_l%d",layer+1),  String.format("hi_hodo_tmatch_2D_l%d",layer+1), 100, -50, 50, 118, 0, 118);
-            		hi_hodo_tmatch_2D[layer].setTitleX("E (MeV)");
-            		hi_hodo_tmatch_2D[layer].setTitleY("Tile");
+            hi_hodo_tmatch[layer].setFillColor(3);
+            hi_hodo_tmatch_2D[layer] = new H2F(String.format("hi_hodo_tmatch_2D_l%d",layer+1),  String.format("hi_hodo_tmatch_2D_l%d",layer+1), 100, -50, 50, 118, 0, 118);
+            hi_hodo_tmatch_2D[layer].setTitleX("E (MeV)");
+            hi_hodo_tmatch_2D[layer].setTitleY("Tile");
+
+            for (int board=0; board < 15; board ++){
+                counter = 15*layer+board;
+                hi_hodo_ematch_board[counter] = new H1F(String.format("hi_hodo_ematch_l%d_b%d",layer+1,board+1), String.format("hi_hodo_eall_l%d_b%d",layer+1,board+1), 200, 0, 10);
+                hi_hodo_ematch_board[counter].setTitleX(String.format("E (MeV)"));
+                hi_hodo_ematch_board[counter].setTitleY(String.format("Counts"));
+                hi_hodo_ematch_board[counter].setFillColor(3);
+                f_charge_landau_board[counter] = new F1D(String.format("Landau_%d_%d",layer+1,board+1),"[amp]*landau(x,[mean],[sigma])+[p0]+[p1]*x", 0.5*(layer+1), 10.0);
+                f_charge_landau_board[counter].setParameter(0,0.0);
+                f_charge_landau_board[counter].setParameter(1,0.0);
+                f_charge_landau_board[counter].setParameter(2,1.0);
+                f_charge_landau_board[counter].setParameter(3,0.0);
+                f_charge_landau_board[counter].setParameter(4,0.0);
+                f_charge_landau_board[counter].setOptStat(1111111);
+                f_charge_landau_board[counter].setLineWidth(2);
+                hi_hodo_tmatch_board[counter] = new H1F(String.format("hi_hodo_tmatch_l%d_b%d",layer+1,board+1),  String.format("hi_hodo_tmatch_l%d_b%d",layer+1,board+1), 100, -50, 50);
+                hi_hodo_tmatch_board[counter].setTitleX(String.format("T-T_start (ns)"));
+                hi_hodo_tmatch_board[counter].setTitleY(String.format("Counts"));
+                hi_hodo_tmatch_board[counter].setFillColor(3);
+            }
 		}
 
 		//Calorimeter Histograms
-		hi_cal_nclusters = new H1F("hi_cal_nclusters", "N. Clusters", "Counts", 5, 0, 5);
+            hi_cal_nclusters = new H1F("hi_cal_nclusters", "N. Clusters", "Counts", 5, 0, 5);
         	hi_cal_nclusters.setFillColor(44);
         	hi_cal_clsize = new H1F("hi_cal_clsize", "Cluster Size", "Counts", 25, 0, 25);
         	hi_cal_clsize.setFillColor(44);
@@ -173,6 +208,29 @@ public class FT {
         	hmassangle.setTitleY("Angle (deg)");
         	hmassangle.setTitle("Angle vs. Mass");
 		
+            crate=72;
+            InverseTranslationTable = new CalibrationConstants(3,
+                                                  "crate/I:" +//3
+                                                  "slot/I:"+//4
+                                                  "chan/I");
+            ccdb = new ConstantsManager();
+            ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo"}));
+            calibrationTranslationTable=ccdb.getConstants(runNum, "/daq/tt/fthodo");
+
+            for (int slotn = 3; slotn < 20; slotn++) {
+                for (int chann = 0; chann < 16; chann++) {
+                    if (!calibrationTranslationTable.hasEntry(crate, slotn, chann)) continue;
+                    int secn = calibrationTranslationTable.getIntValue("sector", crate, slotn, chann);
+                    int layn = calibrationTranslationTable.getIntValue("layer", crate, slotn, chann);
+                    int compn = calibrationTranslationTable.getIntValue("component", crate, slotn, chann);
+                    //System.out.println("about to add Entry "+secn+" "+layn+" "+compn);
+                    InverseTranslationTable.addEntry(secn,layn,compn);
+                    InverseTranslationTable.setIntValue(crate,"crate", secn,layn,compn);
+                    InverseTranslationTable.setIntValue(slotn,"slot", secn,layn,compn);
+                    InverseTranslationTable.setIntValue(chann,"chan", secn,layn,compn);
+                    //System.out.println("Added Entry "+secn+" "+layn+" "+compn);
+                }
+            }
 	}
 
 	public void fillFTHodo(DataBank HodoHits, DataBank HodoClusters) {
@@ -182,6 +240,12 @@ public class FT {
 			int hodoL = HodoHits.getByte("layer",i);
 			int component = HodoHits.getShort("component",i);
 			int tile = -1;
+            int chan=InverseTranslationTable.getIntValue("chan", hodoS, hodoL, component);
+            int slot=InverseTranslationTable.getIntValue("slot", hodoS, hodoL, component);
+            int board = slot-3; //mezzanine board number = slot-3
+            if (slot>12) board=board-2; //slot skips 10->13.
+            // System.out.println(String.format("%d\t%d\t%d\t%d\t%d",board,slot,hodoS, hodoL, component )); // debuggin line
+            int counter = 15*hodoL-15+board; //board runs from 0 to 14.
 			switch (hodoS) {
 				case 1:
                           	  tile = component + 0;
@@ -221,16 +285,18 @@ public class FT {
 			hi_hodo_eall[hodoL-1].fill(hodoHitE);
 
 			for(int j=0; j<HodoClusters.rows(); j++) {
-                        	if(clusterId==HodoClusters.getShort("id", j) && HodoClusters.getShort("size", j)>1) {
-                            		hi_hodo_ematch[hodoL-1].fill(hodoHitE);
-                            		hi_hodo_ematch_2D[hodoL-1].fill(hodoHitE,tile);
-                            		if(startTime > -100) {
-                                		hi_hodo_tmatch[hodoL-1].fill(hodoHitT-path/29.97-startTime);
-                                		hi_hodo_tmatch_2D[hodoL-1].fill(hodoHitT-path/29.97-startTime,tile);
-                            		}
-                        	}
-                    	}
+                if(clusterId==HodoClusters.getShort("id", j) && HodoClusters.getShort("size", j)>1) {
+                    hi_hodo_ematch[hodoL-1].fill(hodoHitE);
+                    hi_hodo_ematch_2D[hodoL-1].fill(hodoHitE,tile);
+                    hi_hodo_ematch_board[counter].fill(hodoHitE);
+                    if(startTime > -100) {
+                        hi_hodo_tmatch[hodoL-1].fill(hodoHitT-path/29.97-startTime);
+                        hi_hodo_tmatch_board[counter].fill(hodoHitT-path/29.97-startTime);
+                        hi_hodo_tmatch_2D[hodoL-1].fill(hodoHitT-path/29.97-startTime,tile);
+                    }
                 }
+            }
+        }
 	}
 
 	public void fillFTCalo(DataBank ftPart, DataBank CalClusters) {
@@ -451,12 +517,17 @@ public class FT {
 		}
 
 	}
-        public void write() {
-                TDirectory dirout = new TDirectory();
-                dirout.mkdir("/ft/");
-                dirout.cd("/ft/");
-                for(int s=0;s<2;s++){
-                        dirout.addDataSet(hi_hodo_eall[s],hi_hodo_ematch[s],hi_hodo_ematch_2D[s],hi_hodo_tmatch[s],hi_hodo_tmatch_2D[s]);
+    public void write() {
+        TDirectory dirout = new TDirectory();
+        dirout.mkdir("/ft/");
+        dirout.cd("/ft/");
+        int counter;
+        for(int s=0;s<2;s++){
+                dirout.addDataSet(hi_hodo_eall[s],hi_hodo_ematch[s],hi_hodo_ematch_2D[s],hi_hodo_tmatch[s],hi_hodo_tmatch_2D[s]);
+                for (int board=0; board<15; board++){
+                    counter=15*s+board;
+                    dirout.addDataSet(hi_hodo_ematch_board[counter], hi_hodo_tmatch_board[counter]);
+                }
 		}
 		dirout.addDataSet(hi_cal_nclusters,hi_cal_clsize,hi_cal_clsize_ch,hi_cal_clsize_en,hi_cal_e_ch,hi_cal_e_all,hi_cal_theta_ch,hi_cal_phi_ch,hi_cal_time_ch,hi_cal_time_cut_ch,hi_cal_time_e_ch);
 		dirout.addDataSet(hi_cal_time_theta_ch,hi_cal_time_neu,hi_cal_time_cut_neu,hi_cal_time_e_neu,hi_cal_time_theta_neu,hpi0sum,hmassangle);
@@ -494,6 +565,7 @@ public class FT {
                 }catch(IOException e){ 
                         e.printStackTrace();
                 }
+
 		int maxevents = 50000000;
 		if(args.length>2)maxevents=Integer.parseInt(args[2]);
 		int progresscount=0;int filetot = toProcessFileNames.size();
