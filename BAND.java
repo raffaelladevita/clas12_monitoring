@@ -84,8 +84,6 @@ public class BAND{
 			L = (float)Math.sqrt(x*x+y*y+z*z);
 			histo2 = time_fadc - L/speedoflight;
 			histo3 = time_tdc - L/speedoflight;
-			System.out.println("adcL*adcR: " +histo1+ " meantimeFadc: "+histo2+ " meantimeTdc: " +histo3);
-			System.out.println("adcL: " +adcL+ " adcR: "+adcR+ " time_fadc: " +time_fadc+ " time_tdc" +time_tdc+ " x: " +x+ " y: " +y+ " z: " +z);
 			
 			if (sect == 2 || sect == 3) {
 				H_BAND_adcCor[0].fill(histo1);
