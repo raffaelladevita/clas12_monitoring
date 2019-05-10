@@ -17,12 +17,17 @@ import org.jlab.groot.data.TDirectory;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.clas.physics.LorentzVector;
 import org.jlab.groot.base.GStyle;
+import org.jlab.utils.groups.IndexedTable;
+import org.jlab.detector.calib.utils.CalibrationConstants;
+import org.jlab.detector.calib.utils.ConstantsManager;
 
 public class tof_monitor {
 		boolean userTimeBased, write_volatile;
 		public int runNum;
 		public boolean hasRF;
 		public float RFTime;
+		public float rfPeriod;
+		public int rf_large_integer;
 		public H2F p1a_pad_occ, p1b_pad_occ, p2_pad_occ;
 		public H2F p1a_pad_XY, p1b_pad_XY, p2_pad_XY;
 		public H2F[] p1a_pad_vt, p1b_pad_vt, p2_pad_vt;
@@ -31,8 +36,25 @@ public class tof_monitor {
 		public H2F[][] DC_residuals_trkDoca;
 		public H1F[][] DC_residuals, DC_time;
 		public F1D[][] f_time_invertedS;
+
+		public IndexedTable InverseTranslationTable;
+        	public IndexedTable calibrationTranslationTable;
+        	public IndexedTable rfTable;
+        	public ConstantsManager ccdb;
+
 	public tof_monitor(int reqrunNum, boolean reqTimeBased, boolean reqwrite_volatile) {
 			runNum = reqrunNum;userTimeBased=reqTimeBased;
+			
+			rfPeriod = 4.008f;
+                	ccdb = new ConstantsManager();
+                	ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config"}));
+                	rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
+                	if (rfTable.hasEntry(1, 1, 1)){
+                		System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
+                		rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
+                	}
+                	rf_large_integer = 1000;
+			
 			write_volatile = reqwrite_volatile;
 			p1a_pad_occ = new H2F("p1a_pad_occ","p1a_pad_occ",25,0,25,6,0.5,6.5);
 			p1a_pad_occ.setTitle("p1a occupancies");
@@ -73,15 +95,15 @@ public class tof_monitor {
 			DC_time = new H1F[6][6];
 			f_time_invertedS = new F1D[6][6];
 		for(int s=0;s<6;s++){
-			p1a_pad_vt[s] = new H2F(String.format("p1a_pad_vt_S%d",s+1),String.format("p1a_pad_vt_S%d",s+1),25,0,25,100,-1.002,1.002);
+			p1a_pad_vt[s] = new H2F(String.format("p1a_pad_vt_S%d",s+1),String.format("p1a_pad_vt_S%d",s+1),25,0,25,100,-rfPeriod/2,rfPeriod/2);
 			p1a_pad_vt[s].setTitle(String.format("p1a S%d time",s+1));
 			p1a_pad_vt[s].setTitleX("paddle");
 			p1a_pad_vt[s].setTitleY("time");
-			p1b_pad_vt[s] = new H2F(String.format("p1b_pad_vt_S%d",s+1),String.format("p1b_pad_vt_S%d",s+1),65,0,65,100,-1.002,1.002);
+			p1b_pad_vt[s] = new H2F(String.format("p1b_pad_vt_S%d",s+1),String.format("p1b_pad_vt_S%d",s+1),65,0,65,100,-rfPeriod/2,rfPeriod/2);
 			p1b_pad_vt[s].setTitle(String.format("p1b S%d time",s+1));
 			p1b_pad_vt[s].setTitleX("paddle");
 			p1b_pad_vt[s].setTitleY("time");
-			p2_pad_vt[s] = new H2F(String.format("p2_pad_vt_S%d",s+1),String.format("p2_pad_vt_S%d",s+1),5,1,6,100,-1.002,1.002);
+			p2_pad_vt[s] = new H2F(String.format("p2_pad_vt_S%d",s+1),String.format("p2_pad_vt_S%d",s+1),5,1,6,100,-rfPeriod/2,rfPeriod/2);
 			p2_pad_vt[s].setTitle(String.format("p2 S%d time",s+1));
 			p2_pad_vt[s].setTitleX("paddle");
 			p2_pad_vt[s].setTitleY("time");
@@ -161,8 +183,8 @@ public class tof_monitor {
 		for(int r=0;r<tofB.rows();r++){
 			int layer = tofB.getInt("layer", r);
 			float thisTime = tofB.getFloat("time", r) - tofB.getFloat("pathLength", r)/29.98f - RFTime;
-			thisTime = (thisTime+1.002f) % 2.004f;
-			thisTime = thisTime - 1.002f;
+			thisTime = (thisTime+(rf_large_integer+0.5f)*rfPeriod) % rfPeriod;
+			thisTime = thisTime - rfPeriod/2;
 			float thisChi2 = 999;
 			float thisMom = 0;
 			float thisVz = 0;
@@ -188,8 +210,8 @@ public class tof_monitor {
 				//TEMPORARY TEST FOR PION VERTEX TIME
 				float flightTime = tofB.getFloat("pathLength", r)/(float)( 29.98f * thisMom/Math.sqrt(thisMom*thisMom + 0.13957f*0.13957f) );
 				float thisPionTime = tofB.getFloat("time", r) - flightTime - RFTime;
-				thisPionTime = (thisPionTime+1.002f) % 2.004f;
-				thisPionTime = thisPionTime - 1.002f;
+				thisPionTime = (thisPionTime+(rf_large_integer+0.5f)*rfPeriod) % rfPeriod;
+				thisPionTime = thisPionTime - rfPeriod/2;
 				//System.out.println("compare vextex times : "+thisTime+" =? "+thisPionTime+" , diff = "+(thisTime-thisPionTime));
 				//thisTime = thisPionTime;
 				thisVz = 0;

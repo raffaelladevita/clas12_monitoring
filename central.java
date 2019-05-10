@@ -17,13 +17,18 @@ import org.jlab.groot.data.TDirectory;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.clas.physics.LorentzVector;
 import org.jlab.groot.base.GStyle;
+import org.jlab.utils.groups.IndexedTable;
+import org.jlab.detector.calib.utils.CalibrationConstants;
+import org.jlab.detector.calib.utils.ConstantsManager;
 
 public class central {
 	boolean userTimeBased, write_volatile;
 	public int runNum;
+	public int rf_large_integer;
 	public boolean BackToBack;
 	public float STT, RFT, MinCTOF,MaxCTOF, minSTT, maxSTT;
 	public float[] CTOF_shft;
+	public double rfPeriod;
 
 	public H2F H_CTOF_pos, H_CTOF_edep_phi, H_CTOF_edep_z, H_CTOF_path_mom;
 	public H2F H_CTOF_edep_pad_neg, H_CTOF_edep_pad_pos;
@@ -36,9 +41,26 @@ public class central {
 	public H2F H_CTOF_vt_pim;
 	public H1F H_CTOF_edep_pim;
 
+	public IndexedTable InverseTranslationTable;
+    	public IndexedTable calibrationTranslationTable;
+    	public IndexedTable rfTable;
+
+    	public ConstantsManager ccdb;
+
 	public central(int reqrunNum, boolean reqTimeBased, boolean reqwrite_volatile) {
 		runNum = reqrunNum;userTimeBased=reqTimeBased;
 		write_volatile = reqwrite_volatile;
+
+		rfPeriod = 4.008;
+                ccdb = new ConstantsManager();
+                ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config"}));
+                rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
+                if (rfTable.hasEntry(1, 1, 1)){
+                	System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
+                	rfPeriod = rfTable.getDoubleValue("clock",1,1,1);
+                }
+		rf_large_integer = 1000;
+
                 CTOF_shft = new float[]{0.00f , -300.51f , -297.72f , -295.05f , -301.03f , -298.19f , -295.41f , -299.74f , -298.30f , -295.21f ,
                                         -300.22f , -297.35f , -295.28f , -299.14f , 0.00f , -294.51f , -298.80f , -298.30f , -295.49f , -298.81f ,
                                         -297.23f , -294.44f , -298.96f , -296.27f , -295.30f , -298.74f , -296.44f , -293.98f , -299.07f , -296.08f ,
@@ -129,7 +151,7 @@ public class central {
 		H_CTOF_neg_mass = new H1F("H_CTOF_neg_mass","H_CTOF_neg_mass",100,-0.5,2.0);
 		H_CTOF_neg_mass.setTitle("neg Mass^2");
 		H_CTOF_neg_mass.setTitleX("M^2 (GeV^2)");
-		H_CTOF_vt_pim = new H2F("H_CTOF_vt_pim","H_CTOF_vt_pim",100,-1.002,1.002,250,-5,5);
+		H_CTOF_vt_pim = new H2F("H_CTOF_vt_pim","H_CTOF_vt_pim",100,-rfPeriod/2,rfPeriod/2,250,-5,5);
 		H_CTOF_vt_pim.setTitle("CTOF MIP (pi-) vertex time");
 		H_CTOF_vt_pim.setTitleX("vertex time - RFTime (ns)");
 		H_CTOF_vt_pim.setTitleY("vertex time - STTime (ns)");
@@ -212,9 +234,9 @@ public class central {
 							H_CTOF_neg_mass.fill(CTOFmass);
 							//pi- fiducial cut borrowing from Pierre's CND
 							if (Math.sqrt(Math.abs(CTOFmass))<0.38 && CTOFmass>-0.35*0.35){
-								float thisTime =CTOFTime-RFT;
-								thisTime = (thisTime+1.002f) % 2.004f;
-								thisTime = thisTime - 1.002f;		
+								double thisTime =CTOFTime-RFT;
+								thisTime = (thisTime+(rf_large_integer+0.5)*rfPeriod) % rfPeriod;
+								thisTime = thisTime - rfPeriod/2;		
 								H_CTOF_vt_pim.fill(thisTime,CTOFTime-STT);
 								H_CTOF_edep_pim.fill(e);
 							}			

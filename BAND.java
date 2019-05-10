@@ -54,7 +54,7 @@ public class BAND{
 			H_BAND_meantimeadc[s] = new H1F(String.format("H_BAND_MeanTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeFADC_SectorCombination %d",s+1),200,0.,500.);
 			H_BAND_meantimeadc[s].setTitleX("meantimeFadc – sqrt(x^2+y^2+z^2)/c (ns)");
 			H_BAND_meantimeadc[s].setTitleY("events");
-			H_BAND_meantimetdc[s] = new H1F(String.format("H_BAND_MeanTimeTDC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeTDC_SectorCombination %d",s+1),200,0.,1000.);
+			H_BAND_meantimetdc[s] = new H1F(String.format("H_BAND_MeanTimeTDC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeTDC_SectorCombination %d",s+1),200,400.,900.);
                         H_BAND_meantimetdc[s].setTitleX("meantimeTDC – sqrt(x^2+y^2+z^2)/c (ns)");
                         H_BAND_meantimetdc[s].setTitleY("events"); 
 		}
@@ -85,12 +85,12 @@ public class BAND{
 			histo2 = time_fadc - L/speedoflight;
 			histo3 = time_tdc - L/speedoflight;
 			
-			if (sect == 2 || sect == 3) {
+			if (sect == 3 || sect == 4) {
 				H_BAND_adcCor[0].fill(histo1);
 				H_BAND_meantimeadc[0].fill(histo2);
 				H_BAND_meantimetdc[0].fill(histo3);
 			}
-			if (sect == 1 || sect == 4 || sect == 5) {
+			if (sect == 1 || sect == 2 || sect == 5) {
 				H_BAND_adcCor[1].fill(histo1);
 				H_BAND_meantimeadc[1].fill(histo2);
                                 H_BAND_meantimetdc[1].fill(histo3);

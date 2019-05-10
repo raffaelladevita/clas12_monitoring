@@ -16,10 +16,15 @@ import org.jlab.groot.data.TDirectory;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.clas.physics.LorentzVector;
 import org.jlab.groot.base.GStyle;
+import org.jlab.utils.groups.IndexedTable;
+import org.jlab.detector.calib.utils.CalibrationConstants;
+import org.jlab.detector.calib.utils.ConstantsManager;
 
 public class HTCC{
 	boolean userTimeBased, write_volatile;
 	int runNum;
+	public double rfPeriod;
+	public int rf_large_integer;
 	boolean[] trigger_bits;
 	public float EBeam;
         public int e_part_ind, e_sect, e_track_ind;
@@ -32,6 +37,12 @@ public class HTCC{
 	public H2F[] H_e_theta_mom, H_e_phi_mom, H_e_theta_phi, H_e_vz, H_e_sampl, H_e_vtime, H_e_trk_chi2, H_e_HTCC;
 	public H2F[] H_e_Ring_theta, H_e_side_phi;
 	public H1F[] H_HTCC_adc, H_HTCC_nphe, H_HTCC2_nphe;
+  
+	public IndexedTable InverseTranslationTable;
+        public IndexedTable calibrationTranslationTable;
+        public IndexedTable rfTable;
+        public ConstantsManager ccdb;
+
 	public HTCC(int reqR, float reqEb, boolean reqTimeBased, boolean reqwrite_volatile){
         	runNum = reqR;userTimeBased=reqTimeBased;
 		write_volatile = reqwrite_volatile;
@@ -41,6 +52,17 @@ public class HTCC{
                 //if(reqEb>7.1 && reqEb<9)EBeam=7.55f;
                 //if(reqEb>9)EBeam=10.6f;
                 EBeam = reqEb;
+
+		rfPeriod = 4.008;
+                ccdb = new ConstantsManager();
+                ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config"}));
+                rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
+                if (rfTable.hasEntry(1, 1, 1)){
+                System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
+                rfPeriod = rfTable.getDoubleValue("clock",1,1,1);
+                }
+                rf_large_integer = 1000;
+
 		trigger_bits = new boolean[32];
 		H_e_theta_mom = new H2F[7];
 		H_e_phi_mom = new H2F[7];
@@ -181,8 +203,8 @@ public class HTCC{
                                 //H_e_TOF_xy.fill(bank.getFloat("x",k) , bank.getFloat("y",k));
                                 //H_e_TOF_t_path.fill(bank.getFloat("time",k),bank.getFloat("path",k));
                                 e_vert_time = bank.getFloat("time",k) - bank.getFloat("path",k)/29.98f;
-                                float time = (e_vert_time-RFtime+1.002f)%2.004f;time -= 1.002f;
-                                e_vert_time_RF = time;
+                                double time = (e_vert_time-RFtime+(rf_large_integer+0.5)*rfPeriod)%rfPeriod;time -= rfPeriod/2;
+                                e_vert_time_RF = (float)time;
                                 //H_e_vt1.fill(e_vert_time_RF);
                                 //H_e_vt2.fill(time2);
                                 e_TOF_X = bank.getFloat("x",k);

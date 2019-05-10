@@ -38,6 +38,7 @@ public class ana_2p2 {
 		if(args.length>3)EB=Float.parseFloat(args[3]);
 		if(args.length>4)if(Integer.parseInt(args[4])==0)useTB=false;
 		System.out.println("will process run number "+runNum+" from list "+filelist+" looking for up to "+maxevents+" events, beam energy setting "+EB);
+
 		monitor2p2GeV ana_mon = new monitor2p2GeV(runNum,EB,useTB,useVolatile);
 		tof_monitor ana_tof = new tof_monitor(runNum,useTB,useVolatile);
 		central ana_cen = new central(runNum,useTB,useVolatile);
@@ -46,6 +47,7 @@ public class ana_2p2 {
 		cndCheckPlots ana_cnd = new cndCheckPlots(runNum,useTB,useVolatile);		
 		FT ana_ft = new FT(runNum,useTB,useVolatile);
 		dst_mon ana_dst_mon = new dst_mon(runNum,EB);
+		BAND ana_band = new BAND(runNum,EB,useTB,useVolatile);
 		//deuterontarget ana_deuteron = new deuterontarget(runNum,EB,useTB,useVolatile);
                 List<String> toProcessFileNames = new ArrayList<String>();
                 File file = new File(filelist);
@@ -87,6 +89,7 @@ public class ana_2p2 {
 				ana_cnd.processEvent(event);
 				ana_ft.processEvent(event);
 				ana_dst_mon.processEvent(event);
+				ana_band.processEvent(event);
 				//ana_deuteron.processEvent(event);
 				filecount++;count++;
 				if(count%10000 == 0){
@@ -122,6 +125,7 @@ public class ana_2p2 {
 		ana_ft.write();
 		ana_dst_mon.plot();
 		ana_dst_mon.write();
+		ana_band.plot();
 		//ana_deuteron.plot();
         }
 }

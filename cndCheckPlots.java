@@ -16,6 +16,9 @@ import org.jlab.groot.data.TDirectory;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.clas.physics.LorentzVector;
 import org.jlab.groot.base.GStyle;
+import org.jlab.utils.groups.IndexedTable;
+import org.jlab.detector.calib.utils.CalibrationConstants;
+import org.jlab.detector.calib.utils.ConstantsManager;
 
 public class cndCheckPlots {
 		boolean userTimeBased, write_volatile;
@@ -45,7 +48,8 @@ public class cndCheckPlots {
 		public float massp = 0.938f;
 		public float masspion = 0.1395f;
 		public float light = 29.92f;
-		public float BB = 4.008f;
+		public double rfPeriod;
+		public int rf_large_integer;
 
 		public double resolutiont=0.0;
 		public double resolutionz=0.0;
@@ -54,11 +58,24 @@ public class cndCheckPlots {
 		public double moyZ=0.0;
 		public double moyT=0.0;
 
+		public IndexedTable InverseTranslationTable;
+        	public IndexedTable calibrationTranslationTable;
+        	public IndexedTable rfTable;
+        	public ConstantsManager ccdb;
 
 		public cndCheckPlots(int reqrunNum, boolean reqTimeBased, boolean reqwrite_volatile) {
 				userTimeBased=reqTimeBased;
 				write_volatile = reqwrite_volatile;
 				runNum = reqrunNum;
+				rfPeriod = 4.008;
+                		ccdb = new ConstantsManager();
+                		ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config"}));
+                		rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
+                		if (rfTable.hasEntry(1, 1, 1)){
+                        		System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
+                        		rfPeriod = rfTable.getDoubleValue("clock",1,1,1);
+                		}
+                		rf_large_integer = 1000;
 				H_CND_time = new H1F("H_CND_time","H_CND_time",100,-2,2);
 				H_CND_time.setTitle("CND vertex time - STT");
 				H_CND_time.setTitleX("vt (ns)");
@@ -436,7 +453,8 @@ public class cndCheckPlots {
 								float phase = 4.f*((TimeJitter+1.f)%6.f);
 								float vt = time - STT - (path/29.92f/beta)-(vertex/29.92f);
 								float vtP = time - STT - (path/29.92f/betaP)-(vertex/29.92f);//- vertex/29.92f;
-								float vtPRF = ((time - RF - path/29.92f/betaP)+1000*BB+(0.5f*BB))%BB - 0.5f*BB;
+								float rfp = (float)rfPeriod;
+								float vtPRF = ((time - RF - path/29.92f/betaP)+1000*rfp+(0.5f*rfp))%rfp - 0.5f*rfp;
 								float pathTH = CNDbank.getFloat("tlength",iCND);
 
 

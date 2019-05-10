@@ -18,6 +18,9 @@ import org.jlab.groot.data.TDirectory;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.clas.physics.LorentzVector;
 import org.jlab.groot.base.GStyle;
+import org.jlab.utils.groups.IndexedTable;
+import org.jlab.detector.calib.utils.CalibrationConstants;
+import org.jlab.detector.calib.utils.ConstantsManager;
 
 public class dst_mon {
 	public int Nevts, Nelecs, Ntrigs, runNum;
@@ -26,6 +29,8 @@ public class dst_mon {
 	public float EB, Eb, Mp;
 	public float RFT, STT;
 	public long TriggerWord;
+	public float rfPeriod;
+	public int rf_large_integer;
 
 	public LorentzVector VB, VT, Ve, VGS, Vprot, Vpip, VG1, VG2, VPI0;
 	public boolean found_eTraj, found_eECAL, found_eFTOF1a, found_eFTOF1b, found_eLTCC, found_eHTCC;
@@ -61,7 +66,7 @@ public class dst_mon {
 
 	public H2F H_e_t_f, H_e_p_f, H_e_vz_f, H_e_vt_vz, H_e_vt_p, H_e_vt_t;
 	public H2F H_e_PCAL, H_e_FTOF, H_e_LTCC, H_e_DCSL6, H_e_DCSL5, H_e_DCSL4, H_e_DCSL3, H_e_DCSL2, H_e_DCSL1, H_e_HTCC;
-    public H2F H_e_nphe_HTCC, H_e_bin_theta_HTCC, H_e_bin_phi_HTCC, H_e_theta_HTCC, H_e_phi_HTCC;
+    	public H2F H_e_nphe_HTCC, H_e_bin_theta_HTCC, H_e_bin_phi_HTCC, H_e_theta_HTCC, H_e_phi_HTCC;
 	public H2F[] H_e_HTCC_cut; 
 	public H2F[] H_e_t_p, H_e_vz_t, H_e_vz_p;
 	public H2F[] H_e_EC_etot_p, H_e_EC_vt_theta, H_e_EC_XY;
@@ -91,7 +96,12 @@ public class dst_mon {
 	public H2F H_pi0_G2_XY, H_pi0_G2_TR, H_pi0_G2_vt_evt, H_pi0_G2_layer_E;//8
 	public H2F H_pi0_G1_mom_the, H_pi0_G1_phi_the, H_pi0_G2_mom_the, H_pi0_G2_phi_the;//12
 	public H2F H_pi0_open_E, H_pi0_E_the, H_pi0_phi_the;//15
-    public H1F H_pi0_mass, H_pi0_G1_layers, H_pi0_G2_layers;//18
+    	public H1F H_pi0_mass, H_pi0_G1_layers, H_pi0_G2_layers;//18
+
+	public IndexedTable InverseTranslationTable;
+    	public IndexedTable calibrationTranslationTable;
+    	public IndexedTable rfTable;
+    	public ConstantsManager ccdb;
 
         public dst_mon(int reqrunNum, float reqEB){
 		runNum = reqrunNum;EB=reqEB;
@@ -109,6 +119,16 @@ public class dst_mon {
                 //if(reqEB>9)Eb=10.6f;
                 Eb = reqEB;
                 System.out.println("Eb="+Eb+" (EB="+EB+") , run="+runNum);
+
+		rfPeriod = 4.008f;
+                ccdb = new ConstantsManager();
+                ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config"}));
+                rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
+                if (rfTable.hasEntry(1, 1, 1)){
+                System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
+                rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
+                }
+		rf_large_integer = 1000;
 
                 VB = new LorentzVector(0,0,Eb,Eb);
                 VT = new LorentzVector(0,0,0,Mp);
@@ -363,23 +383,23 @@ public class dst_mon {
 			H_e_FTOF_XY_pad1b[s].setTitleY("Y (cm)");
 			
 			//from tof_monitor
-			p1a_pad_vt_elec[s] = new H2F(String.format("p1a_pad_vt_elec_S%d",s+1),String.format("p1a_pad_vt_elec_S%d",s+1),100,-1.002,1.002,100,-4,4);
+			p1a_pad_vt_elec[s] = new H2F(String.format("p1a_pad_vt_elec_S%d",s+1),String.format("p1a_pad_vt_elec_S%d",s+1),100,-rfPeriod/2,rfPeriod/2,100,-4,4);
 			p1a_pad_vt_elec[s].setTitle(String.format("p1a S%d time_elec",s+1));
 			p1a_pad_vt_elec[s].setTitleX("vertex time - RFTime (ns)");
 			p1a_pad_vt_elec[s].setTitleY("vertex time - STTime (ns)");
-			p1a_pad_vt_pion[s] = new H2F(String.format("p1a_pad_vt_pion_S%d",s+1),String.format("p1a_pad_vt_pion_S%d",s+1),100,-1.002,1.002,100,-4,4);
+			p1a_pad_vt_pion[s] = new H2F(String.format("p1a_pad_vt_pion_S%d",s+1),String.format("p1a_pad_vt_pion_S%d",s+1),100,-rfPeriod/2,rfPeriod/2,100,-4,4);
 			p1a_pad_vt_pion[s].setTitle(String.format("p1a S%d time_pion",s+1));
 			p1a_pad_vt_pion[s].setTitleX("vertex time - RFTime (ns)");
 			p1a_pad_vt_pion[s].setTitleY("vertex time - STTime (ns)");
-			p1b_pad_vt_elec[s] = new H2F(String.format("p1b_pad_vt_elec_S%d",s+1),String.format("p1b_pad_vt_elec_S%d",s+1),100,-1.002,1.002,100,-4,4);
+			p1b_pad_vt_elec[s] = new H2F(String.format("p1b_pad_vt_elec_S%d",s+1),String.format("p1b_pad_vt_elec_S%d",s+1),100,-rfPeriod/2,rfPeriod/2,100,-4,4);
 			p1b_pad_vt_elec[s].setTitle(String.format("p1b S%d time_elec",s+1));
 			p1b_pad_vt_elec[s].setTitleX("vertex time - RFTime (ns)");
 			p1b_pad_vt_elec[s].setTitleY("vertex time - STTime (ns)");
-			p1b_pad_vt_pion[s] = new H2F(String.format("p1b_pad_vt_pion_S%d",s+1),String.format("p1b_pad_vt_pion_S%d",s+1),100,-1.002,1.002,100,-4,4);
+			p1b_pad_vt_pion[s] = new H2F(String.format("p1b_pad_vt_pion_S%d",s+1),String.format("p1b_pad_vt_pion_S%d",s+1),100,-rfPeriod/2,rfPeriod/2,100,-4,4);
 			p1b_pad_vt_pion[s].setTitle(String.format("p1b S%d time_pion",s+1));
 			p1b_pad_vt_pion[s].setTitleX("vertex time - RFTime (ns)");
 			p1b_pad_vt_pion[s].setTitleY("vertex time - STTime (ns)");
-			p2_pad_vt[s] = new H2F(String.format("p2_pad_vt_S%d",s+1),String.format("p2_pad_vt_S%d",s+1),100,-1.002,1.002,100,-4,4);
+			p2_pad_vt[s] = new H2F(String.format("p2_pad_vt_S%d",s+1),String.format("p2_pad_vt_S%d",s+1),100,-rfPeriod/2,rfPeriod/2,100,-4,4);
 			p2_pad_vt[s].setTitle(String.format("p2 S%d time",s+1));
 			p2_pad_vt[s].setTitleX("vertex time - RFTime (ns)");
 			p2_pad_vt[s].setTitleY("vertex time - STTime (ns)");
@@ -754,8 +774,8 @@ public class dst_mon {
 					e_FTOF1a_path = bank.getFloat("path",r);
 					e_FTOF1a_vt = e_FTOF1a_t - e_FTOF1a_path/29.98f - STT;
 					thisTime = e_FTOF1a_t - e_FTOF1a_path/29.98f - RFT;
-					thisTime = (thisTime+1.002f) % 2.004f;
-					thisTime = thisTime - 1.002f;
+					thisTime = (thisTime+(rf_large_integer+0.5f)*rfPeriod) % rfPeriod;
+					thisTime = thisTime - rfPeriod/2;
 					p1a_pad_vt_elec[s].fill(thisTime,e_FTOF1a_vt);
 					p1a_pad_edep_elec[s].fill(e_FTOF1a_edep);
 				}
@@ -770,8 +790,8 @@ public class dst_mon {
 					e_FTOF1b_path = bank.getFloat("path",r);
 					e_FTOF1b_vt = e_FTOF1b_t - e_FTOF1b_path/29.98f - STT;
 					thisTime = e_FTOF1b_t - e_FTOF1b_path/29.98f -  RFT;
-					thisTime = (thisTime+1.002f) % 2.004f;
-					thisTime = thisTime - 1.002f;
+					thisTime = (thisTime+(rf_large_integer+0.5f)*rfPeriod) % rfPeriod;
+					thisTime = thisTime - rfPeriod/2;
 					p1b_pad_vt_elec[s].fill(thisTime,e_FTOF1b_vt);
 					p1b_pad_edep_elec[s].fill(e_FTOF1b_edep);
 				}
@@ -783,8 +803,8 @@ public class dst_mon {
 				float pip_beta = pip_mom/(float)Math.sqrt(pip_mom*pip_mom + 0.13957f*0.13957f);
 				pip_FTOF1a_vt = pip_FTOF1a_t - pip_FTOF1a_path / ( pip_beta * 29.98f ) - STT;
 				thisTime = pip_FTOF1a_t - pip_FTOF1a_path / ( pip_beta * 29.98f ) - RFT;
-				thisTime = (thisTime+1.002f) % 2.004f;
-				thisTime = thisTime - 1.002f;
+				thisTime = (thisTime+(rf_large_integer+0.5f)*rfPeriod) % rfPeriod;
+				thisTime = thisTime - rfPeriod/2;
 				p1a_pad_vt_pion[s].fill(thisTime,pip_FTOF1a_vt);
 				p1a_pad_edep_pion[s].fill(bank.getFloat("energy",r));
 			}
@@ -795,8 +815,8 @@ public class dst_mon {
 				float pip_beta = pip_mom/(float)Math.sqrt(pip_mom*pip_mom + 0.13957f*0.13957f);
 				pip_FTOF1b_vt = pip_FTOF1b_t - pip_FTOF1b_path / ( pip_beta * 29.98f ) - STT;
 				thisTime = pip_FTOF1b_t - pip_FTOF1b_path / ( pip_beta * 29.98f ) - RFT;
-				thisTime = (thisTime+1.002f) % 2.004f;
-				thisTime = thisTime - 1.002f;
+				thisTime = (thisTime+(rf_large_integer+0.5f)*rfPeriod) % rfPeriod;
+				thisTime = thisTime - rfPeriod/2;
 				p1b_pad_vt_pion[s].fill(thisTime, pip_FTOF1b_vt);
 				p1b_pad_edep_pion[s].fill(bank.getFloat("energy",r));
 			}
@@ -808,8 +828,8 @@ public class dst_mon {
 				float pim_beta = pim_mom/(float)Math.sqrt(pim_mom*pim_mom + 0.13957f*0.13957f);
 				pim_FTOF1a_vt = pim_FTOF1a_t - pim_FTOF1a_path / ( pim_beta * 29.98f ) - STT;
 				thisTime = pim_FTOF1a_t - pim_FTOF1a_path / ( pim_beta * 29.98f ) -  RFT;
-				thisTime = (thisTime+1.002f) % 2.004f;
-				thisTime = thisTime - 1.002f;
+				thisTime = (thisTime+(rf_large_integer+0.5f)*rfPeriod) % rfPeriod;
+				thisTime = thisTime - rfPeriod/2;
 				p1a_pad_vt_pion[s].fill(thisTime, pim_FTOF1a_vt);
 				p1a_pad_edep_pion[s].fill(bank.getFloat("energy",r));
 			}
@@ -819,8 +839,8 @@ public class dst_mon {
 				float pim_beta = pim_mom/(float)Math.sqrt(pim_mom*pim_mom + 0.13957f*0.13957f);
 				pim_FTOF1b_vt = pim_FTOF1b_t - pim_FTOF1b_path / ( pim_beta * 29.98f ) - STT;
 				thisTime = pim_FTOF1b_t - pim_FTOF1b_path / ( pim_beta * 29.98f ) -  RFT;
-				thisTime = (thisTime+1.002f) % 2.004f;
-				thisTime = thisTime - 1.002f;
+				thisTime = (thisTime+(rf_large_integer+0.5f)*rfPeriod) % rfPeriod;
+				thisTime = thisTime - rfPeriod/2;
 				p1b_pad_vt_pion[s].fill(thisTime, pim_FTOF1b_vt);
 				p1b_pad_edep_pion[s].fill(bank.getFloat("energy",r));
 			}
@@ -828,8 +848,8 @@ public class dst_mon {
 			//all particles at p2
 			if(bank.getByte("layer",r)==3){
 				thisTime = bank.getFloat("time",r) - bank.getFloat("path",r)/29.98f - RFT;
-				thisTime = (thisTime+1.002f) % 2.004f;
-				thisTime = thisTime - 1.002f;		
+				thisTime = (thisTime+(rf_large_integer+0.5f)*rfPeriod) % rfPeriod;
+				thisTime = thisTime - rfPeriod/2;		
 				p2_pad_vt[s].fill(thisTime, bank.getFloat("time",r) - bank.getFloat("path",r)/29.98f - STT);
 				p2_pad_edep[s].fill(bank.getFloat("energy",r));
 			}
@@ -842,9 +862,7 @@ public class dst_mon {
 				double mom = Math.sqrt(px*px+py*py+pz*pz);
 				double the = Math.toDegrees(Math.acos(pz/mom));
 				double TOFbeta = bank.getFloat("path",r)/(29.98f*(bank.getFloat("time",r)-STT));
-				//double TOFmass = mom * Math.sqrt( 1/(TOFbeta*TOFbeta) - 1);
 				double TOFmass = mom * mom * ( 1/(TOFbeta*TOFbeta) - 1);
-				// int s = bank.getInt("sector",r)-1;
 				if(bank.getByte("layer",r)==1 && q>0 ){
 					H_FTOF_pos_beta_mom_pad1a[s].fill(mom,TOFbeta);
 					H_FTOF_pos_mass_mom_pad1a[s].fill(mom,TOFmass);
