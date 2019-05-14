@@ -363,11 +363,11 @@ public class LTCC{
             					if ((pid == 211 || pid == -211) && nphe > 2) H_pi_nphe2_LTCC_XY.fill(e_LTCC_tX,e_LTCC_tY);
             					if ((pid == 11 || pid == -11) && nphe > 0) H_e_nphe0_LTCC_XY.fill(e_LTCC_tX,e_LTCC_tY);
             					if ((pid == 11 || pid == -11) && nphe > 2) H_e_nphe2_LTCC_XY.fill(e_LTCC_tX,e_LTCC_tY);
-                            }
-                    	}
+            				}
+            			}
             		}
-				}
-			} 
+            	}
+            } 
         }
 
 	public void fillPions_LTCC(DataEvent event, DataBank part, DataBank ltcc){
