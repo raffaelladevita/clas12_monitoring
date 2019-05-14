@@ -229,5 +229,20 @@ public class BAND{
                 }   
                 System.out.println("Total : " + count + " events");
                 ana.plot();
-        }   
+                ana.write();
+        }
+
+	public void write() {
+		TDirectory dirout = new TDirectory();
+		dirout.mkdir("/BAND/");
+		dirout.cd("/BAND/");
+		for(int j=0;j<2;j++){
+			dirout.addDataSet(H_BAND_adcCor[j], H_BAND_meantimeadc[j], H_BAND_meantimetdc[j]);
+		}
+		if(!write_volatile){
+			if(runNum>0)dirout.writeFile("plots"+runNum+"/out_BAND_"+runNum+".hipo");
+			else dirout.writeFile("plots/out_BAND.hipo");
+		}
+	}
+
 }
