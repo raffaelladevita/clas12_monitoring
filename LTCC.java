@@ -40,6 +40,7 @@ public class LTCC{
 	public H1F[] H_LTCC_PMTocc;
 	public H1F H_Particle_PiPlus_Phi, H_Particle_PiPlus_Phi_LTCC, H_Particle_PiPlus_Mom, H_Particle_PiPlus_Mom_LTCC, H_Particle_PiPlus_nphe_LTCC;
 	public H1F H_Particle_PiMinus_Phi, H_Particle_PiMinus_Phi_LTCC, H_Particle_PiMinus_Mom, H_Particle_PiMinus_Mom_LTCC, H_Particle_PiMinus_nphe_LTCC;
+	public H1F[] H_Particle_PiPlus_nphe_LTCC_S, H_Particle_PiMinus_nphe_LTCC_S;
 
 	public LTCC(int reqR, float reqEb, boolean reqTimeBased, boolean reqwrite_volatile){
         	runNum = reqR;userTimeBased=reqTimeBased;
@@ -53,64 +54,72 @@ public class LTCC{
 		H_pion_nphePMT = new H2F[6];
 		H_e_nphePMT = new H2F[6];
 		H_LTCC_PMTocc = new H1F[6];
-
+		H_Particle_PiPlus_nphe_LTCC_S = new H1F[6];
+		H_Particle_PiMinus_nphe_LTCC_S = new H1F[6];
 		for(int s=0;s<6;s++){
 			H_pion_nphePMT[s] = new H2F(String.format("H_pion_S%d_nphe_vs_PMT",s+1),String.format("Nphe vs PMT (pions) S%d",s+1),36,0.5,36.5,21,-0.5,20.5);
-                        H_pion_nphePMT[s].setTitleX("PMT No");
-                        H_pion_nphePMT[s].setTitleY("Nphe");
+			H_pion_nphePMT[s].setTitleX("PMT No");
+			H_pion_nphePMT[s].setTitleY("Nphe");
 			H_e_nphePMT[s] = new H2F(String.format("H_electron_S%d_nphe_vs_PMT",s+1),String.format("Nphe vs PMT (electrons) S%d",s+1),36,0.5,36.5,21,-0.5,20.5);
-                        H_e_nphePMT[s].setTitleX("PMT No");
-                        H_e_nphePMT[s].setTitleY("Nphe");
+			H_e_nphePMT[s].setTitleX("PMT No");
+			H_e_nphePMT[s].setTitleY("Nphe");
 			H_LTCC_PMTocc[s] = new H1F(String.format("H_LTCC_PMT_occ_S%d",s+1),String.format("LTCC PMT Raw Number of Hits (S%d)",s+1),36,0.5,36.5);
-                	H_LTCC_PMTocc[s].setTitleX("PMT");
-                	H_LTCC_PMTocc[s].setTitleY("events");
+			H_LTCC_PMTocc[s].setTitleX("PMT");
+			H_LTCC_PMTocc[s].setTitleY("events");
+			H_Particle_PiPlus_nphe_LTCC_S[s] = new H1F(String.format("H_piplus_S%d_nphe",s+1), "LTCC nphe #pi^+ Particles",100,0,100);
+			H_Particle_PiPlus_nphe_LTCC_S[s].setTitle(String.format("LTCC nphe #pi^+ Particles_S%d",s));
+			H_Particle_PiPlus_nphe_LTCC_S[s].setTitleX("nphe");
+			H_Particle_PiPlus_nphe_LTCC_S[s].setTitleY("counts");
+			H_Particle_PiMinus_nphe_LTCC_S[s] = new H1F(String.format("H_piminus_S%d_nphe",s+1), "LTCC nphe #pi^- Particles",100,0,100);
+			H_Particle_PiMinus_nphe_LTCC_S[s].setTitle(String.format("LTCC nphe #pi^- Particles_S%d",s));
+			H_Particle_PiMinus_nphe_LTCC_S[s].setTitleX("nphe");
+			H_Particle_PiMinus_nphe_LTCC_S[s].setTitleY("counts");
 		}
 		H_e_nphe0_LTCC_XY = new H2F("H_e_nphe0_LTCC_XY","LTCC XY Electrons (nphe>0)",100,-400.,400.,100,-400.,400.);
 		H_e_nphe2_LTCC_XY = new H2F("H_e_nphe2_LTCC_XY","LTCC XY Electrons (nphe>2)",100,-400.,400.,100,-400.,400.);
 		H_pi_nphe0_LTCC_XY = new H2F("H_e_nphe0_LTCC_XY","LTCC XY Pions (nphe>0)",100,-400.,400.,100,-400.,400.);
-                H_pi_nphe2_LTCC_XY = new H2F("H_e_nphe2_LTCC_XY","LTCC XY Pions (nphe>2)",100,-400.,400.,100,-400.,400.);
+		H_pi_nphe2_LTCC_XY = new H2F("H_e_nphe2_LTCC_XY","LTCC XY Pions (nphe>2)",100,-400.,400.,100,-400.,400.);
 		
 		H_Particle_PiPlus_Phi = new H1F("No #pi^+ Particles vs #phi", "No #pi^+ Particles vs #phi",361, -180.5, 180.5);
 		H_Particle_PiPlus_Phi.setTitle("No #pi^+ Particles vs #phi");
-                H_Particle_PiPlus_Phi.setTitleX("#phi (deg)");
+		H_Particle_PiPlus_Phi.setTitleX("#phi (deg)");
 		H_Particle_PiPlus_Phi.setTitleY("counts");
 		H_Particle_PiMinus_Phi = new H1F("No #pi^- Particles vs #phi", "No #pi^- Particles vs #phi",361, -180.5, 180.5);
 		H_Particle_PiMinus_Phi.setTitle("No #pi^- Particles vs #phi");
-                H_Particle_PiMinus_Phi.setTitleX("#phi (deg)");
-                H_Particle_PiMinus_Phi.setTitleY("counts");
+		H_Particle_PiMinus_Phi.setTitleX("#phi (deg)");
+		H_Particle_PiMinus_Phi.setTitleY("counts");
 		H_Particle_PiPlus_Phi_LTCC = new H1F("No #pi^+ Particles vs #phi with LTCC", "No #pi^+ Particles vs #phi with LTCC",361, -180.5, 180.5);
 		H_Particle_PiPlus_Phi_LTCC.setTitle("No #pi^+ Particles vs #phi with LTCC");
-                H_Particle_PiPlus_Phi_LTCC.setTitleX("#phi (deg)");
-                H_Particle_PiPlus_Phi_LTCC.setTitleY("counts");
+		H_Particle_PiPlus_Phi_LTCC.setTitleX("#phi (deg)");
+		H_Particle_PiPlus_Phi_LTCC.setTitleY("counts");
 		H_Particle_PiMinus_Phi_LTCC = new H1F("No #pi^- Particles vs #phi with LTCC", "No #pi^- Particles vs #phi with LTCC",361, -180.5, 180.5);
 		H_Particle_PiMinus_Phi_LTCC.setTitle("No #pi^- Particles vs #phi with LTCC");
-                H_Particle_PiMinus_Phi_LTCC.setTitleX("#phi (deg)");
-                H_Particle_PiMinus_Phi_LTCC.setTitleY("counts");
+		H_Particle_PiMinus_Phi_LTCC.setTitleX("#phi (deg)");
+		H_Particle_PiMinus_Phi_LTCC.setTitleY("counts");
 		H_Particle_PiPlus_Mom = new H1F("No #pi^+ Particles vs p", "No #pi^+ Particles vs p",100, 0., 10.);
 		H_Particle_PiPlus_Mom.setTitle("No #pi^+ Particles vs p");
-                H_Particle_PiPlus_Mom.setTitleX("p (GeV/c)");
-                H_Particle_PiPlus_Mom.setTitleY("counts");
+		H_Particle_PiPlus_Mom.setTitleX("p (GeV/c)");
+		H_Particle_PiPlus_Mom.setTitleY("counts");
 		H_Particle_PiMinus_Mom = new H1F("No #pi^- Particles vs p", "No #pi^- Particles vs p",100, 0., 10.);
 		H_Particle_PiMinus_Mom.setTitle("No #pi^- Particles vs p");
-                H_Particle_PiMinus_Mom.setTitleX("p (GeV/c)");
-                H_Particle_PiMinus_Mom.setTitleY("counts");
+		H_Particle_PiMinus_Mom.setTitleX("p (GeV/c)");
+		H_Particle_PiMinus_Mom.setTitleY("counts");
 		H_Particle_PiPlus_Mom_LTCC = new H1F("No #pi^+ Particles vs p with LTCC", "No #pi^+ Particles vs p with LTCC",100, 0., 10.);
 		H_Particle_PiPlus_Mom_LTCC.setTitle("No #pi^+ Particles vs p with LTCC");
-                H_Particle_PiPlus_Mom_LTCC.setTitleX("p (GeV/c)");
-                H_Particle_PiPlus_Mom_LTCC.setTitleY("counts");
-                H_Particle_PiMinus_Mom_LTCC = new H1F("No #pi^- Particles vs p with LTCC", "No #pi^- Particles vs p with LTCC",100, 0., 10.);
+		H_Particle_PiPlus_Mom_LTCC.setTitleX("p (GeV/c)");
+		H_Particle_PiPlus_Mom_LTCC.setTitleY("counts");
+		H_Particle_PiMinus_Mom_LTCC = new H1F("No #pi^- Particles vs p with LTCC", "No #pi^- Particles vs p with LTCC",100, 0., 10.);
 		H_Particle_PiMinus_Mom_LTCC.setTitle("No #pi^- Particles vs p with LTCC");
-                H_Particle_PiMinus_Mom_LTCC.setTitleX("p (GeV/c)");
-                H_Particle_PiMinus_Mom_LTCC.setTitleY("counts");
+		H_Particle_PiMinus_Mom_LTCC.setTitleX("p (GeV/c)");
+		H_Particle_PiMinus_Mom_LTCC.setTitleY("counts");
 		H_Particle_PiPlus_nphe_LTCC = new H1F("LTCC nphe #pi^+ Particles", "LTCC nphe #pi^+ Particles",21, -0.5, 20.5);
 		H_Particle_PiPlus_nphe_LTCC.setTitle("LTCC nphe #pi^+ Particles");
-                H_Particle_PiPlus_nphe_LTCC.setTitleX("nphe");
-                H_Particle_PiPlus_nphe_LTCC.setTitleY("counts");
+		H_Particle_PiPlus_nphe_LTCC.setTitleX("nphe");
+		H_Particle_PiPlus_nphe_LTCC.setTitleY("counts");
 		H_Particle_PiMinus_nphe_LTCC = new H1F("LTCC nphe #pi^- Particles", "LTCC nphe #pi^- Particles",21, -0.5, 20.5);
 		H_Particle_PiMinus_nphe_LTCC.setTitle("LTCC nphe #pi^- Particles");
-                H_Particle_PiMinus_nphe_LTCC.setTitleX("nphe");
-                H_Particle_PiMinus_nphe_LTCC.setTitleY("counts");
-		
+		H_Particle_PiMinus_nphe_LTCC.setTitleX("nphe");
+		H_Particle_PiMinus_nphe_LTCC.setTitleY("counts");
 
 	}
 
@@ -334,63 +343,62 @@ public class LTCC{
 	}
 
         public void fillTraj_LTCC(DataBank trajBank, DataBank part, DataBank ltcc){
-		for(int i=0;i<part.rows();i++) {
-                	float nphe = 0;
-                	int pid = -100;
-                	int charge = -100;
-
-                        int status = part.getShort("status", i);
-                        pid = part.getInt("pid", i);
-                        charge = part.getByte("charge", i);
-                        if ((status>=2000 && status<4000) && isLTCCmatch(ltcc,i) != -1 && (pid == 11 || pid == -11 || pid == 211 || pid == -211)) {
-				nphe = ltcc.getFloat("nphe",isLTCCmatch(ltcc,i));
-				//System.out.println("Nphe = "+nphe+" Traj nrows = "+trajBank.rows());
-				for(int r=0;r<trajBank.rows();r++){
-                		        if(trajBank.getShort("pindex",r)==i){
-                                		if(trajBank.getShort("detId",r) == 43) {
-                                        		float e_LTCC_tX = trajBank.getFloat("x",r);
-                                        		float e_LTCC_tY = trajBank.getFloat("y",r);
-                                        		float e_LTCC_tZ = trajBank.getFloat("z",r);
-							if ((pid == 211 || pid == -211) && nphe > 0) H_pi_nphe0_LTCC_XY.fill(e_LTCC_tX,e_LTCC_tY);
-							if ((pid == 211 || pid == -211) && nphe > 2) H_pi_nphe2_LTCC_XY.fill(e_LTCC_tX,e_LTCC_tY);
-							if ((pid == 11 || pid == -11) && nphe > 0) H_e_nphe0_LTCC_XY.fill(e_LTCC_tX,e_LTCC_tY);
-							if ((pid == 11 || pid == -11) && nphe > 2) H_e_nphe2_LTCC_XY.fill(e_LTCC_tX,e_LTCC_tY);
-                                		}
-                        		}
-                		}
-			}
-			
-		} 
+        	for(int i=0;i<part.rows();i++) {
+        		float nphe = 0;
+        		int pid = -100;
+        		int charge = -100;
+        		int status = part.getShort("status", i);
+        		pid = part.getInt("pid", i);
+        		charge = part.getByte("charge", i);
+        		if ((status>=2000 && status<4000) && isLTCCmatch(ltcc,i) != -1 && (pid == 11 || pid == -11 || pid == 211 || pid == -211)) {
+            		nphe = ltcc.getFloat("nphe",isLTCCmatch(ltcc,i));
+            		//System.out.println("Nphe = "+nphe+" Traj nrows = "+trajBank.rows());
+            		for(int r=0;r<trajBank.rows();r++){
+            			if(trajBank.getShort("pindex",r)==i){
+            				if(trajBank.getShort("detId",r) == 43) {
+            					float e_LTCC_tX = trajBank.getFloat("x",r);
+            					float e_LTCC_tY = trajBank.getFloat("y",r);
+            					float e_LTCC_tZ = trajBank.getFloat("z",r);
+            					if ((pid == 211 || pid == -211) && nphe > 0) H_pi_nphe0_LTCC_XY.fill(e_LTCC_tX,e_LTCC_tY);
+            					if ((pid == 211 || pid == -211) && nphe > 2) H_pi_nphe2_LTCC_XY.fill(e_LTCC_tX,e_LTCC_tY);
+            					if ((pid == 11 || pid == -11) && nphe > 0) H_e_nphe0_LTCC_XY.fill(e_LTCC_tX,e_LTCC_tY);
+            					if ((pid == 11 || pid == -11) && nphe > 2) H_e_nphe2_LTCC_XY.fill(e_LTCC_tX,e_LTCC_tY);
+                            }
+                    	}
+            		}
+				}
+			} 
         }
 
 	public void fillPions_LTCC(DataEvent event, DataBank part, DataBank ltcc){
 		for(int i=0;i<part.rows();i++) {
-                        float nphe = 0;
-                        int pid = -100;
-                        int charge = -100;
+			float nphe = 0;
+			int pid = -100;
+			int charge = -100;
 			float phi, mom;
-
-                        int status = part.getShort("status", i);
-                        pid = part.getInt("pid", i);
-                        charge = part.getByte("charge", i);
+			int status = part.getShort("status", i);
+			pid = part.getInt("pid", i);
+			charge = part.getByte("charge", i);
 			float px = part.getFloat("px", i);
-                        float py = part.getFloat("py", i);
-                        float pz = part.getFloat("pz", i);
+			float py = part.getFloat("py", i);
+			float pz = part.getFloat("pz", i);
 			int sector = isDCmatch(event,i);
-                        if ((status>=2000 && status<4000) && isLTCCmatch(ltcc,i) != -1 && (pid == 211 || pid == -211)) {
-                                nphe = ltcc.getFloat("nphe",isLTCCmatch(ltcc,i));
+			if ((status>=2000 && status<4000) && isLTCCmatch(ltcc,i) != -1 && (pid == 211 || pid == -211)) {
+				nphe = ltcc.getFloat("nphe",isLTCCmatch(ltcc,i));
 				phi = (float)Math.toDegrees(Math.atan2(py,px));
-                                mom = (float)Math.sqrt(px*px+py*py+pz*pz);
+				mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 				if (nphe >0. && charge == 1 && pid == 211 && mom > 4.) {
 					H_Particle_PiPlus_Phi_LTCC.fill(phi);
 					if (sector == 3 || sector == 5) H_Particle_PiPlus_Mom_LTCC.fill(mom);
 					H_Particle_PiPlus_nphe_LTCC.fill(nphe);
+					H_Particle_PiPlus_nphe_LTCC_S[sector-1].fill(nphe);
 					//System.out.println("PiPlus nphe = "+nphe);
 				}
 				if (nphe >0. && charge == -1 && pid == -211 && mom > 4.) {
 					H_Particle_PiMinus_Phi_LTCC.fill(phi);
 					if (sector == 3 || sector == 5) H_Particle_PiMinus_Mom_LTCC.fill(mom);
-                                        H_Particle_PiMinus_nphe_LTCC.fill(nphe);
+					H_Particle_PiMinus_nphe_LTCC.fill(nphe);
+					H_Particle_PiPlus_nphe_LTCC_S[sector-1].fill(nphe);
 					//System.out.println("PiMinus nphe = "+nphe);
 				}
 			}
@@ -402,22 +410,22 @@ public class LTCC{
 		float phi, mom;
 		for(int i=0;i<part.rows();i++) {
 			int status = part.getShort("status", i);
-                        pid = part.getInt("pid", i);
-                        int charge = part.getByte("charge", i);
+			pid = part.getInt("pid", i);
+			int charge = part.getByte("charge", i);
 			float px = part.getFloat("px", i);
-                        float py = part.getFloat("py", i);
-                        float pz = part.getFloat("pz", i);
+			float py = part.getFloat("py", i);
+			float pz = part.getFloat("pz", i);
 			phi = (float)Math.toDegrees(Math.atan2(py,px));
-                        mom = (float)Math.sqrt(px*px+py*py+pz*pz);
+			mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 			int sector = isDCmatch(event,i);
 			if ((status>=2000 && status<4000) && pid == 211 && charge == 1 && mom > 4.) {
 				H_Particle_PiPlus_Phi.fill(phi);
 				if (sector == 3 || sector == 5) H_Particle_PiPlus_Mom.fill(mom);
 			}
 			if ((status>=2000 && status<4000) && pid == -211 && charge == -1 && mom > 4.) {
-                                H_Particle_PiMinus_Phi.fill(phi);
-                                if (sector == 3 || sector == 5) H_Particle_PiMinus_Mom.fill(mom);
-                        }
+                H_Particle_PiMinus_Phi.fill(phi);
+                if (sector == 3 || sector == 5) H_Particle_PiMinus_Mom.fill(mom);
+            }
 		}
 	}
 
@@ -448,14 +456,14 @@ public class LTCC{
 		//H_Particle_PiPlus_Phi_LTCC.divide(H_Particle_PiPlus_Phi);
 		can_e_LTCC.cd(17);can_e_LTCC.draw(H_Particle_PiPlus_Phi_LTCC);
 		can_e_LTCC.cd(18);can_e_LTCC.draw(H_Particle_PiMinus_Phi);H_Particle_PiMinus_Phi_LTCC.setLineColor(2);can_e_LTCC.draw(H_Particle_PiMinus_Phi_LTCC,"same");
-                //H_Particle_PiMinus_Phi_LTCC.divide(H_Particle_PiMinus_Phi);
-                can_e_LTCC.cd(19);can_e_LTCC.draw(H_Particle_PiMinus_Phi_LTCC);
+		//H_Particle_PiMinus_Phi_LTCC.divide(H_Particle_PiMinus_Phi);
+		can_e_LTCC.cd(19);can_e_LTCC.draw(H_Particle_PiMinus_Phi_LTCC);
 		can_e_LTCC.cd(20);can_e_LTCC.draw(H_Particle_PiPlus_Mom);H_Particle_PiPlus_Mom_LTCC.setLineColor(2);can_e_LTCC.draw(H_Particle_PiPlus_Mom_LTCC,"same");
-                //H_Particle_PiPlus_Mom_LTCC.divide(H_Particle_PiPlus_Mom);
-                can_e_LTCC.cd(21);can_e_LTCC.draw(H_Particle_PiPlus_Mom_LTCC);
+		//H_Particle_PiPlus_Mom_LTCC.divide(H_Particle_PiPlus_Mom);
+		can_e_LTCC.cd(21);can_e_LTCC.draw(H_Particle_PiPlus_Mom_LTCC);
 		can_e_LTCC.cd(22);can_e_LTCC.draw(H_Particle_PiMinus_Mom);H_Particle_PiMinus_Mom_LTCC.setLineColor(2);can_e_LTCC.draw(H_Particle_PiMinus_Mom_LTCC,"same");
-                //H_Particle_PiMinus_Mom_LTCC.divide(H_Particle_PiMinus_Mom);
-                can_e_LTCC.cd(23);can_e_LTCC.draw(H_Particle_PiMinus_Mom_LTCC);
+		//H_Particle_PiMinus_Mom_LTCC.divide(H_Particle_PiMinus_Mom);
+		can_e_LTCC.cd(23);can_e_LTCC.draw(H_Particle_PiMinus_Mom_LTCC);
 		can_e_LTCC.cd(24);can_e_LTCC.draw(H_Particle_PiPlus_nphe_LTCC);
 		can_e_LTCC.cd(25);can_e_LTCC.draw(H_Particle_PiMinus_nphe_LTCC);
 
@@ -520,5 +528,21 @@ public class LTCC{
                 }   
                 System.out.println("Total : " + count + " events");
                 ana.plot();
-        }   
+                ana.write();
+        }
+
+	public void write() {
+		TDirectory dirout = new TDirectory();
+		dirout.mkdir("/LTCC/");
+		dirout.cd("/LTCC/");
+		for(int s=0;s<6;s++){
+			dirout.addDataSet(H_Particle_PiPlus_nphe_LTCC_S[s], H_Particle_PiMinus_nphe_LTCC_S[s]);
+		}
+
+		if(!write_volatile){
+			if(runNum>0)dirout.writeFile("plots"+runNum+"/out_LTCC_"+runNum+".hipo");
+			else dirout.writeFile("plots/out_LTCC.hipo");
+		}
+	}
+
 }
