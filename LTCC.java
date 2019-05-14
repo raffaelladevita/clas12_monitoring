@@ -423,9 +423,9 @@ public class LTCC{
 				if (sector == 3 || sector == 5) H_Particle_PiPlus_Mom.fill(mom);
 			}
 			if ((status>=2000 && status<4000) && pid == -211 && charge == -1 && mom > 4.) {
-                H_Particle_PiMinus_Phi.fill(phi);
-                if (sector == 3 || sector == 5) H_Particle_PiMinus_Mom.fill(mom);
-            }
+				H_Particle_PiMinus_Phi.fill(phi);
+				if (sector == 3 || sector == 5) H_Particle_PiMinus_Mom.fill(mom);
+			}
 		}
 	}
 
