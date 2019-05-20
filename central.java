@@ -29,6 +29,7 @@ public class central {
 	public float STT, RFT, MinCTOF,MaxCTOF, minSTT, maxSTT;
 	public float[] CTOF_shft;
 	public double rfPeriod;
+	public int e_part_ind;
 
 	public H2F H_CTOF_pos, H_CTOF_edep_phi, H_CTOF_edep_z, H_CTOF_path_mom;
 	public H2F H_CTOF_edep_pad_neg, H_CTOF_edep_pad_pos;
@@ -36,10 +37,13 @@ public class central {
 	public H1F[] H_CVT_t;
 	public H1F H_CVT_t_pos, H_CVT_t_neg;
 
+	public float CTOF_counter_thickness;
+
 	//for timeline
 	public H1F H_CTOF_pos_mass, H_CTOF_neg_mass;
 	public H2F H_CTOF_vt_pim;
 	public H1F H_CTOF_edep_pim;
+	public H1F H_CTOF_edep_neg;
 
 	public IndexedTable InverseTranslationTable;
     	public IndexedTable calibrationTranslationTable;
@@ -51,6 +55,7 @@ public class central {
 		runNum = reqrunNum;userTimeBased=reqTimeBased;
 		write_volatile = reqwrite_volatile;
 
+		CTOF_counter_thickness = 3.0f; //cm
 		rfPeriod = 4.008;
                 ccdb = new ConstantsManager();
                 ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config"}));
@@ -67,25 +72,29 @@ public class central {
                                         -293.52f , -297.96f , -296.42f , -294.40f , -298.90f , -297.14f , -295.28f , -299.03f , -297.71f , -294.35f ,
                                         -298.81f , -296.75f , -293.77f , -298.96f , -297.65f , -294.67f , -299.73f , -297.76f , -295.87f , -297.10f};//2476
 
+		H_CTOF_edep_neg = new H1F("PathLCorrected Edep","PathLCorrected Edep",150,0.,30.);
+		H_CTOF_edep_neg.setTitle("PathLCorrected Edep");
+		H_CTOF_edep_neg.setTitleX("E (MeV)");
+		H_CTOF_edep_neg.setTitleY("counts");
 		H_CTOF_pos = new H2F("H_CTOF_pos","H_CTOF_pos",50,-180,180,100,-10,5);
 		//H_CTOF_pos = new H2F("H_CTOF_pos","H_CTOF_pos",50,-180,180,100,-20,10);
 		H_CTOF_pos.setTitle("CTOF hits z vs #phi");
 		H_CTOF_pos.setTitleX("#phi (^o)");
 		H_CTOF_pos.setTitleY("z/10 (cm)");
-		H_CTOF_edep_phi = new H2F("H_CTOF_edep_phi","H_CTOF_edep_phi",50,-180,180,100,0,60);
-		H_CTOF_edep_phi.setTitle("CTOF Edep vs #phi");
+		H_CTOF_edep_phi = new H2F("H_CTOF_edep_phi","H_CTOF_edep_phi",50,-180,180,100,0,30);
+		H_CTOF_edep_phi.setTitle("CTOF PathLCorrected Edep vs #phi");
 		H_CTOF_edep_phi.setTitleX("#phi (^o)");
 		H_CTOF_edep_phi.setTitleY("E (MeV)");
-		H_CTOF_edep_pad_pos = new H2F("H_CTOF_edep_phi","H_CTOF_edep_phi",50,0.5,50.5,200,0,60);
-		H_CTOF_edep_pad_pos.setTitle("CTOF Edep vs pad, pos. tracks");
+		H_CTOF_edep_pad_pos = new H2F("H_CTOF_edep_phi","H_CTOF_edep_phi",50,0.5,50.5,100,0,30);
+		H_CTOF_edep_pad_pos.setTitle("CTOF PathLCorrected Edep vs pad, pos. tracks");
 		H_CTOF_edep_pad_pos.setTitleX("pad");
 		H_CTOF_edep_pad_pos.setTitleY("E (MeV)");
-                H_CTOF_edep_pad_neg = new H2F("H_CTOF_edep_phi","H_CTOF_edep_phi",50,0.5,50.5,200,0,60);
-                H_CTOF_edep_pad_neg.setTitle("CTOF Edep vs pad, neg. tracks");
+                H_CTOF_edep_pad_neg = new H2F("H_CTOF_edep_phi","H_CTOF_edep_phi",50,0.5,50.5,100,0,30);
+                H_CTOF_edep_pad_neg.setTitle("CTOF PathLCorrected Edep vs pad, neg. tracks");
                 H_CTOF_edep_pad_neg.setTitleX("pad");
                 H_CTOF_edep_pad_neg.setTitleY("E (MeV)");
-		H_CTOF_edep_z = new H2F("H_CTOF_edep_z","H_CTOF_edep_z",100,-10,5,100,0,150);
-		H_CTOF_edep_z.setTitle("CTOF Edep vs z");
+		H_CTOF_edep_z = new H2F("H_CTOF_edep_z","H_CTOF_edep_z",100,-10,5,100,0,30);
+		H_CTOF_edep_z.setTitle("CTOF PathLCorrected Edep vs z");
 		H_CTOF_edep_z.setTitleX("z/10 (cm)");
 		H_CTOF_edep_z.setTitleY("E (MeV)");
 		H_vz_DC_CVT = new H2F("H_vz_DC_CVT","H_vz_DC_CVT",100,-20,20,100,-20,20);
@@ -156,7 +165,7 @@ public class central {
 		H_CTOF_vt_pim.setTitleX("vertex time - RFTime (ns)");
 		H_CTOF_vt_pim.setTitleY("vertex time - STTime (ns)");
 		H_CTOF_edep_pim = new H1F("H_CTOF_edep_pim","H_CTOF_edep_pim",100,0,150);
-		H_CTOF_edep_pim.setTitle("CTOF MIP (pi-) Edep");
+		H_CTOF_edep_pim.setTitle("CTOF MIP (pi-) PathLCorrected Edep");
 		H_CTOF_edep_pim.setTitleX("E (MeV)");
 	}
 	public double Vangle(Vector3 v1, Vector3 v2){ 
@@ -183,19 +192,24 @@ public class central {
 			}
 		}
 	}
+
+
 	public void FillCVTCTOF(DataBank CVTbank, DataBank CTOFbank){
 		for(int iCTOF=0;iCTOF<CTOFbank.rows();iCTOF++){
 			float e = CTOFbank.getFloat("energy",iCTOF);
+			float pathlthroughbar = CTOFbank.getFloat("pathLengthThruBar",iCTOF);
 			int trackid = CTOFbank.getInt("trkID",iCTOF);
-			if(!Float.isNaN(e) && trackid>-1 && e>1.5){
+			if(!Float.isNaN(e) && trackid>-1 && e>2.){
 				boolean matched = false;
 				for(int iCVT=0;iCVT<CVTbank.rows() && !matched;iCVT++){
 					float mom = CVTbank.getFloat("p",iCVT);
+					float momt = CVTbank.getFloat("pt", iCVT);
 					float cx = CVTbank.getFloat("c_x",iCVT)*0.1f;
 					float cy = CVTbank.getFloat("c_y",iCVT)*0.1f;
 					float cz = CVTbank.getFloat("c_z",iCVT)*0.1f;
 					float cphi = (float)Math.toDegrees(Math.atan2(cy,cx));
 					int charge = CVTbank.getInt("q",iCVT);
+					float tandip = CVTbank.getFloat("tandip", iCVT);
 					int pad = CTOFbank.getInt("component",iCTOF);
 					float x = CTOFbank.getFloat("x",iCTOF)*0.1f;
 					float y = CTOFbank.getFloat("y",iCTOF)*0.1f;
@@ -203,6 +217,8 @@ public class central {
 					float t = CTOFbank.getFloat("time",iCTOF);
 					float p = CTOFbank.getFloat("pathLength",iCTOF);
 					float phi = (float)Math.toDegrees(Math.atan2(y,x));
+					float pz = momt * tandip;
+					float theta = (float)Math.toDegrees(Math.acos(pz/Math.sqrt( pz*pz + momt*momt )));
 					//float beta =  mom/(float)Math.sqrt(mom*mom+0.93827f*0.93827f);
 					float beta =  mom/(float)Math.sqrt(mom*mom+0.13957061f*0.13957061f);
 					//float DelPhi = phi-cphi+190;
@@ -211,6 +227,7 @@ public class central {
 					//like FTOF in dst_mon
 					double CTOFbeta = p/(29.98f*(t-STT));
 					double CTOFmass = mom * mom * ( 1/(CTOFbeta*CTOFbeta) - 1);
+					double edep_cor = (double)e*CTOF_counter_thickness/pathlthroughbar;
 
 					while(DelPhi>180)DelPhi-=360;
 					while(DelPhi<-180)DelPhi+=360;
@@ -218,31 +235,32 @@ public class central {
 					if( Math.abs(DelPhi)<180){
 						H_CVT_CTOF_phi.fill(cphi,phi);
 						H_CVT_CTOF_z.fill(cz,z);
-						H_CTOF_pos.fill(phi,z);
-						H_CTOF_edep_phi.fill(phi,e);
-						H_CTOF_edep_z.fill(z,e);
-						H_CTOF_path_mom.fill(mom,p);
 						float CTOFTime = t - p/29.92f/beta;
 						//float CTOFTime = t - p/29.92f/beta - CTOF_shft[pad];
-						if (charge < 0) {
+						if (charge < 0 && e_part_ind != -1) {
+							H_CTOF_pos.fill(phi,z);
+							H_CTOF_edep_phi.fill(phi,edep_cor);
+                                                        H_CTOF_edep_z.fill(z,edep_cor);
+                                                        H_CTOF_path_mom.fill(mom,p);
 							H_CVT_t_STT.fill(STT,CTOFTime);
 							H_CVT_t_pad.fill(pad,CTOFTime-STT);
 							H_CVT_t[pad].fill(CTOFTime-STT);
 							H_CVT_t[49].fill(CTOFTime-STT);
-							H_CTOF_edep_pad_neg.fill(pad,e);
+							H_CTOF_edep_pad_neg.fill(pad,edep_cor);
 							H_CVT_t_neg.fill(CTOFTime-STT);
 							H_CTOF_neg_mass.fill(CTOFmass);
+							H_CTOF_edep_neg.fill(edep_cor);
 							//pi- fiducial cut borrowing from Pierre's CND
 							if (Math.sqrt(Math.abs(CTOFmass))<0.38 && CTOFmass>-0.35*0.35){
 								double thisTime =CTOFTime-RFT;
-								thisTime = (thisTime+(rf_large_integer+0.5)*rfPeriod) % rfPeriod;
-								thisTime = thisTime - rfPeriod/2;		
+                                                                thisTime = (thisTime+(rf_large_integer+0.5)*rfPeriod) % rfPeriod;
+                                                                thisTime = thisTime - rfPeriod/2;
 								H_CTOF_vt_pim.fill(thisTime,CTOFTime-STT);
-								H_CTOF_edep_pim.fill(e);
+								H_CTOF_edep_pim.fill(edep_cor);
 							}			
 						}
-						if (charge>0) {
-							H_CTOF_edep_pad_pos.fill(pad,e);
+						if (charge>0 && e_part_ind != -1) {
+							H_CTOF_edep_pad_pos.fill(pad,edep_cor);
 							H_CVT_t_pos.fill(CTOFTime-STT);
 							H_CTOF_pos_mass.fill(CTOFmass);
 						}
@@ -252,24 +270,51 @@ public class central {
 			}
 		}
 	}
+
+
+        public int makeElectron(DataBank bank){
+		int found_electron = 0;
+                for(int k = 0; k < bank.rows(); k++){
+                        int pid = bank.getInt("pid", k);
+                        byte q = bank.getByte("charge", k);
+                        float px = bank.getFloat("px", k);
+                        float py = bank.getFloat("py", k);
+                        float pz = bank.getFloat("pz", k);
+                        int status = bank.getShort("status", k);
+                        boolean inDC = (status>=2000 && status<4000);
+                        if( inDC && pid == 11 && found_electron == 0){
+				found_electron = 1;
+                        	return k;
+			}
+		}
+                return -1;
+	}
+
+
 	public void processEvent(DataEvent event) {
 		BackToBack = false;
-		DataBank eventBank = null, trackDetBank = null;
+		e_part_ind=-1;
+		DataBank eventBank = null, trackDetBank = null, partBank = null;
                 if(userTimeBased){
                         if(event.hasBank("REC::Event"))eventBank = event.getBank("REC::Event");
                         if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
+			if(event.hasBank("REC::Particle"))partBank = event.getBank("REC::Particle");
                 }
                 if(!userTimeBased){
                         if(event.hasBank("RECHB::Event"))eventBank = event.getBank("RECHB::Event");
+			if(event.hasBank("RECHB::Particle"))partBank = event.getBank("RECHB::Particle");
                         if(event.hasBank("HitBasedTrkg::HBTracks"))trackDetBank = event.getBank("HitBasedTrkg::HBTracks");
                 }
 
 		if(eventBank!=null)STT = eventBank.getFloat("STTime",0);
 		if(eventBank!=null)RFT = eventBank.getFloat("RFTime",0);
 		else return;
+		if(partBank!=null) e_part_ind = makeElectron(partBank);
 		if(trackDetBank != null && event.hasBank("CVTRec::Tracks"))FillTracks(trackDetBank,event.getBank("CVTRec::Tracks"));
 		if(BackToBack && event.hasBank("CVTRec::Tracks") && event.hasBank("CTOF::hits"))FillCVTCTOF(event.getBank("CVTRec::Tracks"),event.getBank("CTOF::hits"));
 	}
+
+
 	public void plot() {
 		EmbeddedCanvas can_central  = new EmbeddedCanvas();
                 can_central.setSize(5000,3000);
@@ -285,13 +330,14 @@ public class central {
 		can_central.cd(5);can_central.draw(H_CTOF_edep_z);
 		can_central.cd(6);can_central.draw(H_CTOF_edep_pad_pos);
 		can_central.cd(7);can_central.draw(H_CTOF_edep_pad_neg);
-		can_central.cd(8);can_central.draw(H_vz_DC_CVT);
-		can_central.cd(9);can_central.draw(H_phi_DC_CVT);
-		can_central.cd(10);can_central.draw(H_CVT_t_STT);
-		can_central.cd(11);can_central.draw(H_CVT_t_pad);
+		can_central.cd(8);can_central.draw(H_CTOF_edep_neg);
+		can_central.cd(9);can_central.draw(H_vz_DC_CVT);
+		can_central.cd(10);can_central.draw(H_phi_DC_CVT);
+		can_central.cd(11);can_central.draw(H_CVT_t_STT);
+		can_central.cd(12);can_central.draw(H_CVT_t_pad);
 
-		can_central.cd(12);can_central.draw(H_CVT_t_pos);
-                can_central.cd(13);can_central.draw(H_CVT_t_neg);
+		can_central.cd(13);can_central.draw(H_CVT_t_pos);
+                can_central.cd(14);can_central.draw(H_CVT_t_neg);
 
 		if(runNum>0){
 			if(!write_volatile)can_central.save(String.format("plots"+runNum+"/central.png"));
@@ -321,6 +367,7 @@ public class central {
                 for(int p=0;p<50;p++)dirout.addDataSet(H_CVT_t[p]);
                 dirout.addDataSet(H_CVT_t_pos, H_CVT_t_neg);
                 dirout.addDataSet(H_CTOF_pos_mass, H_CTOF_neg_mass, H_CTOF_vt_pim, H_CTOF_edep_pim);
+		dirout.addDataSet(H_CVT_t_neg,H_CTOF_edep_neg);
 
 		if(write_volatile)if(runNum>0)dirout.writeFile("/volatile/clas12/rga/spring18/plots"+runNum+"/out_CTOF_"+runNum+".hipo");
                 
