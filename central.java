@@ -306,7 +306,7 @@ public class central {
                         if(event.hasBank("HitBasedTrkg::HBTracks"))trackDetBank = event.getBank("HitBasedTrkg::HBTracks");
                 }
 
-		if(eventBank!=null)STT = eventBank.getFloat("STTime",0);
+		if(eventBank!=null)STT = eventBank.getFloat("startTime",0);
 		if(eventBank!=null)RFT = eventBank.getFloat("RFTime",0);
 		else return;
 		if(partBank!=null) e_part_ind = makeElectron(partBank);

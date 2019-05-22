@@ -153,7 +153,7 @@ public class cnd {
 		if(userTimeBased && event.hasBank("REC::Event"))eventBank = event.getBank("REC::Event");
 		if(!userTimeBased && event.hasBank("RECHB::Event"))eventBank = event.getBank("RECHB::Event");
 		
-		if(eventBank!=null)STT = eventBank.getFloat("STTime",0);
+		if(eventBank!=null)STT = eventBank.getFloat("startTime",0);
 		else return;
 		if(event.hasBank("CND::hits") && event.hasBank("CVTRec::Tracks"))FillCND(event.getBank("CND::hits"),event.getBank("CVTRec::Tracks"));
 	}

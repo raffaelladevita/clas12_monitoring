@@ -702,7 +702,7 @@ public class dst_mon {
 		return selectTrig;
 	}
 	public void fillRecBank(DataBank recBank){
-		STT = recBank.getFloat("STTime",0);
+		STT = recBank.getFloat("startTime",0);
 		RFT = recBank.getFloat("RFTime",0);
 	}
 	public void fillECAL(DataBank bank){
