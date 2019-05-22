@@ -3151,7 +3151,7 @@ public class monitor2p2GeV {
 		}
 	}
 	public void fillEvent(DataBank recEv){
-		G_accCharge.addPoint(Nevts,recEv.getFloat("BCG",0),0,0);
+		G_accCharge.addPoint(Nevts,recEv.getFloat("beamCharge",0),0,0);
 	}
         public void readScalers(DataBank rawScaler){
                 // channel 0 FCups for new code and channel 32 for old code
