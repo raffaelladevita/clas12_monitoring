@@ -918,7 +918,7 @@ public class dst_mon {
 			//System.out.println("comparing "+e_part_ind+" and "+trajBank.getInt("pindex",r));
 			if(trajBank.getShort("pindex",r)==e_part_ind){
 				found_eTraj=true;
-				switch(trajBank.getShort("detector",r)) {
+				switch(trajBank.getInt("detector",r)) {
 					case 0:
 						e_HTCC_tX = trajBank.getFloat("x",r);
 						e_HTCC_tY = trajBank.getFloat("y",r);
