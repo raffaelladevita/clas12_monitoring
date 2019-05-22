@@ -183,6 +183,7 @@ public class LTCC{
 		sect = new int[6];
 		for (int j=0;j<bank.rows();j++) {
 			int status = bank.getShort("status", j);
+			if (status<0) status = -status;
 			pid = bank.getInt("pid", j);
 			charge = bank.getByte("charge", j);;
 			//System.out.println(j+" Particle status = "+status+" pid = "+pid+" charge = "+charge+ "LTCC index = "+isLTCCmatch(bankrecdet,j));
@@ -246,6 +247,7 @@ public class LTCC{
                 sect = new int[6];
                 for (int j=0;j<bank.rows();j++) {
                         int status = bank.getShort("status", j);
+                        if (status<0) status = -status;
                         pid = bank.getInt("pid", j);
                         charge = bank.getByte("charge", j);
                         //System.out.println(j+" Particle status = "+status+" pid = "+pid+" charge = "+charge+ "LTCC index = "+isLTCCmatch(bankrecdet,j));
@@ -348,6 +350,7 @@ public class LTCC{
         		int pid = -100;
         		int charge = -100;
         		int status = part.getShort("status", i);
+        		if (status<0) status = -status;
         		pid = part.getInt("pid", i);
         		charge = part.getByte("charge", i);
         		if ((status>=2000 && status<4000) && isLTCCmatch(ltcc,i) != -1 && (pid == 11 || pid == -11 || pid == 211 || pid == -211)) {
@@ -377,6 +380,7 @@ public class LTCC{
 			int charge = -100;
 			float phi, mom;
 			int status = part.getShort("status", i);
+			if (status<0) status = -status;
 			pid = part.getInt("pid", i);
 			charge = part.getByte("charge", i);
 			float px = part.getFloat("px", i);
@@ -410,6 +414,7 @@ public class LTCC{
 		float phi, mom;
 		for(int i=0;i<part.rows();i++) {
 			int status = part.getShort("status", i);
+			if (status<0) status = -status;
 			pid = part.getInt("pid", i);
 			int charge = part.getByte("charge", i);
 			float px = part.getFloat("px", i);

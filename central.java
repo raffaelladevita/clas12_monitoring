@@ -281,6 +281,7 @@ public class central {
                         float py = bank.getFloat("py", k);
                         float pz = bank.getFloat("pz", k);
                         int status = bank.getShort("status", k);
+                        if (status<0) status = -status;
                         boolean inDC = (status>=2000 && status<4000);
                         if( inDC && pid == 11 && found_electron == 0){
 				found_electron = 1;

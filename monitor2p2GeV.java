@@ -1777,6 +1777,7 @@ public class monitor2p2GeV {
 		for(int k = 0; k < bank.rows(); k++){
 			int pid = bank.getInt("pid", k);
 			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
 			byte q = bank.getByte("charge", k);
 			float thisbeta = bank.getFloat("beta", k);
 			boolean inDC = (status>=2000 && status<4000);
@@ -1821,6 +1822,7 @@ public class monitor2p2GeV {
 					for(int k = 0; k < bank.rows(); k++){
 									int pid = bank.getInt("pid", k);
 									int status = bank.getShort("status", k);
+									if (status<0) status = -status;
 									byte q = bank.getByte("charge", k);
 									float thisbeta = bank.getFloat("beta", k);
 									boolean inDC = (status>=2000 && status<4000);
@@ -1864,6 +1866,7 @@ public class monitor2p2GeV {
 			byte q = bank.getByte("charge", k);
 			float thisbeta = bank.getFloat("beta", k);
 			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
 			boolean inDC = (status>=2000 && status<4000);
 			if(inDC && pid==11)foundelec=true;
 			if(inDC && q<0&&thisbeta>0)nnegatives++;
@@ -1880,6 +1883,7 @@ public class monitor2p2GeV {
 				int pid = bank.getInt("pid", k);
 				byte q = bank.getByte("charge", k);
 				int status = bank.getShort("status", k);
+				if (status<0) status = -status;
 				boolean inDC = (status>=2000 && status<4000);
 				if(inDC && q>0){
 					float px = bank.getFloat("px", k);
@@ -1927,6 +1931,7 @@ public class monitor2p2GeV {
 			float py = bank.getFloat("py", k);
 			float pz = bank.getFloat("pz", k);
 			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
 			boolean inDC = (status>=2000 && status<4000);
 			e_mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 			e_theta = (float)Math.toDegrees(Math.acos(pz/e_mom));
@@ -1951,6 +1956,7 @@ public class monitor2p2GeV {
 			float py = bank.getFloat("py", k);
 			float pz = bank.getFloat("pz", k);
 			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
 			boolean inDC = (status>=2000 && status<4000);
 			e_mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 			e_theta = (float)Math.toDegrees(Math.acos(pz/e_mom));
@@ -2022,6 +2028,7 @@ public class monitor2p2GeV {
                         float mom = (float)Math.sqrt(px*px+py*py+pz*pz);
                         float mass = mom2*(1/(beta*beta)-1);
                         int status = particle.getShort("status", k);
+                        if (status<0) status = -status;
                         boolean Forward = (status<4000);
                         boolean Central = (status>=4000);
 
@@ -2112,6 +2119,7 @@ public class monitor2p2GeV {
 			float mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 			float mass = mom2*(1/(beta*beta)-1);
 			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
 			boolean Forward = (status<4000);
 			boolean Central = (status>=4000);
 
@@ -2443,6 +2451,7 @@ public class monitor2p2GeV {
                        	int pid = bank.getInt("pid", k);
                        	byte q = bank.getByte("charge", k);
                        	int status = bank.getShort("status", k);
+                       	if (status<0) status = -status;
                        	boolean inDC = (status>=2000 && status<4000);//Only forward detectors; CND is >=4000
 			if(inDC && isDCmatch(event,k)>0) {
 				sect = isDCmatch(event, k);
