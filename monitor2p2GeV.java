@@ -2311,15 +2311,15 @@ public class monitor2p2GeV {
 	}
 	public void fillTraj(DataBank bank){
 		for(int iI=0;iI<bank.rows();iI++){
-			if(bank.getInt("detector",iI)<3 && bank.getShort("trkId",iI)==e_track_ind){
+			if(bank.getInt("detector",iI)==8 && bank.getShort("trkId",iI)==e_track_ind){
 				found_e_FMM = 1;
 				float px = bank.getFloat("px", iI);
 				float py = bank.getFloat("py", iI);
 				float pz = bank.getFloat("pz", iI);
-				e_FMMmom[bank.getInt("detector",iI)+1] = (float)Math.sqrt(px*px+py*py+pz*pz);
-				e_FMMtheta[bank.getInt("detector",iI)+1] = (float)Math.toDegrees(Math.acos(pz/e_FMMmom[bank.getInt("detector",iI)+1]));
-				e_FMMphi[bank.getInt("detector",iI)+1] = (float)Math.toDegrees(Math.atan2(py,px));
-				e_FMMvz[bank.getInt("detector",iI)+1] = bank.getFloat("z",iI);
+				e_FMMmom[bank.getInt("layer",iI)-1] = (float)Math.sqrt(px*px+py*py+pz*pz);
+				e_FMMtheta[bank.getInt("layer",iI)-1] = (float)Math.toDegrees(Math.acos(pz/e_FMMmom[bank.getInt("layer",iI)-1]));
+				e_FMMphi[bank.getInt("layer",iI)-1] = (float)Math.toDegrees(Math.atan2(py,px));
+				e_FMMvz[bank.getInt("layer",iI)-1] = bank.getFloat("z",iI);
 			}
 		}
 	}
@@ -2328,7 +2328,7 @@ public class monitor2p2GeV {
 		for(int r=0;r<trajBank.rows();r++){
 			if(trajBank.getShort("pindex",r)==e_part_ind){
 				found_eTraj=1;
-				if(trajBank.getInt("detector",r) == 0) {
+				if(trajBank.getInt("detector",r) == 15) {
 					e_HTCC_tX = trajBank.getFloat("x",r);
                                         e_HTCC_tY = trajBank.getFloat("y",r);
                                         e_HTCC_tZ = trajBank.getFloat("z",r);

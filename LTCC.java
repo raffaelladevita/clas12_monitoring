@@ -358,7 +358,7 @@ public class LTCC{
             		//System.out.println("Nphe = "+nphe+" Traj nrows = "+trajBank.rows());
             		for(int r=0;r<trajBank.rows();r++){
             			if(trajBank.getShort("pindex",r)==i){
-            				if(trajBank.getInt("detector",r) == 43) {
+            				if(trajBank.getInt("detector",r) == 16) {
             					float e_LTCC_tX = trajBank.getFloat("x",r);
             					float e_LTCC_tY = trajBank.getFloat("y",r);
             					float e_LTCC_tZ = trajBank.getFloat("z",r);

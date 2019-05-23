@@ -918,8 +918,9 @@ public class dst_mon {
 			//System.out.println("comparing "+e_part_ind+" and "+trajBank.getInt("pindex",r));
 			if(trajBank.getShort("pindex",r)==e_part_ind){
 				found_eTraj=true;
+				float dstlayer= trajBank.getInt("layer",r);				
 				switch(trajBank.getInt("detector",r)) {
-					case 0:
+					case 15:
 						e_HTCC_tX = trajBank.getFloat("x",r);
 						e_HTCC_tY = trajBank.getFloat("y",r);
 						e_HTCC_tZ = trajBank.getFloat("z",r);
@@ -936,33 +937,42 @@ public class dst_mon {
 						if(e_HTCC_phi<20)e_HTCC_bin_phi = (int) (e_HTCC_phi/4f);
 						if(e_HTCC_phi>20 && e_HTCC_phi<40)e_HTCC_bin_phi = 5 + (int) ((e_HTCC_phi-20f)/1f);
 						if(e_HTCC_phi>40)e_HTCC_bin_phi = 25 + (int) ((e_HTCC_phi-40f)/4f);
-					case 12:
-						e_DCSL1_tX = trajBank.getFloat("x",r);
-						e_DCSL1_tY = trajBank.getFloat("y",r);
-					case 18:
-						e_DCSL2_tX = trajBank.getFloat("x",r);
-						e_DCSL2_tY = trajBank.getFloat("y",r);
-					case 24:
-						e_DCSL3_tX = trajBank.getFloat("x",r);
-						e_DCSL3_tY = trajBank.getFloat("y",r);
-					case 30:
-						e_DCSL4_tX = trajBank.getFloat("x",r);
-						e_DCSL4_tY = trajBank.getFloat("y",r);
-					case 36:
-						e_DCSL5_tX = trajBank.getFloat("x",r);
-						e_DCSL5_tY = trajBank.getFloat("y",r);
-					case 42:
-						e_DCSL6_tX = trajBank.getFloat("x",r);
-						e_DCSL6_tY = trajBank.getFloat("y",r);
-					case 43:
+					case 6:
+						if(dstlayer==6){
+							e_DCSL1_tX = trajBank.getFloat("x",r);
+							e_DCSL1_tY = trajBank.getFloat("y",r);
+						}
+						if(dstlayer==12){
+							e_DCSL2_tX = trajBank.getFloat("x",r);
+							e_DCSL2_tY = trajBank.getFloat("y",r);
+						}
+						if(dstlayer==18){
+							e_DCSL3_tX = trajBank.getFloat("x",r);
+							e_DCSL3_tY = trajBank.getFloat("y",r);
+						}
+						if(dstlayer==24){
+							e_DCSL4_tX = trajBank.getFloat("x",r);
+							e_DCSL4_tY = trajBank.getFloat("y",r);
+						}
+						if(dstlayer==30){
+							e_DCSL5_tX = trajBank.getFloat("x",r);
+							e_DCSL5_tY = trajBank.getFloat("y",r);						
+						}
+						if(dstlayer==36){
+							e_DCSL6_tX = trajBank.getFloat("x",r);
+							e_DCSL6_tY = trajBank.getFloat("y",r);
+						}
+					case 16:
 						e_LTCC_tX = trajBank.getFloat("x",r);
 						e_LTCC_tY = trajBank.getFloat("y",r);
-					case 46:
+					case 12:
 						e_FTOF_tX = trajBank.getFloat("x",r);
 						e_FTOF_tY = trajBank.getFloat("y",r);
-					case 47:
-						e_PCAL_tX = trajBank.getFloat("x",r);
-						e_PCAL_tY = trajBank.getFloat("y",r);
+					case 7:
+						if (dstlayer>0 && dstlayer<4){
+							e_PCAL_tX = trajBank.getFloat("x",r);
+							e_PCAL_tY = trajBank.getFloat("y",r);
+						}
 				}
 			}
 		}
