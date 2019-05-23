@@ -407,7 +407,7 @@ public class FT {
 
 		//Get event start time
 		if(recEvenEB!=null) {
-			startTime = recEvenEB.getFloat("STTime", 0);
+			startTime = recEvenEB.getFloat("startTime", 0);
 			rfTime    = recEvenEB.getFloat("RFTime", 0);
         	}
 

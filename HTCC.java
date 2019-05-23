@@ -138,6 +138,7 @@ public class HTCC{
                         float py = bank.getFloat("py", k);
                         float pz = bank.getFloat("pz", k);
                         int status = bank.getShort("status", k);
+                        if (status<0) status = -status;
                         boolean inDC = (status>=2000 && status<4000);
                         e_mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 			e_theta = (float)Math.toDegrees(Math.acos(pz/e_mom));
