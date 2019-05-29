@@ -178,33 +178,33 @@ public class tof_monitor {
 
 			float[] DCcellsizeSL = {0.9f,0.9f,1.3f,1.3f,2.0f,2.0f};
 		
-			p1a_edep[s][0] = new H1F("p1a_edep_smallangles","p1a_edep_smallangles",150,0.,30.);
+			p1a_edep[s][0] = new H1F(String.format("p1a_edep_smallangles_S%d",s+1),"p1a_edep_smallangles",100,0.,30.);
 			p1a_edep[s][0].setTitle(String.format("p1a PathLCorrected Edep, small angles, S%d",s+1));
 			p1a_edep[s][0].setTitleX("E (MeV)");
 			p1a_edep[s][0].setTitleY("counts");
-			p1a_edep[s][1] = new H1F("p1a_edep_midangles","p1a_edep_midangles",150,0.,30.);
+			p1a_edep[s][1] = new H1F(String.format("p1a_edep_midangles_S%d",s+1),"p1a_edep_midangles",100,0.,30.);
                        	p1a_edep[s][1].setTitle(String.format("p1a PathLCorrected Edep, mid angles, S%d",s+1));
                        	p1a_edep[s][1].setTitleX("E (MeV)");
                        	p1a_edep[s][1].setTitleY("counts");
-			p1a_edep[s][2] = new H1F("p1a_edep_largeangles","p1a_edep_largeangles",150,0.,30.);
+			p1a_edep[s][2] = new H1F(String.format("p1a_edep_largeangles_S%d",s+1),"p1a_edep_largeangles",100,0.,30.);
                        	p1a_edep[s][2].setTitle(String.format("p1a PathLCorrected Edep, large angles, S%d",s+1));
                        	p1a_edep[s][2].setTitleX("E (MeV)");
                        	p1a_edep[s][2].setTitleY("counts");
 
-                       	p1b_edep[s][0] = new H1F("p1b_edep_smallangles","p1b_edep_smallangles",150,0.,30.);
+                       	p1b_edep[s][0] = new H1F(String.format("p1b_edep_smallangles_S%d",s+1),"p1b_edep_smallangles",100,0.,30.);
                        	p1b_edep[s][0].setTitle(String.format("p1b PathLCorrected Edep, small angles, S%d",s+1));
                        	p1b_edep[s][0].setTitleX("E (MeV)");
                        	p1b_edep[s][0].setTitleY("counts");
-                       	p1b_edep[s][1] = new H1F("p1b_edep_midangles","p1b_edep_midangles",150,0.,30.);
+                       	p1b_edep[s][1] = new H1F(String.format("p1b_edep_midangles_S%d",s+1),"p1b_edep_midangles",100,0.,30.);
                        	p1b_edep[s][1].setTitle(String.format("p1b PathLCorrected Edep, mid angles, S%d",s+1));
                        	p1b_edep[s][1].setTitleX("E (MeV)");
                        	p1b_edep[s][1].setTitleY("counts");
-                       	p1b_edep[s][2] = new H1F("p1b_edep_largeangles","p1b_edep_largeangles",150,0.,30.);
+                       	p1b_edep[s][2] = new H1F(String.format("p1b_edep_largeangles_S%d",s+1),"p1b_edep_largeangles",100,0.,30.);
                        	p1b_edep[s][2].setTitle(String.format("p1b PathLCorrected Edep, large angles, S%d",s+1));
                        	p1b_edep[s][2].setTitleX("E (MeV)");
                        	p1b_edep[s][2].setTitleY("counts");
 
-                       	p2_edep[s] = new H1F("p2_edep","p2_edep",150,0.,30.);
+                       	p2_edep[s] = new H1F(String.format("p2_edep_S%d",s+1),"p2_edep",100,0.,30.);
                        	p2_edep[s].setTitle(String.format("p2 PathLCorrected Edep, S%d",s+1));
                        	p2_edep[s].setTitleX("E (MeV)");
                        	p2_edep[s].setTitleY("counts");
@@ -293,23 +293,23 @@ public class tof_monitor {
 						if (charge == -1 && theta <= 11. && energy > 2.) {
 							if (sc.getByte("layer",j)==1) p1a_edep[sector-1][0].fill(energy);
 							if (sc.getByte("layer",j)==2) p1b_edep[sector-1][0].fill(energy);
-							//if (sc.getByte("layer",j)==3) p2_edep[sector-1][0].fill(energy);
 						}
 						if (charge == -1 && (theta > 11. && theta <=23) && energy > 2.) {
 							if (sc.getByte("layer",j)==1) p1a_edep[sector-1][1].fill(energy);
                                                         if (sc.getByte("layer",j)==2) p1b_edep[sector-1][1].fill(energy);
-                                                        //if (sc.getByte("layer",j)==3) p2_edep[sector-1][1].fill(energy);
 						}
 						if (charge == -1 && theta > 23. && energy > 2.) {
 							if (sc.getByte("layer",j)==1) p1a_edep[sector-1][2].fill(energy);
                                                         if (sc.getByte("layer",j)==2) p1b_edep[sector-1][2].fill(energy);
-                                                        //if (sc.getByte("layer",j)==3) p2_edep[sector-1][2].fill(energy);
+						}
+						if (charge ==-1 && energy >2.){
+							if (sc.getByte("layer",j)==3) p2_edep[sector-1].fill(energy);
 						}
 
 						if (pid == 11 || pid == 211 || pid == -211) {
 							if (sc.getByte("layer",j)==1) {p1a_pad_dt_calib[sector-1].fill(pad,timediff); p1a_dt_calib_all[sector-1].fill(timediff);}
 							if (sc.getByte("layer",j)==2) {p1b_pad_dt_calib[sector-1].fill(pad,timediff); p1b_dt_calib_all[sector-1].fill(timediff);}
-							if (sc.getByte("layer",j)==3) {p2_pad_dt_calib[sector-1].fill(pad,timediff); p2_dt_calib_all[sector-1].fill(timediff);p2_edep[sector-1].fill(energy);}
+							if (sc.getByte("layer",j)==3) {p2_pad_dt_calib[sector-1].fill(pad,timediff); p2_dt_calib_all[sector-1].fill(timediff);}
 						}
 					}
 				}
