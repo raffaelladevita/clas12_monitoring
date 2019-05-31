@@ -54,7 +54,7 @@ public class BAND{
 			H_BAND_meantimeadc[s] = new H1F(String.format("H_BAND_MeanTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeFADC_SectorCombination %d",s+1),200,0.,500.);
 			H_BAND_meantimeadc[s].setTitleX("meantimeFadc – sqrt(x^2+y^2+z^2)/c (ns)");
 			H_BAND_meantimeadc[s].setTitleY("events");
-			H_BAND_meantimetdc[s] = new H1F(String.format("H_BAND_MeanTimeTDC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeTDC_SectorCombination %d",s+1),200,400.,900.);
+			H_BAND_meantimetdc[s] = new H1F(String.format("H_BAND_MeanTimeTDC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeTDC_SectorCombination %d",s+1),200,200.,700.);
                         H_BAND_meantimetdc[s].setTitleX("meantimeTDC – sqrt(x^2+y^2+z^2)/c (ns)");
                         H_BAND_meantimetdc[s].setTitleY("events"); 
 		}
