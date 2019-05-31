@@ -402,7 +402,7 @@ public class LTCC{
 					H_Particle_PiMinus_Phi_LTCC.fill(phi);
 					if (sector == 3 || sector == 5) H_Particle_PiMinus_Mom_LTCC.fill(mom);
 					H_Particle_PiMinus_nphe_LTCC.fill(nphe);
-					H_Particle_PiMins_nphe_LTCC_S[sector-1].fill(nphe);
+					H_Particle_PiMinus_nphe_LTCC_S[sector-1].fill(nphe);
 					//System.out.println("PiMinus nphe = "+nphe);
 				}
 			}
