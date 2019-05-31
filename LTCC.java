@@ -67,11 +67,11 @@ public class LTCC{
 			H_LTCC_PMTocc[s].setTitleX("PMT");
 			H_LTCC_PMTocc[s].setTitleY("events");
 			H_Particle_PiPlus_nphe_LTCC_S[s] = new H1F(String.format("H_piplus_S%d_nphe",s+1), "LTCC nphe #pi^+ Particles",100,0,100);
-			H_Particle_PiPlus_nphe_LTCC_S[s].setTitle(String.format("LTCC nphe #pi^+ Particles_S%d",s));
+			H_Particle_PiPlus_nphe_LTCC_S[s].setTitle(String.format("LTCC nphe #pi^+ Particles_S%d",s+1));
 			H_Particle_PiPlus_nphe_LTCC_S[s].setTitleX("nphe");
 			H_Particle_PiPlus_nphe_LTCC_S[s].setTitleY("counts");
 			H_Particle_PiMinus_nphe_LTCC_S[s] = new H1F(String.format("H_piminus_S%d_nphe",s+1), "LTCC nphe #pi^- Particles",100,0,100);
-			H_Particle_PiMinus_nphe_LTCC_S[s].setTitle(String.format("LTCC nphe #pi^- Particles_S%d",s));
+			H_Particle_PiMinus_nphe_LTCC_S[s].setTitle(String.format("LTCC nphe #pi^- Particles_S%d",s+1));
 			H_Particle_PiMinus_nphe_LTCC_S[s].setTitleX("nphe");
 			H_Particle_PiMinus_nphe_LTCC_S[s].setTitleY("counts");
 		}
@@ -402,7 +402,7 @@ public class LTCC{
 					H_Particle_PiMinus_Phi_LTCC.fill(phi);
 					if (sector == 3 || sector == 5) H_Particle_PiMinus_Mom_LTCC.fill(mom);
 					H_Particle_PiMinus_nphe_LTCC.fill(nphe);
-					H_Particle_PiPlus_nphe_LTCC_S[sector-1].fill(nphe);
+					H_Particle_PiMinus_nphe_LTCC_S[sector-1].fill(nphe);
 					//System.out.println("PiMinus nphe = "+nphe);
 				}
 			}
