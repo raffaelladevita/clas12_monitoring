@@ -25,7 +25,7 @@ public class tof_monitor {
 		boolean userTimeBased, write_volatile;
 		public int runNum;
 		public boolean hasRF;
-		public float RFTime;
+		public float RFTime, rfoffset1, rfoffset2;
 		public float rfPeriod;
 		public int rf_large_integer;
 		public int e_part_ind;
@@ -46,7 +46,7 @@ public class tof_monitor {
 
 		public IndexedTable InverseTranslationTable;
         	public IndexedTable calibrationTranslationTable;
-        	public IndexedTable rfTable;
+        	public IndexedTable rfTable, rfTableOffset;
         	public ConstantsManager ccdb;
 
 	public tof_monitor(int reqrunNum, boolean reqTimeBased, boolean reqwrite_volatile) {
@@ -61,6 +61,13 @@ public class tof_monitor {
                		rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
                	}
                	rf_large_integer = 1000;
+		rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
+                if (rfTableOffset.hasEntry(1, 1, 1)){
+                        rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
+                        rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
+                        System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
+                        System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
+                }
 		p1a_counter_thickness = 5.0f; //cm
 		p1b_counter_thickness = 6.0f; //cm
 		p2_counter_thickness = 5.0f; //cm
@@ -415,10 +422,11 @@ public class tof_monitor {
 		for(int r=0;r<RFB.rows() && !hasRF;r++){
 			if(RFB.getInt("id",r)==1){
 				hasRF=true;
-				RFTime = RFB.getFloat("time",r);
+				RFTime = RFB.getFloat("time",r) + rfoffset1;
 			}
 		}
 	}
+
 
         public int makeElectron(DataBank bank){
                 int found_electron = 0;
