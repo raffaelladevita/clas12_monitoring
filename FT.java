@@ -28,12 +28,13 @@ public class FT {
 	boolean userTimeBased, write_volatile;
 	boolean[] trigger_bits;
 	public int runNum, trigger;
-    public int crate;
+	public int crate;
 
 	public boolean hasRF;
 	public double startTime, rfTime;
 
 	public double rfPeriod;
+	public int rf_large_integer;
 	public H1F summary;
 	//Hodoscope
                public H1F[] hi_hodo_eall, hi_hodo_ematch, hi_hodo_tmatch;
@@ -77,6 +78,7 @@ public class FT {
             	System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
             	rfPeriod = rfTable.getDoubleValue("clock",1,1,1);
         	}
+		rf_large_integer = 1000;
 
 		H1F summary = new H1F("summary","summary",6,1,7);
        		summary.setTitleX("sector");
@@ -90,10 +92,10 @@ public class FT {
 		hi_hodo_ematch_2D = new H2F[2];
 		hi_hodo_tmatch_2D = new H2F[2];
 		f_charge_landau = new F1D[2];
-        hi_hodo_ematch_board = new H1F[30];
-        hi_hodo_tmatch_board = new H1F[30];
-        f_charge_landau_board = new F1D[30];
-        int counter=0;
+	        hi_hodo_ematch_board = new H1F[30];
+        	hi_hodo_tmatch_board = new H1F[30];
+        	f_charge_landau_board = new F1D[30];
+        	int counter=0;
 		for(int layer=0; layer < 2; layer++) {
 			hi_hodo_eall[layer] = new H1F(String.format("hi_hodo_eall_l%d",layer+1), String.format("hi_hodo_eall_l%d",layer+1), 200, 0, 10);
 			hi_hodo_eall[layer].setTitleX("E (MeV)");
@@ -341,10 +343,10 @@ public class FT {
                     hi_cal_theta_ch.fill(Math.toDegrees(Math.acos(cz)));
                     hi_cal_phi_ch.fill(Math.toDegrees(Math.atan2(cy,cx)));
                     if(rfTime!=-1000) {
-			hi_cal_time_ch.fill((time-rfTime+1000.5*rfPeriod)%rfPeriod-0.5*rfPeriod);
-                        if(energy>2) hi_cal_time_cut_ch.fill((time-rfTime+1000.5*rfPeriod)%rfPeriod-0.5*rfPeriod);
-                        hi_cal_time_e_ch.fill(energy,(time-rfTime+1000.5*rfPeriod)%rfPeriod-0.5*rfPeriod);
-                        hi_cal_time_theta_ch.fill(Math.toDegrees(Math.acos(cz)),(time-rfTime+1000.5*rfPeriod)%rfPeriod-0.5*rfPeriod);
+			hi_cal_time_ch.fill((time-rfTime+(rf_large_integer+0.5)*rfPeriod)%rfPeriod-0.5*rfPeriod);
+                        if(energy>2) hi_cal_time_cut_ch.fill((time-rfTime+(rf_large_integer+0.5)*rfPeriod)%rfPeriod-0.5*rfPeriod);
+                        hi_cal_time_e_ch.fill(energy,(time-rfTime+(rf_large_integer+0.5)*rfPeriod)%rfPeriod-0.5*rfPeriod);
+                        hi_cal_time_theta_ch.fill(Math.toDegrees(Math.acos(cz)),(time-rfTime+(rf_large_integer+0.5)*rfPeriod)%rfPeriod-0.5*rfPeriod);
                     }
                 }
 		else {

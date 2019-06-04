@@ -54,7 +54,7 @@ public class tof_monitor {
 	
 		rfPeriod = 4.008f;
                	ccdb = new ConstantsManager();
-               	ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config"}));
+               	ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset"}));
                	rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
                	if (rfTable.hasEntry(1, 1, 1)){
                		System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
