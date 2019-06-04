@@ -34,6 +34,7 @@ public class FT {
 	public double startTime, rfTime;
 
 	public double rfPeriod;
+    public int rf_large_integer;
 	public H1F summary;
 	//Hodoscope
                public H1F[] hi_hodo_eall, hi_hodo_ematch, hi_hodo_tmatch;
@@ -77,7 +78,8 @@ public class FT {
             	System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
             	rfPeriod = rfTable.getDoubleValue("clock",1,1,1);
         	}
-
+            rf_large_integer = 1000;
+            
 		H1F summary = new H1F("summary","summary",6,1,7);
        		summary.setTitleX("sector");
        		summary.setTitleY("DC hits");
@@ -341,10 +343,10 @@ public class FT {
                     hi_cal_theta_ch.fill(Math.toDegrees(Math.acos(cz)));
                     hi_cal_phi_ch.fill(Math.toDegrees(Math.atan2(cy,cx)));
                     if(rfTime!=-1000) {
-			hi_cal_time_ch.fill((time-rfTime+1000.5*rfPeriod)%rfPeriod-0.5*rfPeriod);
-                        if(energy>2) hi_cal_time_cut_ch.fill((time-rfTime+1000.5*rfPeriod)%rfPeriod-0.5*rfPeriod);
-                        hi_cal_time_e_ch.fill(energy,(time-rfTime+1000.5*rfPeriod)%rfPeriod-0.5*rfPeriod);
-                        hi_cal_time_theta_ch.fill(Math.toDegrees(Math.acos(cz)),(time-rfTime+1000.5*rfPeriod)%rfPeriod-0.5*rfPeriod);
+			hi_cal_time_ch.fill((time-rfTime+(rf_large_integer+0.5)*rfPeriod)%rfPeriod-0.5*rfPeriod);
+                        if(energy>2) hi_cal_time_cut_ch.fill((time-rfTime+(rf_large_integer+0.5)*rfPeriod)%rfPeriod-0.5*rfPeriod);
+                        hi_cal_time_e_ch.fill(energy,(time-rfTime+(rf_large_integer+0.5)*rfPeriod)%rfPeriod-0.5*rfPeriod);
+                        hi_cal_time_theta_ch.fill(Math.toDegrees(Math.acos(cz)),(time-rfTime+(rf_large_integer+0.5)*rfPeriod)%rfPeriod-0.5*rfPeriod);
                     }
                 }
 		else {
