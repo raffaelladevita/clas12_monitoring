@@ -25,7 +25,7 @@ public class monitor2p2GeV {
 	boolean userTimeBased, write_volatile;
 	int Nevts, Nelecs, Ntrigs, runNum;
         public int Nmuons, Nmuontrigs;
-	public float rfPeriod;
+	public float rfPeriod, rfoffset1, rfoffset2;
 	public int rf_large_integer;
 	int[] Nmuonpairs, Ntrackspair, Nmuonpairs_v8, Ntrackspair_v8;
 	boolean[] trigger_bits;
@@ -154,7 +154,7 @@ public class monitor2p2GeV {
 
 	public H1F[] H_e_RFtime1_FD_S , H_pip_RFtime1_FD_S, H_pim_RFtime1_FD_S, H_p_RFtime1_FD_S;
 	public H1F H_pip_RFtime1_CD, H_pim_RFtime1_CD, H_p_RFtime1_CD, H_e_RFtime1_CD;
-	public H1F  H_RFtimediff ;
+	public H1F  H_RFtimediff, H_RFtimediff_corrected;
 
 	public H1F hbstOccupancy,hbmtOccupancy,htrks,hpostrks,hnegtrks,hndf,hchi2norm,hp,hpt,hpathlen,hbstOnTrkLayers,hbmtOnTrkLayers; //checkpoint_central
 	public H1F hpostrks_rat, hnegtrks_rat; //checkpoint_central
@@ -162,7 +162,7 @@ public class monitor2p2GeV {
 
 	public IndexedTable InverseTranslationTable;
         public IndexedTable calibrationTranslationTable;
-        public IndexedTable rfTable;
+        public IndexedTable rfTable, rfTableOffset;
         public ConstantsManager ccdb;
 
 	public monitor2p2GeV(int reqrunNum, float reqEB, boolean reqTimeBased, boolean reqwrite_volatile ) {
@@ -207,18 +207,29 @@ public class monitor2p2GeV {
 
 		rfPeriod = 4.008f;
                 ccdb = new ConstantsManager();
-                ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config"}));
+                //ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config"}));
+                ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset"}));
                 rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
                 if (rfTable.hasEntry(1, 1, 1)){
                         System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
                         rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
                 }
                 rf_large_integer = 1000;
+		rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
+                if (rfTableOffset.hasEntry(1, 1, 1)){
+                	rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
+			rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
+			System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
+			System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
+                }
 
 		//Initializing rf histograms.
 		H_RFtimediff = new H1F("H_RFtimediff","H_RFtimediff",5000,-5.,5.);
 		H_RFtimediff.setTitle("RF time difference (1-2)");
 		H_RFtimediff.setTitleX("RF1-RF2 (ns)");
+		H_RFtimediff_corrected = new H1F("H_RFtimediff_corrected","H_RFtimediff_corrected",5000,-5.,5.);
+                H_RFtimediff_corrected.setTitle("RF time difference (1-2), offset corrected");
+                H_RFtimediff_corrected.setTitleX("RF1+rfoffset1-RF2-rfoffset2 (ns)");
 		H_e_RFtime1_FD_S = new H1F[6];
 		H_pip_RFtime1_FD_S = new H1F[6];
 		H_pim_RFtime1_FD_S = new H1F[6];
@@ -3251,6 +3262,9 @@ public class monitor2p2GeV {
 			}
 			
 			H_RFtimediff.fill((RFtime1-RFtime2+1000*rfPeriod) % rfPeriod);
+			H_RFtimediff_corrected.fill((RFtime1-RFtime2+1000*rfPeriod) % rfPeriod + (rfoffset1 - rfoffset2));
+			RFtime1+=rfoffset1;
+			RFtime2+=rfoffset2;
 			// RFtime2 = 0f;//bank.getFloat("time",1);
 		}
 		for(int i=1;i<7;i++)trigger_bits[i]=false;
@@ -4093,6 +4107,7 @@ public class monitor2p2GeV {
 		can_RF.cd(26);can_RF.draw(H_pim_RFtime1_CD);
 		can_RF.cd(27);can_RF.draw(H_p_RFtime1_CD);
 		can_RF.cd(28);can_RF.draw(H_RFtimediff);
+		can_RF.cd(29);can_RF.draw(H_RFtimediff_corrected);
 		if(runNum>0){
 			if(!write_volatile)can_RF.save(String.format("plots"+runNum+"/RF.png"));
 			if(write_volatile)can_RF.save(String.format("/volatile/clas12/rgb/spring19/plots"+runNum+"/RF.png"));
@@ -4565,7 +4580,7 @@ public class monitor2p2GeV {
 			dirout.addDataSet(H_pim_RFtime1_FD_S[s]);
 			dirout.addDataSet(H_p_RFtime1_FD_S[s]);
 		}
-		dirout.addDataSet(H_RFtimediff,H_e_RFtime1_CD,H_pip_RFtime1_CD,H_pim_RFtime1_CD,H_p_RFtime1_CD);
+		dirout.addDataSet(H_RFtimediff,H_e_RFtime1_CD,H_pip_RFtime1_CD,H_pim_RFtime1_CD,H_p_RFtime1_CD,H_RFtimediff_corrected);
 				//dirout.mkdir("");
 		//dirout.cd("");
 
