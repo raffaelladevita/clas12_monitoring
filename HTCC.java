@@ -23,7 +23,7 @@ import org.jlab.detector.calib.utils.ConstantsManager;
 public class HTCC{
 	boolean userTimeBased, write_volatile;
 	int runNum;
-	public double rfPeriod;
+	public float rfPeriod, rfoffset1, rfoffset2;
 	public int rf_large_integer;
 	boolean[] trigger_bits;
 	public float EBeam;
@@ -40,7 +40,7 @@ public class HTCC{
   
 	public IndexedTable InverseTranslationTable;
         public IndexedTable calibrationTranslationTable;
-        public IndexedTable rfTable;
+        public IndexedTable rfTable, rfTableOffset;
         public ConstantsManager ccdb;
 
 	public HTCC(int reqR, float reqEb, boolean reqTimeBased, boolean reqwrite_volatile){
@@ -53,15 +53,22 @@ public class HTCC{
                 //if(reqEb>9)EBeam=10.6f;
                 EBeam = reqEb;
 
-		rfPeriod = 4.008;
+		rfPeriod = 4.008f;
                 ccdb = new ConstantsManager();
                 ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config"}));
                 rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
                 if (rfTable.hasEntry(1, 1, 1)){
                 System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
-                rfPeriod = rfTable.getDoubleValue("clock",1,1,1);
+                rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
                 }
                 rf_large_integer = 1000;
+                rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
+                if (rfTableOffset.hasEntry(1, 1, 1)){
+                        rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
+                        rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
+                        System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
+                        System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
+                }
 
 		trigger_bits = new boolean[32];
 		H_e_theta_mom = new H2F[7];
@@ -349,7 +356,7 @@ public class HTCC{
 			for (int i = 31; i >= 0; i--) {trigger_bits[i] = (TriggerWord & (1 << i)) != 0;} 
 			if(event.hasBank("RUN::rf")){
 				for(int r=0;r<event.getBank("RUN::rf").rows();r++){
-					if(event.getBank("RUN::rf").getInt("id",r)==1)RFtime=event.getBank("RUN::rf").getFloat("time",r);
+					if(event.getBank("RUN::rf").getInt("id",r)==1)RFtime=event.getBank("RUN::rf").getFloat("time",r) + rfoffset1;
 				}    
 			}
                 DataBank partBank = null, trackBank = null, trackDetBank = null, ecalBank = null, cherenkovBank = null, scintillBank = null;
