@@ -28,7 +28,7 @@ public class central {
 	public boolean BackToBack;
 	public float STT, RFT, MinCTOF,MaxCTOF, minSTT, maxSTT;
 	public float[] CTOF_shft;
-	public double rfPeriod;
+	public double rfPeriod, rfoffset1, rfoffset2;
 	public int e_part_ind;
 
 	public H2F H_CTOF_pos, H_CTOF_edep_phi, H_CTOF_edep_z, H_CTOF_path_mom;
@@ -47,7 +47,7 @@ public class central {
 
 	public IndexedTable InverseTranslationTable;
     	public IndexedTable calibrationTranslationTable;
-    	public IndexedTable rfTable;
+    	public IndexedTable rfTable, rfTableOffset;
 
     	public ConstantsManager ccdb;
 
@@ -58,13 +58,20 @@ public class central {
 		CTOF_counter_thickness = 3.0f; //cm
 		rfPeriod = 4.008;
                 ccdb = new ConstantsManager();
-                ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config"}));
+                ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset"}));
                 rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
                 if (rfTable.hasEntry(1, 1, 1)){
                 	System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
                 	rfPeriod = rfTable.getDoubleValue("clock",1,1,1);
                 }
 		rf_large_integer = 1000;
+		rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
+                if (rfTableOffset.hasEntry(1, 1, 1)){
+                        rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
+                        rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
+                        System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
+                        System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
+                }
 
                 CTOF_shft = new float[]{0.00f , -300.51f , -297.72f , -295.05f , -301.03f , -298.19f , -295.41f , -299.74f , -298.30f , -295.21f ,
                                         -300.22f , -297.35f , -295.28f , -299.14f , 0.00f , -294.51f , -298.80f , -298.30f , -295.49f , -298.81f ,
