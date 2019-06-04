@@ -17,6 +17,9 @@ import org.jlab.groot.data.TDirectory;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.clas.physics.LorentzVector;
 import org.jlab.groot.base.GStyle;
+import org.jlab.utils.groups.IndexedTable;
+import org.jlab.detector.calib.utils.CalibrationConstants;
+import org.jlab.detector.calib.utils.ConstantsManager;
 
 public class LTCC{
 	boolean userTimeBased, write_volatile;
@@ -25,6 +28,8 @@ public class LTCC{
 	public float EBeam;
         public int e_part_ind, e_sect, e_track_ind, pip_part_ind, pipm_part_ind, pip_sect, pim_sect;
         public float RFtime, e_mom, e_theta, e_phi, e_vx, e_vy, e_vz, e_ecal_X, e_ecal_Y, e_ecal_Z, e_ecal_E, e_track_chi2, e_vert_time, e_vert_time_RF, e_Q2, e_xB, e_W;
+	public float rfPeriod, rfoffset1, rfoffset2;
+	public int rf_large_integer;
         public float e_HTCC, e_LTCC, e_pcal_e, e_etot_e, e_TOF_X, e_TOF_Y, e_TOF_Z, e_HTCC_X, e_HTCC_Y, e_HTCC_Z;
 	public float pip_mom, pip_theta, pip_phi, pip_vx, pip_vy, pip_vz, pip_LTCC_X, pip_LTCC_Y, pip_LTCC_Z;
         public float pim_mom, pim_theta, pim_phi, pim_vx, pim_vy, pim_vz, pim_LTCC_X, pim_LTCC_Y, pim_LTCC_Z;
@@ -42,6 +47,11 @@ public class LTCC{
 	public H1F H_Particle_PiMinus_Phi, H_Particle_PiMinus_Phi_LTCC, H_Particle_PiMinus_Mom, H_Particle_PiMinus_Mom_LTCC, H_Particle_PiMinus_nphe_LTCC;
 	public H1F[] H_Particle_PiPlus_nphe_LTCC_S, H_Particle_PiMinus_nphe_LTCC_S;
 
+	public IndexedTable InverseTranslationTable;
+        public IndexedTable calibrationTranslationTable;
+        public IndexedTable rfTable, rfTableOffset;
+        public ConstantsManager ccdb;
+
 	public LTCC(int reqR, float reqEb, boolean reqTimeBased, boolean reqwrite_volatile){
         	runNum = reqR;userTimeBased=reqTimeBased;
 		write_volatile = reqwrite_volatile;
@@ -56,6 +66,24 @@ public class LTCC{
 		H_LTCC_PMTocc = new H1F[6];
 		H_Particle_PiPlus_nphe_LTCC_S = new H1F[6];
 		H_Particle_PiMinus_nphe_LTCC_S = new H1F[6];
+
+		rfPeriod = 4.008f;
+                ccdb = new ConstantsManager();
+                ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset"}));
+                rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
+                if (rfTable.hasEntry(1, 1, 1)){
+                        System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
+                        rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
+                }
+                rf_large_integer = 1000;
+                rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
+                if (rfTableOffset.hasEntry(1, 1, 1)){
+                        rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
+                        rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
+                        System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
+                        System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
+                }
+
 		for(int s=0;s<6;s++){
 			H_pion_nphePMT[s] = new H2F(String.format("H_pion_S%d_nphe_vs_PMT",s+1),String.format("Nphe vs PMT (pions) S%d",s+1),36,0.5,36.5,21,-0.5,20.5);
 			H_pion_nphePMT[s].setTitleX("PMT No");
@@ -298,7 +326,7 @@ public class LTCC{
 			for (int i = 31; i >= 0; i--) {trigger_bits[i] = (TriggerWord & (1 << i)) != 0;} 
 			if(event.hasBank("RUN::rf")){
 				for(int r=0;r<event.getBank("RUN::rf").rows();r++){
-					if(event.getBank("RUN::rf").getInt("id",r)==1)RFtime=event.getBank("RUN::rf").getFloat("time",r);
+					if(event.getBank("RUN::rf").getInt("id",r)==1)RFtime=event.getBank("RUN::rf").getFloat("time",r) + rfoffset1;
 				}    
 			}
                 DataBank partBank = null, trackBank = null, trackDetBank = null, ecalBank = null, cherenkovBank = null, scintillBank = null;
