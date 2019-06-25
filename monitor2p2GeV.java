@@ -1651,10 +1651,10 @@ public class monitor2p2GeV {
 		hchi2norm = new H1F("hchi2norm", 100,0,100);
                 hchi2norm.setTitle("CVT track chi2norm");
                 hchi2norm.setTitleX("CVT track chi2/ndf");
-		hp = new H1F("hp", 100,0,10);
+		hp = new H1F("hp", 100,0,2);
                 hp.setTitle("CVT track momentum");
                 hp.setTitleX("CVT track momentum (GeV/c)");
-		hpt = new H1F("hpt", 100,0,10);
+		hpt = new H1F("hpt", 100,0,2);
 		hpt.setTitle("CVT track transverse momentum");
                 hpt.setTitleX("CVT track transverse momentum (GeV/c)");
 		hpathlen = new H1F("hpathlen", 100,0,70);
