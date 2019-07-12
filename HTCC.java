@@ -27,6 +27,7 @@ public class HTCC{
 	public int rf_large_integer;
 	boolean[] trigger_bits;
 	public float EBeam;
+	public float RFT, STT;
         public int e_part_ind, e_sect, e_track_ind;
         public float RFtime, e_mom, e_theta, e_phi, e_vx, e_vy, e_vz, e_ecal_X, e_ecal_Y, e_ecal_Z, e_ecal_E, e_track_chi2, e_vert_time, e_vert_time_RF, e_Q2, e_xB, e_W;
         public float e_HTCC, e_LTCC, e_pcal_e, e_etot_e, e_TOF_X, e_TOF_Y, e_TOF_Z, e_HTCC_X, e_HTCC_Y, e_HTCC_Z;
@@ -37,6 +38,7 @@ public class HTCC{
 	public H2F[] H_e_theta_mom, H_e_phi_mom, H_e_theta_phi, H_e_vz, H_e_sampl, H_e_vtime, H_e_trk_chi2, H_e_HTCC;
 	public H2F[] H_e_Ring_theta, H_e_side_phi;
 	public H1F[] H_HTCC_adc, H_HTCC_nphe, H_HTCC2_nphe;
+	public H1F[] H_HTCC_vtime_e;
   
 	public IndexedTable InverseTranslationTable;
         public IndexedTable calibrationTranslationTable;
@@ -81,6 +83,7 @@ public class HTCC{
 		H_e_HTCC = new H2F[7];
 		H_e_Ring_theta = new H2F[7];
 		H_e_side_phi = new H2F[7];
+		H_HTCC_vtime_e = new H1F[48];
 		for(int s=0;s<7;s++){
 			H_e_theta_mom[s] = new H2F(String.format("H_e_S%d_theta_mom",s+1),String.format("e #theta vs p S%d",s+1),100,0,EBeam,100,0,40);
 			H_e_theta_mom[s].setTitleX("p (GeV)");
@@ -129,6 +132,10 @@ public class HTCC{
 					H_HTCC_nphe[counter] = new H1F(String.format("H_HTCC_nphe_s%d_r%d_side%d",s+1,r+1,side+1),histitle,100,0,50); //title changed
 					histitle = String.format("HTCC UNMATCHED NPHE S%d, Ring %d, %s",s+1,r+1,stringSide);
 					H_HTCC2_nphe[counter] = new H1F(String.format("H_HTCC2_nphe%d",s+1),histitle,100,0,50);
+					H_HTCC_vtime_e[counter] = new H1F(String.format("H_HTCC_vtime%d",counter+1),String.format("H_HTCC_vtime%d",counter+1),-3,3,150);
+					H_HTCC_vtime_e[counter].setTitle(String.format("HTCC vtime - STT, electrons, pmt %d",counter+1));
+					H_HTCC_vtime_e[counter].setTitleX("HTCC vtime - STT (ns)");
+					H_HTCC_vtime_e[counter].setTitleY("counts");
 				}
 			}
 		}
@@ -220,6 +227,19 @@ public class HTCC{
                         }    
                 }    
         }    
+	public void getElecHTCCvtime(DataBank part, DataBank rechtcc, DataBank dethtcc, DataBank htccadc) {
+		for (int k = 0; k < part.rows(); k++) {
+                       if (part.getInt("pid", k) == 11) {
+                               for (int j = 0; j < rechtcc.rows(); j++) {
+                                       if (rechtcc.getShort("pindex", j) == k && rechtcc.getByte("detector", j) == 15) {
+						float timeCC = rechtcc.getFloat("time", j);
+						double deltavtime = timeCC - STT;
+					}
+				}
+			}
+		}	
+	
+	}
         public void fillEBTrack(DataBank bank){
                 e_track_ind=-1;
                 for(int k = 0; k < bank.rows(); k++){
@@ -347,6 +367,10 @@ public class HTCC{
 			}
 		}
 	}
+	public void fillRecBank(DataBank recBank){
+                STT = recBank.getFloat("STTime",0);
+                RFT = recBank.getFloat("RFTime",0);
+        }
 	public void processEvent(DataEvent event){
 		e_part_ind = -1;
 		RFtime=0;
@@ -359,23 +383,24 @@ public class HTCC{
 					if(event.getBank("RUN::rf").getInt("id",r)==1)RFtime=event.getBank("RUN::rf").getFloat("time",r) + rfoffset1;
 				}    
 			}
-                DataBank partBank = null, trackBank = null, trackDetBank = null, ecalBank = null, cherenkovBank = null, scintillBank = null;
-                if(userTimeBased){
-                        if(event.hasBank("REC::Particle"))partBank = event.getBank("REC::Particle");
-                        if(event.hasBank("REC::Track"))trackBank = event.getBank("REC::Track");
-                        if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
-                        if(event.hasBank("REC::Calorimeter")) ecalBank = event.getBank("REC::Calorimeter");
-                        if(event.hasBank("REC::Cherenkov"))cherenkovBank = event.getBank("REC::Cherenkov");
-                        if(event.hasBank("REC::Scintillator"))scintillBank = event.getBank("REC::Scintillator");
-                }
-                if(!userTimeBased){
-                        if(event.hasBank("RECHB::Particle"))partBank = event.getBank("RECHB::Particle");
-                        if(event.hasBank("RECHB::Track"))trackBank = event.getBank("RECHB::Track");
-                        if(event.hasBank("HitBasedTrkg::HBTracks"))trackDetBank = event.getBank("HitBasedTrkg::HBTracks");
-                        if(event.hasBank("RECHB::Calorimeter")) ecalBank = event.getBank("RECHB::Calorimeter");
-                        if(event.hasBank("RECHB::Cherenkov"))cherenkovBank = event.getBank("RECHB::Cherenkov");
-                        if(event.hasBank("RECHB::Scintillator"))scintillBank = event.getBank("RECHB::Scintillator");
-                }
+			if(event.hasBank("REC::Event"))fillRecBank(event.getBank("REC::Event"));
+                	DataBank partBank = null, trackBank = null, trackDetBank = null, ecalBank = null, cherenkovBank = null, scintillBank = null;
+                	if(userTimeBased){
+                        	if(event.hasBank("REC::Particle"))partBank = event.getBank("REC::Particle");
+                        	if(event.hasBank("REC::Track"))trackBank = event.getBank("REC::Track");
+                        	if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
+                        	if(event.hasBank("REC::Calorimeter")) ecalBank = event.getBank("REC::Calorimeter");
+                        	if(event.hasBank("REC::Cherenkov"))cherenkovBank = event.getBank("REC::Cherenkov");
+                        	if(event.hasBank("REC::Scintillator"))scintillBank = event.getBank("REC::Scintillator");
+                	}
+                	if(!userTimeBased){
+                        	if(event.hasBank("RECHB::Particle"))partBank = event.getBank("RECHB::Particle");
+                        	if(event.hasBank("RECHB::Track"))trackBank = event.getBank("RECHB::Track");
+                        	if(event.hasBank("HitBasedTrkg::HBTracks"))trackDetBank = event.getBank("HitBasedTrkg::HBTracks");
+                        	if(event.hasBank("RECHB::Calorimeter")) ecalBank = event.getBank("RECHB::Calorimeter");
+                        	if(event.hasBank("RECHB::Cherenkov"))cherenkovBank = event.getBank("RECHB::Cherenkov");
+                        	if(event.hasBank("RECHB::Scintillator"))scintillBank = event.getBank("RECHB::Scintillator");
+                	}
 
 			if( (trigger_bits[1] || trigger_bits[2] || trigger_bits[3] || trigger_bits[4] || trigger_bits[5] || trigger_bits[6]) && partBank!=null)e_part_ind = makeElectron(partBank);
 			if(e_part_ind==-1)return;
