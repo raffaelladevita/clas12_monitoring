@@ -302,7 +302,7 @@ public class central {
                                 int adc_pmt = (component_adc-1)*2+order_adc+1;
                                 float time_adc = ctofadc.getFloat("time",j);
                                 if (sector_adc == sector_tdc && layer_adc == layer_tdc && component_adc == component_tdc && adc_pmt == tdc_pmt) {
-                                        int triggerPhaseTOF = ((int)timestamp + phase_offset)%6;
+                                        int triggerPhaseTOF = (int) ((timestamp + phase_offset)%6);
                                         float time_tdc = (float)TDC*0.02345f - (float)triggerPhaseTOF*4.f;
                                         float time_diff = time_tdc - time_adc;
                                         H_CTOF_tdcadc_dt.fill(time_diff);
