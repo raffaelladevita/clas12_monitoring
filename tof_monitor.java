@@ -299,7 +299,7 @@ public class tof_monitor {
 				int adc_pmt = (component_adc-1)*2+order_adc+1;
                         	float time_adc = ftofadc.getFloat("time",j);
 				if (sector_adc == sector_tdc && layer_adc == layer_tdc && component_adc == component_tdc && adc_pmt == tdc_pmt) {
-					int triggerPhaseTOF = ((int)timestamp + phase_offset)%6;
+					int triggerPhaseTOF = (int)((timestamp + phase_offset)%6);
 					float time_tdc = (float)TDC*0.02345f - (float)triggerPhaseTOF*4.f;
 					float time_diff = time_tdc - time_adc;
 //System.out.println("TDC component " +component_tdc+ "; ADC component" +component_adc+ "; Layer ADC "+layer_adc+ "; Layer TDC "+layer_tdc+"; Sector ADC "+sector_adc+"; Sector TDC "+sector_tdc+"; TDC bank value "+TDC+"; ADC bank value "+time_adc);
