@@ -451,8 +451,8 @@ public class cndCheckPlots {
 								float beta = mom/(float)Math.sqrt(mom*mom+0.93827f*0.93827f);
 								float betaP = mom/(float)Math.sqrt(mom*mom+0.139f*0.139f);
 								float phase = 4.f*((TimeJitter+1.f)%6.f);
-								float vt = time - STT - (path/29.92f/beta)-(vertex/29.92f);
-								float vtP = time - STT - (path/29.92f/betaP)-(vertex/29.92f);//- vertex/29.92f;
+								float vt = time - STT - (path/29.92f/beta);//-(vertex/29.92f);
+								float vtP = time - STT - (path/29.92f/betaP);//-(vertex/29.92f);//- vertex/29.92f;
 								float rfp = (float)rfPeriod;
 								float vtPRF = ((time - RF - path/29.92f/betaP)+1000*rfp+(0.5f*rfp))%rfp - 0.5f*rfp;
 								float pathTH = CNDbank.getFloat("tlength",iCND);
