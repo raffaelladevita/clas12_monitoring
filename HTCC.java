@@ -37,7 +37,7 @@ public class HTCC{
 
 	public H2F[] H_e_theta_mom, H_e_phi_mom, H_e_theta_phi, H_e_vz, H_e_sampl, H_e_vtime, H_e_trk_chi2, H_e_HTCC;
 	public H2F[] H_e_Ring_theta, H_e_side_phi;
-	public H1F[] H_HTCC_adc, H_HTCC_nphe, H_HTCC2_nphe;
+	public H1F[] H_HTCC_adc, H_HTCC_nphe, H_HTCC2_nphe, H_HTCC3_nphe;
 	public H1F[] H_HTCC_vtime_e;
   
 	public IndexedTable InverseTranslationTable;
@@ -119,6 +119,7 @@ public class HTCC{
 		H_HTCC_adc = new H1F[48];
 		H_HTCC_nphe = new H1F[48];
 		H_HTCC2_nphe = new H1F[48];
+        H_HTCC3_nphe = new H1F[48];
 		H_HTCC_vtime_e = new H1F[48];
 		for(int r=0;r<4;r++){
 			for(int side=0;side<2;side++){
@@ -131,12 +132,13 @@ public class HTCC{
 					histitle = String.format("HTCC NPHE S%d, Ring %d, %s",s+1,r+1,stringSide);
 					H_HTCC_nphe[counter] = new H1F(String.format("H_HTCC_nphe_s%d_r%d_side%d",s+1,r+1,side+1),histitle,100,0,50); //title changed
 					histitle = String.format("HTCC UNMATCHED NPHE S%d, Ring %d, %s",s+1,r+1,stringSide);
-					H_HTCC2_nphe[counter] = new H1F(String.format("H_HTCC2_nphe%d",s+1),histitle,100,0,50);
-                                        H_HTCC2_nphe[counter] = new H1F(String.format("H_HTCC2_nphe%d",s+1),histitle,100,0,50);
-                                        H_HTCC_vtime_e[counter] = new H1F(String.format("H_HTCC_vtime%d",counter+1),String.format("H_HTCC_vtime%d",counter+1),150,-3,3);
-                                        H_HTCC_vtime_e[counter].setTitle(String.format("HTCC vtime - STT, electrons, pmt %d",counter+1));
-                                        H_HTCC_vtime_e[counter].setTitleX("HTCC vtime - STT (ns)");
-                                        H_HTCC_vtime_e[counter].setTitleY("counts");
+					H_HTCC2_nphe[counter] = new H1F(String.format("H_HTCC2_nphe_s%d_r%d_side%d",s+1,r+1,side+1),histitle,100,0,50);
+                    histitle = String.format("HTCC ELECTRON NPHE S%d, Ring %d, %s",s+1,r+1,stringSide);
+                    H_HTCC3_nphe[counter] = new H1F(String.format("H_HTCC3_nphe_s%d_r%d_side%d",s+1,r+1,side+1),histitle,100,0,50);
+                    H_HTCC_vtime_e[counter] = new H1F(String.format("H_HTCC_vtime_s%d_r%d_side%d",s+1,r+1,side+1),String.format("H_HTCC_vtime_s%d_r%d_side%d",s+1,r+1,side+1),150,-3,3);
+                    H_HTCC_vtime_e[counter].setTitle(String.format("HTCC vtime - STT, electrons, pmt %d",counter+1));
+                    H_HTCC_vtime_e[counter].setTitleX("HTCC vtime - STT (ns)");
+                    H_HTCC_vtime_e[counter].setTitleY("counts");
 				}
 			}
 		}
@@ -230,18 +232,41 @@ public class HTCC{
                 }    
         }    
 
-        public void getElecHTCCvtime(DataBank part, DataBank rechtcc, DataBank dethtcc, DataBank htccadc) {
-                for (int k = 0; k < part.rows(); k++) {
-                       if (part.getInt("pid", k) == 11) {
-                               for (int j = 0; j < rechtcc.rows(); j++) {
-                                       if (rechtcc.getShort("pindex", j) == k && rechtcc.getByte("detector", j) == 15) {
-                                                float timeCC = rechtcc.getFloat("time", j);
-                                                double deltavtime = timeCC - STT;
-                                        }
+        public void getElecHTCCvtime(DataBank dethtcc, DataBank rechtcc, DataBank htccadc) {
+                for(int k = 0; k < dethtcc.rows(); k++){
+                        short pind = dethtcc.getShort("pindex",k);
+                        if(dethtcc.getByte("detector",k)==15 && pind==e_part_ind){
+                                int sect_HTCC = dethtcc.getInt("sector", k);
+                                if (sect_HTCC!=e_sect) return;
+                                int rec_ind = dethtcc.getInt("index",k);
+                                float timeCC = rechtcc.getFloat("time", rec_ind);
+                                double deltavtime = timeCC - STT;                              
+                                int nhits = rechtcc.getInt("nhits",rec_ind);
+                                float nphe = rechtcc.getFloat("nphe",rec_ind);
+                                if (nphe!=e_HTCC) return;                                
+                                if (nhits!=1) return;
+                                int adc_ind =- 1;
+                                if (htccadc.rows()==1) adc_ind = 0;
+                                else{
+                                    int count_sect = 0;
+                                    int temp_ind = -1;
+                                    for(int r=0; r<htccadc.rows(); r++){
+                                        int sect = htccadc.getInt("sector",r);
+                                        if (sect==e_sect) count_sect = count_sect+1;
+                                        temp_ind = r;
+                                    }
+                                    if (count_sect==1) adc_ind = temp_ind;
                                 }
-                        }
-                }
-
+                                if(adc_ind>-1){
+                                    int sect = htccadc.getInt("sector",adc_ind);
+                                    int side = htccadc.getInt("layer",adc_ind);
+                                    int ring = htccadc.getInt("component",adc_ind);
+                                    int counter = (ring-1) + 4*( (side-1) + 2*(sect-1) );
+                                    H_HTCC_vtime_e[counter].fill(deltavtime);
+                                    H_HTCC3_nphe[counter].fill(nphe);
+                                }
+                        }    
+                }    
         }
 
         public void fillEBTrack(DataBank bank){
@@ -372,8 +397,8 @@ public class HTCC{
 		}
 	}
         public void fillRecBank(DataBank recBank){
-                STT = recBank.getFloat("STTime",0);
-                RFT = recBank.getFloat("RFTime",0);
+                STT = (float) recBank.getFloat("startTime",0);
+                RFT = (float) recBank.getFloat("RFTime",0);
         }
 	public void processEvent(DataEvent event){
 		e_part_ind = -1;
@@ -387,8 +412,9 @@ public class HTCC{
 					if(event.getBank("RUN::rf").getInt("id",r)==1)RFtime=event.getBank("RUN::rf").getFloat("time",r) + rfoffset1;
 				}    
 			}
-                DataBank partBank = null, trackBank = null, trackDetBank = null, ecalBank = null, cherenkovBank = null, scintillBank = null;
+                DataBank eventBank=null, partBank = null, trackBank = null, trackDetBank = null, ecalBank = null, cherenkovBank = null, scintillBank = null;
                 if(userTimeBased){
+                        if(event.hasBank("REC::Event"))eventBank = event.getBank("REC::Event");
                         if(event.hasBank("REC::Particle"))partBank = event.getBank("REC::Particle");
                         if(event.hasBank("REC::Track"))trackBank = event.getBank("REC::Track");
                         if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
@@ -397,6 +423,7 @@ public class HTCC{
                         if(event.hasBank("REC::Scintillator"))scintillBank = event.getBank("REC::Scintillator");
                 }
                 if(!userTimeBased){
+                        if(event.hasBank("REC::Event"))eventBank = event.getBank("REC::Event");
                         if(event.hasBank("RECHB::Particle"))partBank = event.getBank("RECHB::Particle");
                         if(event.hasBank("RECHB::Track"))trackBank = event.getBank("RECHB::Track");
                         if(event.hasBank("HitBasedTrkg::HBTracks"))trackDetBank = event.getBank("HitBasedTrkg::HBTracks");
@@ -407,6 +434,7 @@ public class HTCC{
 
 			if( (trigger_bits[1] || trigger_bits[2] || trigger_bits[3] || trigger_bits[4] || trigger_bits[5] || trigger_bits[6]) && partBank!=null)e_part_ind = makeElectron(partBank);
 			if(e_part_ind==-1)return;
+            if(eventBank!=null)fillRecBank(eventBank);
 			if(trackBank!=null)fillEBTrack(trackBank);
 			if(ecalBank!=null)getElecEBECal(ecalBank);
 			if(cherenkovBank!=null)getElecEBCC(cherenkovBank);
@@ -417,6 +445,7 @@ public class HTCC{
 				fill_eHists();
 				if(event.hasBank("HTCC::adc"))HTCCadc(event.getBank("HTCC::adc"));
 				if(event.hasBank("HTCC::rec")&&event.hasBank("HTCC::adc"))HTCCrec(event.getBank("HTCC::rec"),event.getBank("HTCC::adc"));
+                if(cherenkovBank!=null&&event.hasBank("HTCC::rec")&&event.hasBank("HTCC::adc")) getElecHTCCvtime(cherenkovBank,event.getBank("HTCC::rec"),event.getBank("HTCC::adc"));
 			}
 		}
 	}
@@ -556,7 +585,7 @@ public class HTCC{
                 }   
                 System.out.println("Total : " + count + " events");
                 ana.plot();
-		ana.write(); //for H_HTCC_nphe
+		        ana.write();
         }   
 
 	public void write() {
@@ -564,7 +593,7 @@ public class HTCC{
 		dirout.mkdir("/HTCC/");
 		dirout.cd("/HTCC/");
 		for(int s=0;s<48;s++){
-			dirout.addDataSet(H_HTCC_nphe[s]);
+			dirout.addDataSet(H_HTCC_nphe[s],H_HTCC2_nphe[s],H_HTCC3_nphe[s],H_HTCC_vtime_e[s]);
 		}
 
 		if(!write_volatile){
