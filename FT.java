@@ -351,7 +351,7 @@ public class FT {
                 }
 		else {
                     Particle recParticle = new Particle(22, energy*cx, energy*cy, energy*cz, 0,0,0);
-                    gammas.add(recParticle);
+                    if(energy>0.5 && size>3) gammas.add(recParticle);
                     hi_cal_e_neu.fill(energy);
                     if(startTime!=-1000 && trigger==11) {
                         hi_cal_time_neu.fill(time-startTime);
@@ -373,7 +373,7 @@ public class FT {
                         	double invmass = Math.sqrt(partPi0.mass2());
                         	double x = (partGamma1.p() - partGamma2.p()) / (partGamma1.p() + partGamma2.p());
                         	double angle = Math.toDegrees(Math.acos(partGamma1.cosTheta(partGamma2)));
-                        	if(angle>1.5) hpi0sum.fill(invmass*1000);
+                        	if(angle>2.0) hpi0sum.fill(invmass*1000);
                         	hmassangle.fill(invmass*1000, angle);
                     }
                 }
