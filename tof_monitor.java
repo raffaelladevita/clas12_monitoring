@@ -323,6 +323,7 @@ public class tof_monitor {
 			float py = part.getFloat("py",k);
 			float pz = part.getFloat("pz",k);
 			float vz = part.getFloat("vz",k);
+			float vt = part.getFloat("vt",k);
 			float mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 			float theta = (float)Math.toDegrees(Math.acos(pz/mom));;
 			for (int j=0;j<sc.rows();j++) {
@@ -339,9 +340,7 @@ public class tof_monitor {
 						float vcor = -10.0f;
 						if (pid == 11) {flighttime = pathlength/29.98f; vcor = vz/29.98f;}
 						if (pid == 211 || pid == -211) {flighttime = pathlength/(float)(29.98f * mom/Math.sqrt(mom*mom+0.13957f*0.13957f)); vcor = vz/(float)(29.98f * mom/Math.sqrt(mom*mom+0.13957f*0.13957f));}
-						//timediff = (float) (time - flighttime + vcor) - RFTime;
-						timediff = (float) (time - flighttime) - RFTime;
-						timediff = (timediff+(rf_large_integer+0.5f)*rfPeriod) % rfPeriod - rfPeriod/2;
+						timediff = (float) (time - flighttime) - vt;
 						if (sc.getByte("layer",j)==1){
 							energy = energy*p1a_counter_thickness/path;
 						}
