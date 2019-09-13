@@ -2036,6 +2036,7 @@ public class monitor2p2GeV {
                         float vx = particle.getFloat("vx" , k);
                         float vy = particle.getFloat("vy" , k);
                         float vz = particle.getFloat("vz" , k);
+			float vt = particle.getFloat("vt",k);
                         float mom2 = px*px+py*py+pz*pz;
                         float mom = (float)Math.sqrt(px*px+py*py+pz*pz);
                         float mass = mom2*(1/(beta*beta)-1);
@@ -2058,21 +2059,25 @@ public class monitor2p2GeV {
 						en = (float)Math.sqrt(mom2 + mass_proton*mass_proton);
                                                 DCbeta = mom/en;
                                                 p_vert_time = scintillator.getFloat("time",kk)-scintillator.getFloat("path",kk)/ (29.98f * DCbeta) ;
-                                                timediff = (p_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+                                                //timediff = (p_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+                                                timediff = p_vert_time - vt;
                                                 H_p_RFtime1_FD_S[sector-1].fill(timediff);
                                 	}
                                 	if(pid==211){
 						en = (float)Math.sqrt(mom2 + mass_pion*mass_pion);
 						DCbeta = mom/en;
                                 		pi_vert_time = scintillator.getFloat("time",kk)-scintillator.getFloat("path",kk)/ (29.98f * DCbeta) ;
-						timediff = (pi_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+						//timediff = (pi_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+						timediff = pi_vert_time - vt;
 						H_pip_RFtime1_FD_S[sector-1].fill(timediff);
                                 	}
                                 	if(pid==-211){
                                                 en = (float)Math.sqrt(mom2 + mass_pion*mass_pion);
                                                 DCbeta = mom/en;
-                                                pi_vert_time = scintillator.getFloat("time",kk)-scintillator.getFloat("path",kk)/ (29.98f * DCbeta) ;
-                                                timediff = (pi_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+                                                pi_vert_time = scintillator.getFloat("time",kk)-scintillator.getFloat("path",kk)/ (29.98f * DCbeta);
+
+                                                //timediff = (pi_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+                                                timediff = pi_vert_time - vt;
                                                 H_pim_RFtime1_FD_S[sector-1].fill(timediff);
                                 	}
 
@@ -2082,26 +2087,31 @@ public class monitor2p2GeV {
                                                 en = (float)Math.sqrt(mom2 + mass_proton*mass_proton);
                                                 Cbeta = mom/en;
                                                 p_vert_time = scintillator.getFloat("time",kk)-scintillator.getFloat("path",kk)/ (29.98f * Cbeta) ;
-                                                timediff = (p_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+                                                //timediff = (p_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+                                                timediff = p_vert_time - vt;
                                                 H_p_RFtime1_CD.fill(timediff);
                                         }
                                         if(pid==211){
                                                 en = (float)Math.sqrt(mom2 + mass_pion*mass_pion);
                                                 Cbeta = mom/en;
                                                 pi_vert_time = scintillator.getFloat("time",kk)-scintillator.getFloat("path",kk)/ (29.98f * Cbeta) ;
-                                                timediff = (pi_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+                                                //timediff = (pi_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+                                                timediff = pi_vert_time - vt;
                                                 H_pip_RFtime1_CD.fill(timediff);
                                         }
                                         if(pid==-211){
                                                 en = (float)Math.sqrt(mom2 + mass_pion*mass_pion);
                                                 Cbeta = mom/en;
                                                 pi_vert_time = scintillator.getFloat("time",kk)-scintillator.getFloat("path",kk)/ (29.98f * Cbeta) ;
-                                                timediff = (pi_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+                                                //timediff = (pi_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+                                                timediff = pi_vert_time - vt;
                                                 H_pim_RFtime1_CD.fill(timediff);
                                         }
 					if(pid==11) {
 						e_vert_time = scintillator.getFloat("time",kk) - scintillator.getFloat("path",kk)/29.98f;
-						timediff = (e_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+						//timediff = (e_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+						timediff = e_vert_time-vt;
+
                                                 H_e_RFtime1_CD.fill(timediff);
 					}	
 				}
