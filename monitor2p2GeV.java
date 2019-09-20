@@ -153,7 +153,7 @@ public class monitor2p2GeV {
 	public H1F H_CVT_e_vz_diff, H_CVT_e_phi_diff, H_elast_W;
 
 	public H1F[] H_e_RFtime1_FD_S , H_pip_RFtime1_FD_S, H_pim_RFtime1_FD_S, H_p_RFtime1_FD_S;
-	public H1F H_pip_RFtime1_CD, H_pim_RFtime1_CD, H_p_RFtime1_CD, H_e_RFtime1_CD;
+	public H1F H_pip_RFtime1_CD, H_pim_RFtime1_CD, H_p_RFtime1_CD;
 	public H1F  H_RFtimediff, H_RFtimediff_corrected;
 
 	public H1F hbstOccupancy,hbmtOccupancy,htrks,hpostrks,hnegtrks,hndf,hchi2norm,hp,hpt,hpathlen,hbstOnTrkLayers,hbmtOnTrkLayers; //checkpoint_central
@@ -249,9 +249,6 @@ public class monitor2p2GeV {
                         H_p_RFtime1_FD_S[i].setTitle(String.format("FD prot vertex_t - RF1_t, S%d",i+1));
                         H_p_RFtime1_FD_S[i].setTitleX("v_t-RF1_t (ns)");
 		}
-		H_e_RFtime1_CD = new H1F("H_e_RFtime1","H_e_RFtime1",1000,-5.,5.);
-                H_e_RFtime1_CD.setTitle("CD elec vertex_t - RF1_t");
-                H_e_RFtime1_CD.setTitleX("v_t-RF1_t (ns)");
                 H_pip_RFtime1_CD = new H1F("H_pip_RFtime1","H_pip_RFtime1",1000,-5.,5.);
                 H_pip_RFtime1_CD.setTitle("CD #pi^+ vertex_t - RF1_t");
                 H_pip_RFtime1_CD.setTitleX("v_t-RF1_t (ns)");
@@ -2107,13 +2104,6 @@ public class monitor2p2GeV {
                                                 timediff = pi_vert_time - vt;
                                                 H_pim_RFtime1_CD.fill(timediff);
                                         }
-					if(pid==11) {
-						e_vert_time = scintillator.getFloat("time",kk) - scintillator.getFloat("path",kk)/29.98f;
-						//timediff = (e_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
-						timediff = e_vert_time-vt;
-
-                                                H_e_RFtime1_CD.fill(timediff);
-					}	
 				}
 			}
 	
@@ -2269,19 +2259,20 @@ public class monitor2p2GeV {
 			}
 		}
 	}
-	public void getElecEBTOF(DataBank bank){
+	public void getElecEBTOF(DataBank bank, DataBank particle){
 		for(int k = 0; k < bank.rows(); k++){
 			short pind = bank.getShort("pindex",k);
 			if(pind==e_part_ind && bank.getFloat("energy",k)>5){
+				float vt = particle.getFloat("vt",e_part_ind);
 				H_e_TOF_xy.fill(bank.getFloat("x",k) , bank.getFloat("y",k));
 				H_e_TOF_t_path.fill(bank.getFloat("time",k),bank.getFloat("path",k));
 				e_vert_time = bank.getFloat("time",k) - bank.getFloat("path",k)/29.98f;
 				float time1 = (e_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;time1 -= rfPeriod/2;
 				float time2 = (e_vert_time-RFtime2+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;time2 -= rfPeriod/2;
-				e_vert_time_RF = time1;
+				e_vert_time_RF = e_vert_time - vt;
 				H_e_vt1.fill(e_vert_time_RF);
 				H_e_vt2.fill(time2);
-				H_e_RFtime1_FD_S[e_sect-1].fill(time1);
+				H_e_RFtime1_FD_S[e_sect-1].fill(e_vert_time_RF);
                                 e_TOF_X = bank.getFloat("x",k);
                                 e_TOF_Y = bank.getFloat("y",k);
                                 e_TOF_Z = bank.getFloat("z",k);
@@ -3282,7 +3273,7 @@ public class monitor2p2GeV {
 			}
 			
 			H_RFtimediff.fill((RFtime1-RFtime2+1000*rfPeriod) % rfPeriod);
-			H_RFtimediff_corrected.fill((RFtime1-RFtime2+1000*rfPeriod) % rfPeriod + (rfoffset1 - rfoffset2));
+			H_RFtimediff_corrected.fill((RFtime1-RFtime2+(rfoffset1 - rfoffset2)+1000*rfPeriod) % rfPeriod);
 			RFtime1+=rfoffset1;
 			RFtime2+=rfoffset2;
 			// RFtime2 = 0f;//bank.getFloat("time",1);
@@ -3425,7 +3416,7 @@ public class monitor2p2GeV {
 		if(cherenkovBank!=null)getElecEBCC(cherenkovBank);
 		if(cherenkovBank != null && TrajBank != null)fillTraj_HTCC(TrajBank, cherenkovBank);
 		if(scintillBank!=null){
-			getElecEBTOF(scintillBank);
+			if(partBank!=null) getElecEBTOF(scintillBank,partBank);
 			fillOtherTOF(scintillBank);
 		}
 		if(trackDetBank!=null){
@@ -4077,8 +4068,8 @@ public class monitor2p2GeV {
 		can_e_ecal.cd(12);can_e_ecal.draw(H_e_LTCC_nphe);
 
 		can_e_ecal.cd(8);can_e_ecal.draw(H_e_TOF_xy);
-		H_e_vt2.setLineColor(2);
-		can_e_ecal.cd(13);can_e_ecal.draw(H_e_vt1);can_e_ecal.draw(H_e_vt2,"same");
+		//H_e_vt2.setLineColor(2);
+		can_e_ecal.cd(13);can_e_ecal.draw(H_e_vt1);//can_e_ecal.draw(H_e_vt2,"same");
 
 		can_e_ecal.cd(10);can_e_ecal.draw(H_e_vz);
 		can_e_ecal.cd(9);can_e_ecal.draw(H_e_TOF_t_path);
@@ -4122,7 +4113,6 @@ public class monitor2p2GeV {
 			can_RF.cd(12+s);can_RF.draw(H_pim_RFtime1_FD_S[s]);
 			can_RF.cd(18+s);can_RF.draw(H_p_RFtime1_FD_S[s]);
 		}
-		can_RF.cd(24);can_RF.draw(H_e_RFtime1_CD);
 		can_RF.cd(25);can_RF.draw(H_pip_RFtime1_CD);
 		can_RF.cd(26);can_RF.draw(H_pim_RFtime1_CD);
 		can_RF.cd(27);can_RF.draw(H_p_RFtime1_CD);
@@ -4600,7 +4590,7 @@ public class monitor2p2GeV {
 			dirout.addDataSet(H_pim_RFtime1_FD_S[s]);
 			dirout.addDataSet(H_p_RFtime1_FD_S[s]);
 		}
-		dirout.addDataSet(H_RFtimediff,H_e_RFtime1_CD,H_pip_RFtime1_CD,H_pim_RFtime1_CD,H_p_RFtime1_CD,H_RFtimediff_corrected);
+		dirout.addDataSet(H_RFtimediff,H_pip_RFtime1_CD,H_pim_RFtime1_CD,H_p_RFtime1_CD,H_RFtimediff_corrected);
 				//dirout.mkdir("");
 		//dirout.cd("");
 
