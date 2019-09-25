@@ -33,11 +33,14 @@ public class central {
 
 	public H2F H_CTOF_pos, H_CTOF_edep_phi, H_CTOF_edep_z, H_CTOF_path_mom;
 	public H2F H_CTOF_edep_pad_neg, H_CTOF_edep_pad_pos;
+	public H1F H_CTOF_tdcadc_dt;
 	public H2F H_vz_DC_CVT, H_phi_DC_CVT, H_CVT_CTOF_phi, H_CVT_CTOF_z, H_CVT_t_STT, H_CVT_t_pad;
 	public H1F[] H_CVT_t;
 	public H1F H_CVT_t_pos, H_CVT_t_neg;
 
 	public float CTOF_counter_thickness;
+	public int phase_offset;
+        public long timestamp;
 
 	//for timeline
 	public H1F H_CTOF_pos_mass, H_CTOF_neg_mass;
@@ -56,6 +59,7 @@ public class central {
 		write_volatile = reqwrite_volatile;
 
 		CTOF_counter_thickness = 3.0f; //cm
+		phase_offset = 3; //RGA Fall 2018, RGB Spring 2019, RGA Spring 2019
 		rfPeriod = 4.008;
                 ccdb = new ConstantsManager();
                 ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset"}));
@@ -104,6 +108,10 @@ public class central {
 		H_CTOF_edep_z.setTitle("CTOF PathLCorrected Edep vs z");
 		H_CTOF_edep_z.setTitleX("z/10 (cm)");
 		H_CTOF_edep_z.setTitleY("E (MeV)");
+		H_CTOF_tdcadc_dt = new H1F("CTOF TDC-ADC Time Difference","CTOF TDC-ADC Time Difference",2250,-10.,80.);
+                H_CTOF_tdcadc_dt.setTitle("CTOF TDC_time-ADC_time");
+                H_CTOF_tdcadc_dt.setTitleX("Delta_t (ns)");
+                H_CTOF_tdcadc_dt.setTitleY("counts");
 		H_vz_DC_CVT = new H2F("H_vz_DC_CVT","H_vz_DC_CVT",100,-20,20,100,-20,20);
 		H_vz_DC_CVT.setTitle("CVT vz vs DC vz");
 		H_vz_DC_CVT.setTitleX("DC vz (cm)");
@@ -278,6 +286,32 @@ public class central {
 		}
 	}
 
+	public void fillCTOFadctdcHist(DataBank ctofadc, DataBank ctoftdc) {
+        	for (int r=0;r<ctoftdc.rows();r++) {
+                	int sector_tdc = ctoftdc.getInt("sector",r);
+                        int layer_tdc = ctoftdc.getInt("layer",r);
+                        int component_tdc = ctoftdc.getInt("component",r);
+			int order = ctoftdc.getByte("order",r)-2;
+                        int tdc_pmt = (component_tdc-1)*2+order+1;
+                        int TDC = ctoftdc.getInt("TDC",r);
+                        for (int j=0;j<ctofadc.rows();j++) {
+                                int sector_adc = ctofadc.getInt("sector",j);
+                                int layer_adc = ctofadc.getInt("layer",j);
+                                int component_adc = ctofadc.getInt("component",j);
+				int order_adc = ctofadc.getByte("order",j);
+                                int adc_pmt = (component_adc-1)*2+order_adc+1;
+                                float time_adc = ctofadc.getFloat("time",j);
+                                if (sector_adc == sector_tdc && layer_adc == layer_tdc && component_adc == component_tdc && adc_pmt == tdc_pmt) {
+                                        int triggerPhaseTOF = (int) ((timestamp + phase_offset)%6);
+                                        float time_tdc = (float)TDC*0.02345f - (float)triggerPhaseTOF*4.f;
+                                        float time_diff = time_tdc - time_adc;
+                                        H_CTOF_tdcadc_dt.fill(time_diff);
+
+                                }
+                        }
+                }
+        }
+
 
         public int makeElectron(DataBank bank){
 		int found_electron = 0;
@@ -302,6 +336,7 @@ public class central {
 		BackToBack = false;
 		e_part_ind=-1;
 		DataBank eventBank = null, trackDetBank = null, partBank = null;
+		DataBank tofadc = null, toftdc = null;
                 if(userTimeBased){
                         if(event.hasBank("REC::Event"))eventBank = event.getBank("REC::Event");
                         if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
@@ -314,8 +349,10 @@ public class central {
                 }
 
 		if(eventBank!=null)STT = eventBank.getFloat("STTime",0);
-		if(eventBank!=null)RFT = eventBank.getFloat("RFTime",0);
-		else return;
+		if(eventBank!=null)RFT = eventBank.getFloat("RFTime",0); else return;
+		if(event.hasBank("RUN::config"))timestamp = event.getBank("RUN::config").getLong("timestamp",0);
+		if(event.hasBank("CTOF::adc")) tofadc = event.getBank("CTOF::adc");
+                if(event.hasBank("CTOF::tdc")) toftdc = event.getBank("CTOF::tdc");
 		if(partBank!=null) e_part_ind = makeElectron(partBank);
 		if(trackDetBank != null && event.hasBank("CVTRec::Tracks"))FillTracks(trackDetBank,event.getBank("CVTRec::Tracks"));
 		if(BackToBack && event.hasBank("CVTRec::Tracks") && event.hasBank("CTOF::hits"))FillCVTCTOF(event.getBank("CVTRec::Tracks"),event.getBank("CTOF::hits"));
@@ -325,7 +362,7 @@ public class central {
 	public void plot() {
 		EmbeddedCanvas can_central  = new EmbeddedCanvas();
                 can_central.setSize(5000,3000);
-                can_central.divide(5,3);
+                can_central.divide(5,4);
                 can_central.setAxisTitleSize(30);
                 can_central.setAxisFontSize(30);
                 can_central.setTitleSize(30);
@@ -345,6 +382,7 @@ public class central {
 
 		can_central.cd(13);can_central.draw(H_CVT_t_pos);
                 can_central.cd(14);can_central.draw(H_CVT_t_neg);
+		can_central.cd(15);can_central.draw(H_CTOF_tdcadc_dt);
 
 		if(runNum>0){
 			if(!write_volatile)can_central.save(String.format("plots"+runNum+"/central.png"));
@@ -374,7 +412,7 @@ public class central {
                 for(int p=0;p<50;p++)dirout.addDataSet(H_CVT_t[p]);
                 dirout.addDataSet(H_CVT_t_pos, H_CVT_t_neg);
                 dirout.addDataSet(H_CTOF_pos_mass, H_CTOF_neg_mass, H_CTOF_vt_pim, H_CTOF_edep_pim);
-		dirout.addDataSet(H_CVT_t_neg,H_CTOF_edep_neg);
+		dirout.addDataSet(H_CVT_t_neg,H_CTOF_edep_neg,H_CTOF_tdcadc_dt);
 
 		if(write_volatile)if(runNum>0)dirout.writeFile("/volatile/clas12/rga/spring18/plots"+runNum+"/out_CTOF_"+runNum+".hipo");
                 
