@@ -135,7 +135,7 @@ public class HTCC{
 					H_HTCC2_nphe[counter] = new H1F(String.format("H_HTCC2_nphe_s%d_r%d_side%d",s+1,r+1,side+1),histitle,100,0,50);
                     histitle = String.format("HTCC ELECTRON NPHE S%d, Ring %d, %s",s+1,r+1,stringSide);
                     H_HTCC3_nphe[counter] = new H1F(String.format("H_HTCC3_nphe_s%d_r%d_side%d",s+1,r+1,side+1),histitle,100,0,50);
-                    H_HTCC_vtime_e[counter] = new H1F(String.format("H_HTCC_vtime_s%d_r%d_side%d",s+1,r+1,side+1),String.format("H_HTCC_vtime_s%d_r%d_side%d",s+1,r+1,side+1),150,-3,3);
+                    H_HTCC_vtime_e[counter] = new H1F(String.format("H_HTCC_vtime_s%d_r%d_side%d",s+1,r+1,side+1),String.format("H_HTCC_vtime_s%d_r%d_side%d",s+1,r+1,side+1),750,-15,15);
                     H_HTCC_vtime_e[counter].setTitle(String.format("HTCC vtime - STT, electrons, pmt %d",counter+1));
                     H_HTCC_vtime_e[counter].setTitleX("HTCC vtime - STT (ns)");
                     H_HTCC_vtime_e[counter].setTitleY("counts");
