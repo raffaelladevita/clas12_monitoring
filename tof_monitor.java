@@ -34,7 +34,7 @@ public class tof_monitor {
 		public H2F[] p1a_pad_vt, p1b_pad_vt, p2_pad_vt;
 		public H2F[] p1a_pad_edep, p1b_pad_edep, p2_pad_edep;
 		public H1F[][] p1a_edep, p1b_edep;
-		public H1F[] p2_edep;
+		public H1F[] p2_edep, p1a_tdcadc_dt, p1b_tdcadc_dt, p2_tdcadc_dt;
 		public H2F[] p1a_pad_dt, p1b_pad_dt, p2_pad_dt;
 		public H2F[] p1a_pad_dt_calib, p1b_pad_dt_calib, p2_pad_dt_calib;
 		public H1F[] p1a_dt_calib_all, p1b_dt_calib_all, p2_dt_calib_all;
@@ -42,7 +42,9 @@ public class tof_monitor {
 		public H1F[][] DC_residuals, DC_time;
 		public F1D[][] f_time_invertedS;
 
-		public float p1a_counter_thickness, p1b_counter_thickness, p2_counter_thickness;
+		public float p1a_counter_thickness, p1b_counter_thickness, p2_counter_thickness; 
+		public int phase_offset;
+		public long timestamp;
 
 		public IndexedTable InverseTranslationTable;
         	public IndexedTable calibrationTranslationTable;
@@ -69,6 +71,7 @@ public class tof_monitor {
                         System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
                 }
 		p1a_counter_thickness = 5.0f; //cm
+		phase_offset = 3; //RGA Fall 2018, RGB Spring 2019, RGA Spring 2019
 		p1b_counter_thickness = 6.0f; //cm
 		p2_counter_thickness = 5.0f; //cm
 			
@@ -217,6 +220,22 @@ public class tof_monitor {
                        	p2_edep[s].setTitleX("E (MeV)");
                        	p2_edep[s].setTitleY("counts");
 
+			p1a_tdcadc_dt[s] =  new H1F(String.format("p1a_tdcadc_dt_S%d",s+1),"p1a_tdcadc",2250,-30.000,60.000);
+                        p1a_tdcadc_dt[s].setTitle(String.format("p1a t_tdc-t_fadc, S%d",s+1));
+                        p1a_tdcadc_dt[s].setTitleX("t_tdc-t_fadc (ns)");
+                        p1a_tdcadc_dt[s].setTitleY("counts");
+
+			p1b_tdcadc_dt[s] =  new H1F(String.format("p1b_tdcadc_dt_S%d",s+1),"p1a_tdcadc",2250,-30.000,60.000);
+                        p1b_tdcadc_dt[s].setTitle(String.format("p1b t_tdc-t_fadc, S%d",s+1));
+                        p1b_tdcadc_dt[s].setTitleX("t_tdc-t_fadc (ns)");
+                        p1b_tdcadc_dt[s].setTitleY("counts");
+
+			p2_tdcadc_dt[s] =  new H1F(String.format("p2_tdcadc_dt_S%d",s+1),"p1a_tdcadc",2250,-30.000,60.000);
+                        p2_tdcadc_dt[s].setTitle(String.format("p2 t_tdc-t_fadc, S%d",s+1));
+                        p2_tdcadc_dt[s].setTitleX("t_tdc-t_fadc (ns)");
+                        p2_tdcadc_dt[s].setTitleY("counts"); 
+
+
 			for(int sl=0;sl<6;sl++){
 				DC_residuals_trkDoca[s][sl] = new H2F(String.format("DC_residuals_trkDoca_%d_%d",s+1,sl+1),String.format("DC_residuals_trkDoca_%d_%d",s+1,sl+1),100,0,DCcellsizeSL[sl],100,-1,1);
 				DC_residuals_trkDoca[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
@@ -262,6 +281,39 @@ public class tof_monitor {
 		}
 	}
 
+	public void fillTOFadctdcHists(DataBank ftofadc, DataBank ftoftdc) {
+		for (int r=0;r<ftoftdc.rows();r++) {
+			int sector_tdc = ftoftdc.getInt("sector",r);
+			int layer_tdc = ftoftdc.getInt("layer",r);
+			int component_tdc = ftoftdc.getInt("component",r);	
+			int order = ftoftdc.getByte("order",r)-2;
+			int tdc_pmt = (component_tdc-1)*2+order+1;
+			int TDC = ftoftdc.getInt("TDC",r);
+			for (int j=0;j<ftofadc.rows();j++) {
+				int sector_adc = ftofadc.getInt("sector",j);
+                        	int layer_adc = ftofadc.getInt("layer",j);
+                        	int component_adc = ftofadc.getInt("component",j);
+				int order_adc = ftofadc.getByte("order",j);
+				int adc_pmt = (component_adc-1)*2+order_adc+1;
+                        	float time_adc = ftofadc.getFloat("time",j);
+				if (sector_adc == sector_tdc && layer_adc == layer_tdc && component_adc == component_tdc && adc_pmt == tdc_pmt) {
+					int triggerPhaseTOF = (int)((timestamp + phase_offset)%6);
+					float time_tdc = (float)TDC*0.02345f - (float)triggerPhaseTOF*4.f;
+					float time_diff = time_tdc - time_adc;
+//System.out.println("TDC component " +component_tdc+ "; ADC component" +component_adc+ "; Layer ADC "+layer_adc+ "; Layer TDC "+layer_tdc+"; Sector ADC "+sector_adc+"; Sector TDC "+sector_tdc+"; TDC bank value "+TDC+"; ADC bank value "+time_adc);
+//System.out.println("TDC PMT "+tdc_pmt+" ADC PMT "+adc_pmt);
+//System.out.println("TimeStamp "+timestamp+"; Int Trigger Phase "+triggerPhaseTOF+"; Float Trigger Phase "+(float)triggerPhaseTOF+"; time_tdc "+time_tdc+" time_adc "+time_adc+"; Time diff "+time_diff);
+//System.out.println(" ");
+					if (layer_adc == 1 && triggerPhaseTOF!=0) {p1a_tdcadc_dt[sector_adc-1].fill(time_diff);}
+					if (layer_adc == 2 && triggerPhaseTOF!=0) {p1b_tdcadc_dt[sector_adc-1].fill(time_diff);}
+					if (layer_adc == 3 && triggerPhaseTOF!=0) {p2_tdcadc_dt[sector_adc-1].fill(time_diff);}
+
+				}
+			}
+		}	
+	}
+
+
 	public void fillTOFCalibHists(DataBank part, DataBank sc, DataBank hits){
 		for(int k=0;k<part.rows();k++) {
 			byte charge = part.getByte("charge",k);
@@ -286,8 +338,7 @@ public class tof_monitor {
 						float vcor = -10.0f;
 						if (pid == 11) {flighttime = pathlength/29.98f; vcor = vz/29.98f;}
 						if (pid == 211 || pid == -211) {flighttime = pathlength/(float)(29.98f * mom/Math.sqrt(mom*mom+0.13957f*0.13957f)); vcor = vz/(float)(29.98f * mom/Math.sqrt(mom*mom+0.13957f*0.13957f));}
-						timediff = (float) (time - flighttime + vcor) - RFTime;
-						timediff = (timediff+(rf_large_integer+0.5f)*rfPeriod) % rfPeriod - rfPeriod/2;
+						timediff = (float) (time - flighttime) - vt;
 						if (sc.getByte("layer",j)==1){
 							energy = energy*p1a_counter_thickness/path;
 						}
@@ -452,6 +503,7 @@ public class tof_monitor {
 		hasRF = false;
 		e_part_ind = -1;
 		DataBank trackDetBank = null, hitBank = null, partBank = null, tofhits = null, scintillator = null;
+		DataBank tofadc = null, toftdc = null;
 		if(userTimeBased){
 			if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
 			if(event.hasBank("TimeBasedTrkg::TBHits")){hitBank = event.getBank("TimeBasedTrkg::TBHits");}
@@ -466,13 +518,17 @@ public class tof_monitor {
 		}
 
 		if(event.hasBank("FTOF::hits")) tofhits = event.getBank("FTOF::hits");
+		if(event.hasBank("FTOF::adc")) tofadc = event.getBank("FTOF::adc");
+		if(event.hasBank("FTOF::tdc")) toftdc = event.getBank("FTOF::tdc");
 		
 		if(event.hasBank("RUN::rf"))fillRFTime(event.getBank("RUN::rf"));
+		if(event.hasBank("RUN::config"))timestamp = event.getBank("RUN::config").getLong("timestamp",0);
 		if(!hasRF)return;
 		if(partBank!=null) e_part_ind = makeElectron(partBank);
 		if(event.hasBank("FTOF::hits") && trackDetBank!=null)fillTOFHists(event.getBank("FTOF::hits") , trackDetBank);
 		if (partBank!=null && scintillator!=null && tofhits!=null) fillTOFCalibHists(partBank,scintillator,tofhits);
 		if(userTimeBased && hitBank!=null)fillDC(hitBank);
+		if(toftdc!=null && tofadc!=null) fillTOFadctdcHists(tofadc,toftdc);
 
 	}
 
@@ -592,6 +648,27 @@ public class tof_monitor {
                         System.out.println(String.format("saved plots/TOF_calib.png"));
                 }
 
+		EmbeddedCanvas can_TOF_ADCTDC = new EmbeddedCanvas();
+                can_TOF_ADCTDC.setSize(3000,3000);
+                can_TOF_ADCTDC.divide(6,3);
+                can_TOF_ADCTDC.setAxisTitleSize(18);
+                can_TOF_ADCTDC.setAxisFontSize(18);
+                can_TOF_ADCTDC.setTitleSize(18);
+                for(int s=0;s<6;s++){
+                        can_TOF_ADCTDC.cd(s);can_TOF_ADCTDC.draw(p1a_tdcadc_dt[s]);
+                        can_TOF_ADCTDC.cd(s+6);can_TOF_ADCTDC.draw(p1b_tdcadc_dt[s]);
+                        can_TOF_ADCTDC.cd(s+12);can_TOF_ADCTDC.draw(p2_tdcadc_dt[s]);
+                }
+                if(runNum>0){
+                        if(!write_volatile)can_TOF_ADCTDC.save(String.format("plots"+runNum+"/TOF_adctdc_timediff.png"));
+                        if(write_volatile)can_TOF_ADCTDC.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/TOF_adctdc_timediff.png"));
+                        System.out.println(String.format("saved plots"+runNum+"/TOF_adctdc_timediff.png"));
+                }
+                else{
+                        can_TOF_ADCTDC.save(String.format("plots/TOF_adctdc_timediff.png"));
+                        System.out.println(String.format("saved plots/TOF_adctdc_timediff.png"));
+                }
+
 		EmbeddedCanvas can_DC_resd_trkDoca  = new EmbeddedCanvas();
 		can_DC_resd_trkDoca.setSize(3000,3000);
 		can_DC_resd_trkDoca.divide(6,6);
@@ -661,6 +738,7 @@ public class tof_monitor {
                 for(int s=0;s<6;s++){
                         dirout.addDataSet(p1a_pad_vt[s],p1b_pad_vt[s],p2_pad_vt[s],p1a_pad_dt[s],p1b_pad_dt[s],p2_pad_dt[s]);
 			dirout.addDataSet(p1a_pad_dt_calib[s],p1b_pad_dt_calib[s],p2_pad_dt_calib[s],p1a_dt_calib_all[s],p1b_dt_calib_all[s],p2_dt_calib_all[s],p2_edep[s]); 
+			dirout.addDataSet(p1a_tdcadc_dt[s], p1b_tdcadc_dt[s], p2_tdcadc_dt[s]);
 			for (int i=0;i<3;i++) {
 				dirout.addDataSet(p1a_edep[s][i],p1b_edep[s][i]);
 			}
