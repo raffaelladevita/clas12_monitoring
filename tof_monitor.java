@@ -322,6 +322,7 @@ public class tof_monitor {
 			float py = part.getFloat("py",k);
 			float pz = part.getFloat("pz",k);
 			float vz = part.getFloat("vz",k);
+			float vt = part.getFloat("vt",k);
 			float mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 			float theta = (float)Math.toDegrees(Math.acos(pz/mom));;
 			for (int j=0;j<sc.rows();j++) {
