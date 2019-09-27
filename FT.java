@@ -34,7 +34,7 @@ public class FT {
 	public double startTime, rfTime;
 
 	public double rfPeriod;
-	public int rf_large_integer;
+    public int rf_large_integer;
 	public H1F summary;
 	//Hodoscope
                public H1F[] hi_hodo_eall, hi_hodo_ematch, hi_hodo_tmatch;
@@ -78,8 +78,8 @@ public class FT {
             	System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
             	rfPeriod = rfTable.getDoubleValue("clock",1,1,1);
         	}
-		rf_large_integer = 1000;
-
+            rf_large_integer = 1000;
+            
 		H1F summary = new H1F("summary","summary",6,1,7);
        		summary.setTitleX("sector");
        		summary.setTitleY("DC hits");
@@ -409,7 +409,7 @@ public class FT {
 
 		//Get event start time
 		if(recEvenEB!=null) {
-			startTime = recEvenEB.getFloat("STTime", 0);
+			startTime = recEvenEB.getFloat("startTime", 0);
 			rfTime    = recEvenEB.getFloat("RFTime", 0);
         	}
 

@@ -48,9 +48,9 @@ public class LTCC{
 	public H1F[] H_Particle_PiPlus_nphe_LTCC_S, H_Particle_PiMinus_nphe_LTCC_S;
 
 	public IndexedTable InverseTranslationTable;
-        public IndexedTable calibrationTranslationTable;
-        public IndexedTable rfTable, rfTableOffset;
-        public ConstantsManager ccdb;
+	public IndexedTable calibrationTranslationTable;
+	public IndexedTable rfTable, rfTableOffset;
+	public ConstantsManager ccdb;
 
 	public LTCC(int reqR, float reqEb, boolean reqTimeBased, boolean reqwrite_volatile){
         	runNum = reqR;userTimeBased=reqTimeBased;
@@ -68,21 +68,21 @@ public class LTCC{
 		H_Particle_PiMinus_nphe_LTCC_S = new H1F[6];
 
 		rfPeriod = 4.008f;
-                ccdb = new ConstantsManager();
-                ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset"}));
-                rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
-                if (rfTable.hasEntry(1, 1, 1)){
-                        System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
-                        rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
-                }
-                rf_large_integer = 1000;
-                rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
-                if (rfTableOffset.hasEntry(1, 1, 1)){
-                        rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
-                        rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
-                        System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
-                        System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
-                }
+		ccdb = new ConstantsManager();
+		ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset"}));
+		rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
+		if (rfTable.hasEntry(1, 1, 1)){
+				System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
+				rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
+		}
+		rf_large_integer = 1000;
+		rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
+		if (rfTableOffset.hasEntry(1, 1, 1)){
+				rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
+				rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
+				System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
+				System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
+		}
 
 		for(int s=0;s<6;s++){
 			H_pion_nphePMT[s] = new H2F(String.format("H_pion_S%d_nphe_vs_PMT",s+1),String.format("Nphe vs PMT (pions) S%d",s+1),36,0.5,36.5,21,-0.5,20.5);
@@ -211,6 +211,7 @@ public class LTCC{
 		sect = new int[6];
 		for (int j=0;j<bank.rows();j++) {
 			int status = bank.getShort("status", j);
+			if (status<0) status = -status;
 			pid = bank.getInt("pid", j);
 			charge = bank.getByte("charge", j);;
 			//System.out.println(j+" Particle status = "+status+" pid = "+pid+" charge = "+charge+ "LTCC index = "+isLTCCmatch(bankrecdet,j));
@@ -274,6 +275,7 @@ public class LTCC{
                 sect = new int[6];
                 for (int j=0;j<bank.rows();j++) {
                         int status = bank.getShort("status", j);
+                        if (status<0) status = -status;
                         pid = bank.getInt("pid", j);
                         charge = bank.getByte("charge", j);
                         //System.out.println(j+" Particle status = "+status+" pid = "+pid+" charge = "+charge+ "LTCC index = "+isLTCCmatch(bankrecdet,j));
@@ -376,6 +378,7 @@ public class LTCC{
         		int pid = -100;
         		int charge = -100;
         		int status = part.getShort("status", i);
+        		if (status<0) status = -status;
         		pid = part.getInt("pid", i);
         		charge = part.getByte("charge", i);
         		if ((status>=2000 && status<4000) && isLTCCmatch(ltcc,i) != -1 && (pid == 11 || pid == -11 || pid == 211 || pid == -211)) {
@@ -383,7 +386,7 @@ public class LTCC{
             		//System.out.println("Nphe = "+nphe+" Traj nrows = "+trajBank.rows());
             		for(int r=0;r<trajBank.rows();r++){
             			if(trajBank.getShort("pindex",r)==i){
-            				if(trajBank.getShort("detId",r) == 43) {
+            				if(trajBank.getInt("detector",r) == 16) {
             					float e_LTCC_tX = trajBank.getFloat("x",r);
             					float e_LTCC_tY = trajBank.getFloat("y",r);
             					float e_LTCC_tZ = trajBank.getFloat("z",r);
@@ -405,6 +408,7 @@ public class LTCC{
 			int charge = -100;
 			float phi, mom;
 			int status = part.getShort("status", i);
+			if (status<0) status = -status;
 			pid = part.getInt("pid", i);
 			charge = part.getByte("charge", i);
 			float px = part.getFloat("px", i);
@@ -438,6 +442,7 @@ public class LTCC{
 		float phi, mom;
 		for(int i=0;i<part.rows();i++) {
 			int status = part.getShort("status", i);
+			if (status<0) status = -status;
 			pid = part.getInt("pid", i);
 			int charge = part.getByte("charge", i);
 			float px = part.getFloat("px", i);

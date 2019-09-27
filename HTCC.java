@@ -61,7 +61,7 @@ public class HTCC{
                 rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
                 if (rfTable.hasEntry(1, 1, 1)){
                 System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
-                rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
+                rfPeriod = (float) rfTable.getDoubleValue("clock",1,1,1);
                 }
                 rf_large_integer = 1000;
                 rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
@@ -120,7 +120,8 @@ public class HTCC{
 		H_HTCC_adc = new H1F[48];
 		H_HTCC_nphe = new H1F[48];
 		H_HTCC2_nphe = new H1F[48];
-		H_HTCC3_nphe = new H1F[48];
+        H_HTCC3_nphe = new H1F[48];
+		H_HTCC_vtime_e = new H1F[48];
 		for(int r=0;r<4;r++){
 			for(int side=0;side<2;side++){
 				for(int s=0;s<6;s++){
@@ -155,6 +156,7 @@ public class HTCC{
                         float py = bank.getFloat("py", k);
                         float pz = bank.getFloat("pz", k);
                         int status = bank.getShort("status", k);
+                        if (status<0) status = -status;
                         boolean inDC = (status>=2000 && status<4000);
                         e_mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 			e_theta = (float)Math.toDegrees(Math.acos(pz/e_mom));
@@ -395,9 +397,9 @@ public class HTCC{
 			}
 		}
 	}
-	public void fillRecBank(DataBank recBank){
-                STT = recBank.getFloat("STTime",0);
-                RFT = recBank.getFloat("RFTime",0);
+        public void fillRecBank(DataBank recBank){
+                STT = (float) recBank.getFloat("startTime",0);
+                RFT = (float) recBank.getFloat("RFTime",0);
         }
 	public void processEvent(DataEvent event){
 		e_part_ind = -1;
@@ -411,26 +413,25 @@ public class HTCC{
 					if(event.getBank("RUN::rf").getInt("id",r)==1)RFtime=event.getBank("RUN::rf").getFloat("time",r) + rfoffset1;
 				}    
 			}
-			if(event.hasBank("REC::Event"))fillRecBank(event.getBank("REC::Event"));
-                	DataBank eventBank=null, partBank = null, trackBank = null, trackDetBank = null, ecalBank = null, cherenkovBank = null, scintillBank = null;
-                	if(userTimeBased){
-                        	if(event.hasBank("REC::Event"))eventBank = event.getBank("REC::Event");
-                        	if(event.hasBank("REC::Particle"))partBank = event.getBank("REC::Particle");
-                        	if(event.hasBank("REC::Track"))trackBank = event.getBank("REC::Track");
-                        	if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
-                        	if(event.hasBank("REC::Calorimeter")) ecalBank = event.getBank("REC::Calorimeter");
-                        	if(event.hasBank("REC::Cherenkov"))cherenkovBank = event.getBank("REC::Cherenkov");
-                        	if(event.hasBank("REC::Scintillator"))scintillBank = event.getBank("REC::Scintillator");
-                	}
-                	if(!userTimeBased){
-                        	if(event.hasBank("REC::Event"))eventBank = event.getBank("REC::Event");
-                        	if(event.hasBank("RECHB::Particle"))partBank = event.getBank("RECHB::Particle");
-                        	if(event.hasBank("RECHB::Track"))trackBank = event.getBank("RECHB::Track");
-                        	if(event.hasBank("HitBasedTrkg::HBTracks"))trackDetBank = event.getBank("HitBasedTrkg::HBTracks");
-                        	if(event.hasBank("RECHB::Calorimeter")) ecalBank = event.getBank("RECHB::Calorimeter");
-                        	if(event.hasBank("RECHB::Cherenkov"))cherenkovBank = event.getBank("RECHB::Cherenkov");
-                        	if(event.hasBank("RECHB::Scintillator"))scintillBank = event.getBank("RECHB::Scintillator");
-                	}
+                DataBank eventBank=null, partBank = null, trackBank = null, trackDetBank = null, ecalBank = null, cherenkovBank = null, scintillBank = null;
+                if(userTimeBased){
+                        if(event.hasBank("REC::Event"))eventBank = event.getBank("REC::Event");
+                        if(event.hasBank("REC::Particle"))partBank = event.getBank("REC::Particle");
+                        if(event.hasBank("REC::Track"))trackBank = event.getBank("REC::Track");
+                        if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
+                        if(event.hasBank("REC::Calorimeter")) ecalBank = event.getBank("REC::Calorimeter");
+                        if(event.hasBank("REC::Cherenkov"))cherenkovBank = event.getBank("REC::Cherenkov");
+                        if(event.hasBank("REC::Scintillator"))scintillBank = event.getBank("REC::Scintillator");
+                }
+                if(!userTimeBased){
+                        if(event.hasBank("REC::Event"))eventBank = event.getBank("REC::Event");
+                        if(event.hasBank("RECHB::Particle"))partBank = event.getBank("RECHB::Particle");
+                        if(event.hasBank("RECHB::Track"))trackBank = event.getBank("RECHB::Track");
+                        if(event.hasBank("HitBasedTrkg::HBTracks"))trackDetBank = event.getBank("HitBasedTrkg::HBTracks");
+                        if(event.hasBank("RECHB::Calorimeter")) ecalBank = event.getBank("RECHB::Calorimeter");
+                        if(event.hasBank("RECHB::Cherenkov"))cherenkovBank = event.getBank("RECHB::Cherenkov");
+                        if(event.hasBank("RECHB::Scintillator"))scintillBank = event.getBank("RECHB::Scintillator");
+                }
 
 			if( (trigger_bits[1] || trigger_bits[2] || trigger_bits[3] || trigger_bits[4] || trigger_bits[5] || trigger_bits[6]) && partBank!=null)e_part_ind = makeElectron(partBank);
 			if(e_part_ind==-1)return;
@@ -585,7 +586,7 @@ public class HTCC{
                 }   
                 System.out.println("Total : " + count + " events");
                 ana.plot();
-		ana.write(); //for H_HTCC_nphe
+		        ana.write();
         }   
 
 	public void write() {

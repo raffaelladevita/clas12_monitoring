@@ -223,13 +223,21 @@ public class monitor2p2GeV {
 			System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
                 }
 
+		rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
+		if (rfTableOffset.hasEntry(1, 1, 1)){
+			rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
+			rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
+			System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
+			System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
+		}
+
 		//Initializing rf histograms.
 		H_RFtimediff = new H1F("H_RFtimediff","H_RFtimediff",5000,-5.,5.);
 		H_RFtimediff.setTitle("RF time difference (1-2)");
 		H_RFtimediff.setTitleX("RF1-RF2 (ns)");
 		H_RFtimediff_corrected = new H1F("H_RFtimediff_corrected","H_RFtimediff_corrected",5000,-5.,5.);
-                H_RFtimediff_corrected.setTitle("RF time difference (1-2), offset corrected");
-                H_RFtimediff_corrected.setTitleX("RF1+rfoffset1-RF2-rfoffset2 (ns)");
+		H_RFtimediff_corrected.setTitle("RF time difference (1-2), offset corrected");
+		H_RFtimediff_corrected.setTitleX("RF1+rfoffset1-RF2-rfoffset2 (ns)");
 		H_e_RFtime1_FD_S = new H1F[6];
 		H_pip_RFtime1_FD_S = new H1F[6];
 		H_pim_RFtime1_FD_S = new H1F[6];
@@ -1785,6 +1793,7 @@ public class monitor2p2GeV {
 		for(int k = 0; k < bank.rows(); k++){
 			int pid = bank.getInt("pid", k);
 			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
 			byte q = bank.getByte("charge", k);
 			float thisbeta = bank.getFloat("beta", k);
 			boolean inDC = (status>=2000 && status<4000);
@@ -1829,6 +1838,7 @@ public class monitor2p2GeV {
 					for(int k = 0; k < bank.rows(); k++){
 									int pid = bank.getInt("pid", k);
 									int status = bank.getShort("status", k);
+									if (status<0) status = -status;
 									byte q = bank.getByte("charge", k);
 									float thisbeta = bank.getFloat("beta", k);
 									boolean inDC = (status>=2000 && status<4000);
@@ -1872,6 +1882,7 @@ public class monitor2p2GeV {
 			byte q = bank.getByte("charge", k);
 			float thisbeta = bank.getFloat("beta", k);
 			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
 			boolean inDC = (status>=2000 && status<4000);
 			if(inDC && pid==11)foundelec=true;
 			if(inDC && q<0&&thisbeta>0)nnegatives++;
@@ -1888,6 +1899,7 @@ public class monitor2p2GeV {
 				int pid = bank.getInt("pid", k);
 				byte q = bank.getByte("charge", k);
 				int status = bank.getShort("status", k);
+				if (status<0) status = -status;
 				boolean inDC = (status>=2000 && status<4000);
 				if(inDC && q>0){
 					float px = bank.getFloat("px", k);
@@ -1935,6 +1947,7 @@ public class monitor2p2GeV {
 			float py = bank.getFloat("py", k);
 			float pz = bank.getFloat("pz", k);
 			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
 			boolean inDC = (status>=2000 && status<4000);
 			e_mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 			e_theta = (float)Math.toDegrees(Math.acos(pz/e_mom));
@@ -1959,6 +1972,7 @@ public class monitor2p2GeV {
 			float py = bank.getFloat("py", k);
 			float pz = bank.getFloat("pz", k);
 			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
 			boolean inDC = (status>=2000 && status<4000);
 			e_mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 			e_theta = (float)Math.toDegrees(Math.acos(pz/e_mom));
@@ -2026,11 +2040,12 @@ public class monitor2p2GeV {
                         float vx = particle.getFloat("vx" , k);
                         float vy = particle.getFloat("vy" , k);
                         float vz = particle.getFloat("vz" , k);
- 			float vt = particle.getFloat("vt",k);
-                       float mom2 = px*px+py*py+pz*pz;
+			float vt = particle.getFloat("vt",k);
+                        float mom2 = px*px+py*py+pz*pz;
                         float mom = (float)Math.sqrt(px*px+py*py+pz*pz);
                         float mass = mom2*(1/(beta*beta)-1);
                         int status = particle.getShort("status", k);
+                        if (status<0) status = -status;
                         boolean Forward = (status<4000);
                         boolean Central = (status>=4000);
 
@@ -2063,7 +2078,8 @@ public class monitor2p2GeV {
                                 	if(pid==-211){
                                                 en = (float)Math.sqrt(mom2 + mass_pion*mass_pion);
                                                 DCbeta = mom/en;
-                                                pi_vert_time = scintillator.getFloat("time",kk)-scintillator.getFloat("path",kk)/ (29.98f * DCbeta) ;
+                                                pi_vert_time = scintillator.getFloat("time",kk)-scintillator.getFloat("path",kk)/ (29.98f * DCbeta);
+
                                                 //timediff = (pi_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
                                                 timediff = pi_vert_time - vt;
                                                 H_pim_RFtime1_FD_S[sector-1].fill(timediff);
@@ -2075,7 +2091,7 @@ public class monitor2p2GeV {
                                                 en = (float)Math.sqrt(mom2 + mass_proton*mass_proton);
                                                 Cbeta = mom/en;
                                                 p_vert_time = scintillator.getFloat("time",kk)-scintillator.getFloat("path",kk)/ (29.98f * Cbeta) ;
-                                                // timediff = (p_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+                                                //timediff = (p_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
                                                 timediff = p_vert_time - vt;
                                                 H_p_RFtime1_CD.fill(timediff);
                                         }
@@ -2083,7 +2099,7 @@ public class monitor2p2GeV {
                                                 en = (float)Math.sqrt(mom2 + mass_pion*mass_pion);
                                                 Cbeta = mom/en;
                                                 pi_vert_time = scintillator.getFloat("time",kk)-scintillator.getFloat("path",kk)/ (29.98f * Cbeta) ;
-                                                // timediff = (pi_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+                                                //timediff = (pi_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
                                                 timediff = pi_vert_time - vt;
                                                 H_pip_RFtime1_CD.fill(timediff);
                                         }
@@ -2091,7 +2107,7 @@ public class monitor2p2GeV {
                                                 en = (float)Math.sqrt(mom2 + mass_pion*mass_pion);
                                                 Cbeta = mom/en;
                                                 pi_vert_time = scintillator.getFloat("time",kk)-scintillator.getFloat("path",kk)/ (29.98f * Cbeta) ;
-                                                // timediff = (pi_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
+                                                //timediff = (pi_vert_time-RFtime1+(rf_large_integer+0.5f)*rfPeriod)%rfPeriod;timediff -= rfPeriod/2;
                                                 timediff = pi_vert_time - vt;
                                                 H_pim_RFtime1_CD.fill(timediff);
                                         }
@@ -2122,6 +2138,7 @@ public class monitor2p2GeV {
 			float mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 			float mass = mom2*(1/(beta*beta)-1);
 			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
 			boolean Forward = (status<4000);
 			boolean Central = (status>=4000);
 
@@ -2314,15 +2331,15 @@ public class monitor2p2GeV {
 	}
 	public void fillTraj(DataBank bank){
 		for(int iI=0;iI<bank.rows();iI++){
-			if(bank.getShort("detId",iI)<3 && bank.getShort("trkId",iI)==e_track_ind){
+			if(bank.getInt("detector",iI)==8 && bank.getShort("trkId",iI)==e_track_ind){
 				found_e_FMM = 1;
 				float px = bank.getFloat("px", iI);
 				float py = bank.getFloat("py", iI);
 				float pz = bank.getFloat("pz", iI);
-				e_FMMmom[bank.getShort("detId",iI)+1] = (float)Math.sqrt(px*px+py*py+pz*pz);
-				e_FMMtheta[bank.getShort("detId",iI)+1] = (float)Math.toDegrees(Math.acos(pz/e_FMMmom[bank.getShort("detId",iI)+1]));
-				e_FMMphi[bank.getShort("detId",iI)+1] = (float)Math.toDegrees(Math.atan2(py,px));
-				e_FMMvz[bank.getShort("detId",iI)+1] = bank.getFloat("z",iI);
+				e_FMMmom[bank.getInt("layer",iI)-1] = (float)Math.sqrt(px*px+py*py+pz*pz);
+				e_FMMtheta[bank.getInt("layer",iI)-1] = (float)Math.toDegrees(Math.acos(pz/e_FMMmom[bank.getInt("layer",iI)-1]));
+				e_FMMphi[bank.getInt("layer",iI)-1] = (float)Math.toDegrees(Math.atan2(py,px));
+				e_FMMvz[bank.getInt("layer",iI)-1] = bank.getFloat("z",iI);
 			}
 		}
 	}
@@ -2331,7 +2348,7 @@ public class monitor2p2GeV {
 		for(int r=0;r<trajBank.rows();r++){
 			if(trajBank.getShort("pindex",r)==e_part_ind){
 				found_eTraj=1;
-				if(trajBank.getShort("detId",r) == 0) {
+				if(trajBank.getInt("detector",r) == 15) {
 					e_HTCC_tX = trajBank.getFloat("x",r);
                                         e_HTCC_tY = trajBank.getFloat("y",r);
                                         e_HTCC_tZ = trajBank.getFloat("z",r);
@@ -2454,6 +2471,7 @@ public class monitor2p2GeV {
                        	int pid = bank.getInt("pid", k);
                        	byte q = bank.getByte("charge", k);
                        	int status = bank.getShort("status", k);
+                       	if (status<0) status = -status;
                        	boolean inDC = (status>=2000 && status<4000);//Only forward detectors; CND is >=4000
 			if(inDC && isDCmatch(event,k)>0) {
 				sect = isDCmatch(event, k);
@@ -3162,7 +3180,7 @@ public class monitor2p2GeV {
 		}
 	}
 	public void fillEvent(DataBank recEv){
-		G_accCharge.addPoint(Nevts,recEv.getFloat("BCG",0),0,0);
+		G_accCharge.addPoint(Nevts,recEv.getFloat("beamCharge",0),0,0);
 	}
         public void readScalers(DataBank rawScaler){
                 // channel 0 FCups for new code and channel 32 for old code
@@ -4057,7 +4075,7 @@ public class monitor2p2GeV {
 		can_e_ecal.cd(12);can_e_ecal.draw(H_e_LTCC_nphe);
 
 		can_e_ecal.cd(8);can_e_ecal.draw(H_e_TOF_xy);
-		// H_e_vt2.setLineColor(2);
+		//H_e_vt2.setLineColor(2);
 		can_e_ecal.cd(13);can_e_ecal.draw(H_e_vt1);//can_e_ecal.draw(H_e_vt2,"same");
 
 		can_e_ecal.cd(10);can_e_ecal.draw(H_e_vz);

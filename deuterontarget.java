@@ -428,6 +428,7 @@ public class deuterontarget {
 		for(int k = 0; k < bank.rows(); k++){
 			int pid = bank.getInt("pid", k);
 			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
 			byte q = bank.getByte("charge", k);
 			float thisbeta = bank.getFloat("beta", k);
 			boolean inDC = (status>=2000 && status<4000);
@@ -468,6 +469,7 @@ public class deuterontarget {
                 for(int k = 0; k < bank.rows(); k++){
                         int pid = bank.getInt("pid", k);
                         int status = bank.getShort("status", k);
+                        if (status<0) status = -status;
                         byte q = bank.getByte("charge", k);
                         float thisbeta = bank.getFloat("beta", k);
                         boolean inDC = (status>=2000 && status<4000);
@@ -510,6 +512,7 @@ public class deuterontarget {
 			byte q = bank.getByte("charge", k);
 			float thisbeta = bank.getFloat("beta", k);
 			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
 			boolean inDC = (status>=2000 && status<4000);
 			if(inDC && pid==11)foundelec=true;
 			if(inDC && q<0&&thisbeta>0)nnegatives++;
@@ -524,6 +527,7 @@ public class deuterontarget {
 				int pid = bank.getInt("pid", k);
 				byte q = bank.getByte("charge", k);
 				int status = bank.getShort("status", k);
+				if (status<0) status = -status;
 				boolean inDC = (status>=2000 && status<4000);
 				if(inDC && q>0){
 					float px = bank.getFloat("px", k);
@@ -611,6 +615,7 @@ public class deuterontarget {
 			float py = bank.getFloat("py", k);
 			float pz = bank.getFloat("pz", k);
 			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
 			boolean inDC = (status>=2000 && status<4000);
 			e_mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 			e_theta = (float)Math.toDegrees(Math.acos(pz/e_mom));
@@ -635,6 +640,7 @@ public class deuterontarget {
 			float py = bank.getFloat("py", k);
 			float pz = bank.getFloat("pz", k);
 			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
 			boolean inDC = (status>=2000 && status<4000);
 			e_mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 			e_theta = (float)Math.toDegrees(Math.acos(pz/e_mom));

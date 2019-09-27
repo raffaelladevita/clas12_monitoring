@@ -63,12 +63,12 @@ public class tof_monitor {
                		rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
                	}
                	rf_large_integer = 1000;
-		rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
-                if (rfTableOffset.hasEntry(1, 1, 1)){
-                        rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
-                        rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
-                        System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
-                        System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
+               	rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
+               	if (rfTableOffset.hasEntry(1, 1, 1)){
+               		rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
+               		rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
+               		System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
+               		System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
                 }
 		p1a_counter_thickness = 5.0f; //cm
 		phase_offset = 3; //RGA Fall 2018, RGB Spring 2019, RGA Spring 2019
@@ -119,6 +119,9 @@ public class tof_monitor {
 		p1a_edep = new H1F[6][3];
 		p1b_edep = new H1F[6][3];
 		p2_edep = new H1F[6];
+		p1b_tdcadc_dt = new H1F[6];
+		p1a_tdcadc_dt = new H1F[6];
+		p2_tdcadc_dt = new H1F[6];
 		DC_residuals_trkDoca = new H2F[6][6];
 		DC_residuals = new H1F[6][6];
 		DC_time = new H1F[6][6];
@@ -161,7 +164,7 @@ public class tof_monitor {
 			p2_pad_dt[s].setTitle(String.format("p2 S%d #delta t",s+1));
 			p2_pad_dt[s].setTitleX("paddle");
 			p2_pad_dt[s].setTitleY("time");
-//One must use 25-ps bin widths for the TOF vertex-time-difference histograms
+//FTOF vertex time differences are to be plotted in 25-ps-wide bins
 			p1a_pad_dt_calib[s] = new H2F(String.format("p1a_pad_dt_S%d",s+1),String.format("p1a_pad_dt_S%d",s+1),25,0,25,160,-2.000,2.000);
                         p1a_pad_dt_calib[s].setTitle(String.format("p1a S%d FTOF vertex t - RFTime",s+1));
                         p1a_pad_dt_calib[s].setTitleX("paddle");
@@ -234,7 +237,6 @@ public class tof_monitor {
                         p2_tdcadc_dt[s].setTitle(String.format("p2 t_tdc-t_fadc, S%d",s+1));
                         p2_tdcadc_dt[s].setTitleX("t_tdc-t_fadc (ns)");
                         p2_tdcadc_dt[s].setTitleY("counts"); 
-
 
 			for(int sl=0;sl<6;sl++){
 				DC_residuals_trkDoca[s][sl] = new H2F(String.format("DC_residuals_trkDoca_%d_%d",s+1,sl+1),String.format("DC_residuals_trkDoca_%d_%d",s+1,sl+1),100,0,DCcellsizeSL[sl],100,-1,1);
@@ -313,7 +315,6 @@ public class tof_monitor {
 		}	
 	}
 
-
 	public void fillTOFCalibHists(DataBank part, DataBank sc, DataBank hits){
 		for(int k=0;k<part.rows();k++) {
 			byte charge = part.getByte("charge",k);
@@ -362,7 +363,7 @@ public class tof_monitor {
 							if (sc.getByte("layer",j)==1) p1a_edep[sector-1][2].fill(energy);
                                                         if (sc.getByte("layer",j)==2) p1b_edep[sector-1][2].fill(energy);
 						}
-						if (charge == -1 && energy > 2.) {
+						if (charge ==-1 && energy >2.){
 							if (sc.getByte("layer",j)==3) p2_edep[sector-1].fill(energy);
 						}
 
@@ -490,6 +491,7 @@ public class tof_monitor {
                         float py = bank.getFloat("py", k);
                         float pz = bank.getFloat("pz", k);
                         int status = bank.getShort("status", k);
+                        if (status<0) status = -status;
                         boolean inDC = (status>=2000 && status<4000);
                         if( inDC && pid == 11 && found_electron == 0){
                                 found_electron = 1;
