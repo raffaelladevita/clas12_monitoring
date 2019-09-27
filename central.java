@@ -322,6 +322,7 @@ public class central {
                         float py = bank.getFloat("py", k);
                         float pz = bank.getFloat("pz", k);
                         int status = bank.getShort("status", k);
+                        if (status<0) status = -status;
                         boolean inDC = (status>=2000 && status<4000);
                         if( inDC && pid == 11 && found_electron == 0){
 				found_electron = 1;
@@ -348,7 +349,7 @@ public class central {
                         if(event.hasBank("HitBasedTrkg::HBTracks"))trackDetBank = event.getBank("HitBasedTrkg::HBTracks");
                 }
 
-		if(eventBank!=null)STT = eventBank.getFloat("STTime",0);
+		if(eventBank!=null)STT = eventBank.getFloat("startTime",0);
 		if(eventBank!=null)RFT = eventBank.getFloat("RFTime",0); else return;
 		if(event.hasBank("RUN::config"))timestamp = event.getBank("RUN::config").getLong("timestamp",0);
 		if(event.hasBank("CTOF::adc")) tofadc = event.getBank("CTOF::adc");
@@ -356,6 +357,7 @@ public class central {
 		if(partBank!=null) e_part_ind = makeElectron(partBank);
 		if(trackDetBank != null && event.hasBank("CVTRec::Tracks"))FillTracks(trackDetBank,event.getBank("CVTRec::Tracks"));
 		if(BackToBack && event.hasBank("CVTRec::Tracks") && event.hasBank("CTOF::hits"))FillCVTCTOF(event.getBank("CVTRec::Tracks"),event.getBank("CTOF::hits"));
+		if(toftdc!=null && tofadc!=null) fillCTOFadctdcHist(tofadc,toftdc);
 	}
 
 

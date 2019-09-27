@@ -566,7 +566,7 @@ public class cndCheckPlots {
 
 						}
 						public void processEvent(DataEvent event) {
-								if(event.hasBank("REC::Event"))STT = event.getBank("REC::Event").getFloat("STTime",0);
+								if(event.hasBank("REC::Event"))STT = event.getBank("REC::Event").getFloat("startTime",0);
 								//else return;
 								if(event.hasBank("REC::Event"))RF = event.getBank("REC::Event").getFloat("RFTime",0);
 								if(event.hasBank("RUN::config"))TimeJitter = event.getBank("RUN::config").getLong("timestamp",0);

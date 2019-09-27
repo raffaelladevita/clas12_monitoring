@@ -34,10 +34,11 @@ public class BAND{
 	public H1F[] H_BAND_adcCor, H_BAND_meantimeadc, H_BAND_meantimetdc;
 	public float speedoflight;
 
-        public IndexedTable InverseTranslationTable;
-        public IndexedTable calibrationTranslationTable;
-        public IndexedTable rfTable, rfTableOffset;
-        public ConstantsManager ccdb;
+	public IndexedTable InverseTranslationTable;
+	public IndexedTable calibrationTranslationTable;
+	public IndexedTable rfTable, rfTableOffset;
+	public ConstantsManager ccdb;
+
 
 	public BAND(int reqR, float reqEb, boolean reqTimeBased, boolean reqwrite_volatile){
         	runNum = reqR;userTimeBased=reqTimeBased;
@@ -56,23 +57,22 @@ public class BAND{
 
 		speedoflight = 29.9792458f;
 
-                rfPeriod = 4.008f;
-                ccdb = new ConstantsManager();
-                ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset"}));
-                rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
-                if (rfTable.hasEntry(1, 1, 1)){
-                        System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
-                        rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
-                }
-                rf_large_integer = 1000;
-                rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
-                if (rfTableOffset.hasEntry(1, 1, 1)){
-                        rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
-                        rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
-                        System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
-                        System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
-                }
-
+		rfPeriod = 4.008f;
+		ccdb = new ConstantsManager();
+		ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset"}));
+		rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
+		if (rfTable.hasEntry(1, 1, 1)){
+			System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
+			rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
+		}
+		rf_large_integer = 1000;
+		rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
+		if (rfTableOffset.hasEntry(1, 1, 1)){
+			rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
+			rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
+			System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
+			System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
+		}
 
 		for(int s=0;s<2;s++){
 			H_BAND_adcCor[s] = new H1F(String.format("H_BAND_ADC_LR_SectorCombination%d",s+1),String.format("H_BAND_ADC_LR_SectorCombination %d",s+1),200,0.,6000.);

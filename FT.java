@@ -28,13 +28,13 @@ public class FT {
 	boolean userTimeBased, write_volatile;
 	boolean[] trigger_bits;
 	public int runNum, trigger;
-	public int crate;
+    public int crate;
 
 	public boolean hasRF;
 	public double startTime, rfTime;
 
 	public double rfPeriod;
-	public int rf_large_integer;
+    public int rf_large_integer;
 	public H1F summary;
 	//Hodoscope
                public H1F[] hi_hodo_eall, hi_hodo_ematch, hi_hodo_tmatch;
@@ -78,8 +78,8 @@ public class FT {
             	System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
             	rfPeriod = rfTable.getDoubleValue("clock",1,1,1);
         	}
-		rf_large_integer = 1000;
-
+            rf_large_integer = 1000;
+            
 		H1F summary = new H1F("summary","summary",6,1,7);
        		summary.setTitleX("sector");
        		summary.setTitleY("DC hits");
@@ -92,10 +92,10 @@ public class FT {
 		hi_hodo_ematch_2D = new H2F[2];
 		hi_hodo_tmatch_2D = new H2F[2];
 		f_charge_landau = new F1D[2];
-	        hi_hodo_ematch_board = new H1F[30];
-        	hi_hodo_tmatch_board = new H1F[30];
-        	f_charge_landau_board = new F1D[30];
-        	int counter=0;
+        hi_hodo_ematch_board = new H1F[30];
+        hi_hodo_tmatch_board = new H1F[30];
+        f_charge_landau_board = new F1D[30];
+        int counter=0;
 		for(int layer=0; layer < 2; layer++) {
 			hi_hodo_eall[layer] = new H1F(String.format("hi_hodo_eall_l%d",layer+1), String.format("hi_hodo_eall_l%d",layer+1), 200, 0, 10);
 			hi_hodo_eall[layer].setTitleX("E (MeV)");
@@ -409,7 +409,7 @@ public class FT {
 
 		//Get event start time
 		if(recEvenEB!=null) {
-			startTime = recEvenEB.getFloat("STTime", 0);
+			startTime = recEvenEB.getFloat("startTime", 0);
 			rfTime    = recEvenEB.getFloat("RFTime", 0);
         	}
 
