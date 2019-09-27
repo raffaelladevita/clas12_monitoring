@@ -215,13 +215,6 @@ public class monitor2p2GeV {
                         rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
                 }
                 rf_large_integer = 1000;
-		rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
-                if (rfTableOffset.hasEntry(1, 1, 1)){
-                	rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
-			rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
-			System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
-			System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
-                }
 
 		rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
 		if (rfTableOffset.hasEntry(1, 1, 1)){

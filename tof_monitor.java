@@ -481,7 +481,6 @@ public class tof_monitor {
 		}
 	}
 
-
         public int makeElectron(DataBank bank){
                 int found_electron = 0;
                 for(int k = 0; k < bank.rows(); k++){

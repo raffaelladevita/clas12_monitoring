@@ -83,7 +83,6 @@ public class HTCC{
 		H_e_HTCC = new H2F[7];
 		H_e_Ring_theta = new H2F[7];
 		H_e_side_phi = new H2F[7];
-		H_HTCC_vtime_e = new H1F[48];
 		for(int s=0;s<7;s++){
 			H_e_theta_mom[s] = new H2F(String.format("H_e_S%d_theta_mom",s+1),String.format("e #theta vs p S%d",s+1),100,0,EBeam,100,0,40);
 			H_e_theta_mom[s].setTitleX("p (GeV)");

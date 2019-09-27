@@ -28,7 +28,7 @@ public class FT {
 	boolean userTimeBased, write_volatile;
 	boolean[] trigger_bits;
 	public int runNum, trigger;
-	public int crate;
+    public int crate;
 
 	public boolean hasRF;
 	public double startTime, rfTime;
@@ -92,10 +92,10 @@ public class FT {
 		hi_hodo_ematch_2D = new H2F[2];
 		hi_hodo_tmatch_2D = new H2F[2];
 		f_charge_landau = new F1D[2];
-	        hi_hodo_ematch_board = new H1F[30];
-        	hi_hodo_tmatch_board = new H1F[30];
-        	f_charge_landau_board = new F1D[30];
-        	int counter=0;
+        hi_hodo_ematch_board = new H1F[30];
+        hi_hodo_tmatch_board = new H1F[30];
+        f_charge_landau_board = new F1D[30];
+        int counter=0;
 		for(int layer=0; layer < 2; layer++) {
 			hi_hodo_eall[layer] = new H1F(String.format("hi_hodo_eall_l%d",layer+1), String.format("hi_hodo_eall_l%d",layer+1), 200, 0, 10);
 			hi_hodo_eall[layer].setTitleX("E (MeV)");
