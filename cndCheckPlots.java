@@ -470,8 +470,8 @@ public class cndCheckPlots {
 
 								float mass2=mom*mom*(float)((1.f/(betaCND*betaCND))-1.f);
 
-								if(charge==-1 && Math.abs(vtP)<1.5 && z<(25.+2.5*(layer-1)))massN.fill(mass2);
-								if(charge==1 && Math.abs(vtP)<1.5 && z<(25.+2.5*(layer-1)))massP.fill(mass2);
+								if(charge==-1 && Math.abs(vtP)<1.5 && z<(15.+5*(layer-1)))massN.fill(mass2);
+								if(charge==1 && Math.abs(vtP)<1.5 && z<(15.+5*(layer-1)))massP.fill(mass2);
 
 								//if(charge==-1)H_CND_time.fill(vtP);
 								//if(charge==-1 && Math.abs(mass2)<0.4*0.4 && z<(25.+2.5*(layer-1)))H_CND_vt_pad[layer-1].fill(sector + 25*(comp-1),vtP);
@@ -489,7 +489,7 @@ public class cndCheckPlots {
 								//	in=(sector==CNDbank.getInt("sector",jCND) && layer==(CNDbank.getInt("layer",jCND)-1));
 								//	if(in)System.out.println("problem");
 								//}
-								/*if (timeC>2.0)*/if( charge==-1 && Math.sqrt(Math.abs(mass2))<0.4 && mass2>-0.2*0.2 && z<(25.+2.5*(layer-1)) && Math.abs(vtP)<1.5/*&& betaCND<0.7*//*&& timeC>1.5*//*&& Math.abs(z-tz)<5.*/){//H_CND_alignt[((comp-1)*3)+(layer-1)+((sector-1)*6)].fill(vtP);
+								/*if (timeC>2.0)*/if( charge==-1 && Math.sqrt(Math.abs(mass2))<0.4 && mass2>-0.2*0.2 && z<(15.+5*(layer-1)) && Math.abs(vtP)<1.5/*&& betaCND<0.7*//*&& timeC>1.5*//*&& Math.abs(z-tz)<5.*/){//H_CND_alignt[((comp-1)*3)+(layer-1)+((sector-1)*6)].fill(vtP);
 										//H_CND_vt_P.fill(mom,vtP);
 								}
 								if (charge==-1 && Math.abs(vtP)<1.5) RFTIME.fill(betaCND-betaP);
@@ -501,8 +501,9 @@ public class cndCheckPlots {
 										H_CND_z_pad[layer-1].fill((comp-0.5)+2*(sector-1),z);
 								}
 
-								if (charge==-1 && /*Math.sqrt(Math.abs(mass2))>0.4 &&*/ /*mass2>-0.2*0.2 &&*/ z<(25.+2.5*(layer-1)) && Math.abs(vtP)<1.5)
+								if (charge==-1 && /*Math.sqrt(Math.abs(mass2))>0.4 &&*/ /*mass2>-0.2*0.2 &&*/ z<(15.+5*(layer-1)) && Math.abs(vtP)<1.5)
 								{
+										H_CND_time_z_charged[layer-1].fill(z,vtP);
 										H_CND_edep_phi[layer-1].fill((sector-1)*2+(comp-0.5),e);
 										//H_CVT_CND_z[layer-1].fill(z,tz);
 										H_CND_align[((comp-1)*3)+(layer-1)+((sector-1)*6)].fill(z-tz);
@@ -514,21 +515,21 @@ public class cndCheckPlots {
 										//H_CND_edep_phi[layer-1].fill((sector-1)*2+(comp-0.5),e);
 								}
 								H_CVT_CND_phi[layer-1].fill(cndPhi,cvtPhi);
-								if(charge==-1)H_CND_time_z_charged[layer-1].fill(z,vtP);
-								if(charge==-1 && z<(25.+2.5*(layer-1)))H_CND_t_t.fill(timeC,timeCVT);
+								//if(charge==-1)H_CND_time_z_charged[layer-1].fill(z,vtP);
+								if(charge==-1 && z<(15.+5*(layer-1)))H_CND_t_t.fill(timeC,timeCVT);
 								//only include one hit from cluster
 								//if(Tracks[trkID]==0){
 								if (betaCND > 0.2){
 									H_CND_beta_energy.fill(e,betaCND);
 								}
-								if(/*sector==18 &&*/   /*&& mass2>-0.2*0.2*/  charge==1  && z<(25.+2.5*(layer-1)) && Math.abs(vtP)<1.5 /*&& Math.abs(z-tz)<5.*/)H_CND_beta_p.fill(mom,betaCND);
-								if(charge==-1 /*&& Math.sqrt(Math.abs(mass2))<0.3  && mass2>-0.3*0.3*/ && z<(25.+2.5*(layer-1)) && Math.abs(vtP)<1.5/* && Math.abs(z-tz)<5.*/)H_CND_beta_pn.fill(mom,betaCND);				
+								if(/*sector==18 &&*/   /*&& mass2>-0.2*0.2*/  charge==1  && z<(15.+5*(layer-1)) && Math.abs(vtP)<1.5 /*&& Math.abs(z-tz)<5.*/)H_CND_beta_p.fill(mom,betaCND);
+								if(charge==-1 /*&& Math.sqrt(Math.abs(mass2))<0.3  && mass2>-0.3*0.3*/ && z<(15.+5*(layer-1)) && Math.abs(vtP)<1.5/* && Math.abs(z-tz)<5.*/)H_CND_beta_pn.fill(mom,betaCND);				
 								//	Tracks[trkID]=1;
 								//}
 
 
 								//proton
-								if (charge==1 && Math.sqrt(Math.abs(mass2))>0.4 && /*mass2>-0.2*0.2 &&*/ z<(25.+2.5*(layer-1)) /*&& Math.abs(vtP)<3.0*/) 
+								if (charge==1 && Math.sqrt(Math.abs(mass2))>0.4 && /*mass2>-0.2*0.2 &&*/ z<(15.+5*(layer-1)) /*&& Math.abs(vtP)<3.0*/) 
 								{
 										pathlength[layer-1].fill((sector-1)*2+(comp-0.5),path);
 										momentum[layer-1].fill((sector-1)*2+(comp-0.5),mom);
@@ -536,7 +537,7 @@ public class cndCheckPlots {
 
 								}
 								//pi-
-								if (charge==-1 && Math.sqrt(Math.abs(mass2))<0.38 && mass2>-0.35*0.35 && z<(25.+2.5*(layer-1)) && Math.abs(vtP)<1.5)
+								if (charge==-1 && Math.sqrt(Math.abs(mass2))<0.38 && mass2>-0.35*0.35 && z<(15.+5*(layer-1)) && Math.abs(vtP)<1.5)
 								{
 										H_CND_vt_pad[layer-1].fill((sector-1)*2+(comp-0.5),vtP);
 										H_CND_time.fill(vtP);
@@ -553,7 +554,7 @@ public class cndCheckPlots {
 
 								}
 								//pi+
-								if (charge==1 && Math.sqrt(Math.abs(mass2))<0.4 && mass2>-0.2*0.2 && z<(25.+2.5*(layer-1)) && Math.abs(vtP)<1.5)
+								if (charge==1 && Math.sqrt(Math.abs(mass2))<0.4 && mass2>-0.2*0.2 && z<(15.+5*(layer-1)) && Math.abs(vtP)<1.5)
 								{
 										pathlengthpl[layer-1].fill((sector-1)*2+(comp-0.5),path);
 										momentumpl[layer-1].fill((sector-1)*2+(comp-0.5),mom);
