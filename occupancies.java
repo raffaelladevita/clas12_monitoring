@@ -212,14 +212,15 @@ public class occupancies {
 		H_BMT_R3_phi.setTitleX("e^- #phi (^o)");
 		H_BMT_R3_phi.setTitleY("R1 #phi (^o)");
 	}
-	public void MakeBST_hits(DataBank bank){
-		H_BST_multi.fill(bank.rows());
+	public void MakeBST_hits(DataBank bank, DataBank hits){
+		H_BST_multi.fill(hits.rows());
 		for(int k=0;k<bank.rows();k++){
 			int S = bank.getByte("sector",k);
 			int l = bank.getByte("layer",k);
 			int comp = bank.getShort("component",k);
 			int ADC = bank.getInt("ADC",k);
-			if (ADC != -1) {
+			//if (ADC != -1) {
+			if (ADC >= 0) {
 				if (l == 1) H_BST_occ_reg1_l1.fill((S-1)*256+comp);
 				if (l == 3) H_BST_occ_reg2_l1.fill((S-1)*256+comp);
 				if (l == 5) H_BST_occ_reg3_l1.fill((S-1)*256+comp);
@@ -347,7 +348,8 @@ public class occupancies {
         public void processEvent(DataEvent event) {
 		found_elec = 0;
 		if(event.hasBank("REC::Particle"))MakeElectron(event.getBank("REC::Particle"));
-		if(event.hasBank("BST::adc"))MakeBST_hits(event.getBank("BST::adc"));
+		//if(event.hasBank("BST::adc"))MakeBST_hits(event.getBank("BST::adc"));
+		if(event.hasBank("BSTRec::Hits") && event.hasBank("BST::adc"))MakeBST_hits(event.getBank("BST::adc"),event.getBank("BSTRec::Hits"));
 		if(event.hasBank("BMT::adc"))MakeBMT_hits(event.getBank("BMT::adc"));
 		if(event.hasBank("BSTRec::Crosses"))MakeBST_crosses(event.getBank("BSTRec::Crosses"));
 		if(event.hasBank("BMTRec::Crosses"))MakeBMT_crosses(event.getBank("BMTRec::Crosses"));
