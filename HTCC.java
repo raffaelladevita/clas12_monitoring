@@ -119,7 +119,7 @@ public class HTCC{
 		H_HTCC_adc = new H1F[48];
 		H_HTCC_nphe = new H1F[48];
 		H_HTCC2_nphe = new H1F[48];
-        H_HTCC3_nphe = new H1F[48];
+        	H_HTCC3_nphe = new H1F[48];
 		H_HTCC_vtime_e = new H1F[48];
 		for(int r=0;r<4;r++){
 			for(int side=0;side<2;side++){
@@ -131,14 +131,18 @@ public class HTCC{
 					H_HTCC_adc[counter] = new H1F(String.format("H_HTCC_adc%d",s+1),histitle,100,0,10000);
 					histitle = String.format("HTCC NPHE S%d, Ring %d, %s",s+1,r+1,stringSide);
 					H_HTCC_nphe[counter] = new H1F(String.format("H_HTCC_nphe_s%d_r%d_side%d",s+1,r+1,side+1),histitle,100,0,50); //title changed
+					H_HTCC_nphe[counter].setOptStat(110);
 					histitle = String.format("HTCC UNMATCHED NPHE S%d, Ring %d, %s",s+1,r+1,stringSide);
 					H_HTCC2_nphe[counter] = new H1F(String.format("H_HTCC2_nphe_s%d_r%d_side%d",s+1,r+1,side+1),histitle,100,0,50);
-                    histitle = String.format("HTCC ELECTRON NPHE S%d, Ring %d, %s",s+1,r+1,stringSide);
-                    H_HTCC3_nphe[counter] = new H1F(String.format("H_HTCC3_nphe_s%d_r%d_side%d",s+1,r+1,side+1),histitle,100,0,50);
-                    H_HTCC_vtime_e[counter] = new H1F(String.format("H_HTCC_vtime_s%d_r%d_side%d",s+1,r+1,side+1),String.format("H_HTCC_vtime_s%d_r%d_side%d",s+1,r+1,side+1),750,-15,15);
-                    H_HTCC_vtime_e[counter].setTitle(String.format("HTCC vtime - STT, electrons, pmt %d",counter+1));
-                    H_HTCC_vtime_e[counter].setTitleX("HTCC vtime - STT (ns)");
-                    H_HTCC_vtime_e[counter].setTitleY("counts");
+					H_HTCC2_nphe[counter].setOptStat(110);
+					histitle = String.format("HTCC ELECTRON NPHE S%d, Ring %d, %s",s+1,r+1,stringSide);
+                    			H_HTCC3_nphe[counter] = new H1F(String.format("H_HTCC3_nphe_s%d_r%d_side%d",s+1,r+1,side+1),histitle,100,0,50);
+					H_HTCC3_nphe[counter].setOptStat(110);
+                    			H_HTCC_vtime_e[counter] = new H1F(String.format("H_HTCC_vtime_s%d_r%d_side%d",s+1,r+1,side+1),String.format("H_HTCC_vtime_s%d_r%d_side%d",s+1,r+1,side+1),750,-15,15);
+                    			H_HTCC_vtime_e[counter].setTitle(String.format("HTCC vtime - STT, electrons, pmt %d",counter+1));
+                    			H_HTCC_vtime_e[counter].setTitleX("HTCC vtime - STT (ns)");
+                    			H_HTCC_vtime_e[counter].setTitleY("counts");
+		    
 				}
 			}
 		}
@@ -450,6 +454,25 @@ public class HTCC{
 		}
 	}
         public void plot() {
+		EmbeddedCanvas can_vtime_HTCC  = new EmbeddedCanvas();
+		can_vtime_HTCC.setSize(3500,4000);
+                can_vtime_HTCC.divide(6,8);
+                can_vtime_HTCC.setAxisTitleSize(18);
+                can_vtime_HTCC.setAxisFontSize(18);
+                can_vtime_HTCC.setTitleSize(18);
+                for(int s=0;s<48;s++){
+                        can_vtime_HTCC.cd(s);can_vtime_HTCC.draw(H_HTCC_vtime_e[s]);
+		}
+                if(runNum>0){
+                        if(!write_volatile)can_vtime_HTCC.save(String.format("plots"+runNum+"/HTCC_timing.png"));
+                        if(write_volatile)can_vtime_HTCC.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/HTCC_timing.png"));
+                        System.out.println(String.format("saved plots"+runNum+"/HTCC_timing.png"));
+                }
+                else{
+                        can_vtime_HTCC.save(String.format("plots/HTCC_timing.png"));
+                        System.out.println(String.format("saved plots/HTCC_timing.png"));
+                }
+
 		EmbeddedCanvas can_e_HTCC  = new EmbeddedCanvas();
 		can_e_HTCC.setSize(3500,4000);
 		can_e_HTCC.divide(7,10);
