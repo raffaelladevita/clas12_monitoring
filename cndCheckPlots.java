@@ -383,7 +383,7 @@ public class cndCheckPlots {
 				}
 				float vertexTrigger=PARTbank.getFloat("vz",0);
 				int pidTrigger=PARTbank.getInt("pid",0);
-				if(pidTrigger!=11)continue;
+				
 			
 				for(int iCND=0;iCND<CNDbank.rows();iCND++){
 						int layer = CNDbank.getInt("layer",iCND);
@@ -443,7 +443,7 @@ public class cndCheckPlots {
 								}
 						}
 
-						if(layer>0 && layer<4 && trkID>-1 && STT>-999 ){
+						if(layer>0 && layer<4 && trkID>-1 && STT>-999 && pidTrigger==11){
 								float tx = CNDbank.getFloat("tx",iCND);
 								float ty = CNDbank.getFloat("ty",iCND);
 								float tz = CNDbank.getFloat("tz",iCND);
@@ -456,8 +456,8 @@ public class cndCheckPlots {
 								float phase = 4.f*((TimeJitter+1.f)%6.f);
 							
 								
-								float vertexCorrCentral=vertex/29.92;
-								float vertexCorrForward=vertexTrigger/29.92;
+								float vertexCorrCentral=vertex/29.92f;
+								float vertexCorrForward=vertexTrigger/29.92f;
 							
 								float vt = time - STT - (path/29.92f/beta);//-(vertex/29.92f);
 								float vtP = time - (STT-vertexCorrForward+vertexCorrCentral) - (path/29.92f/betaP);//-(vertex/29.92f);//- vertex/29.92f;
