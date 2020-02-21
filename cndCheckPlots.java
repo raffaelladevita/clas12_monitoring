@@ -367,7 +367,7 @@ public class cndCheckPlots {
 				alignE.setTitleX("paddle");
 				alignE.setTitleY("dE/dz");
 		}
-		public void FillCND(DataBank CNDbank, DataBank CVTbank){
+		public void FillCND(DataBank CNDbank, DataBank CVTbank, DataBank PARTbank){
 
 				//System.out.println("New event");
 				//System.out.println();
@@ -381,7 +381,10 @@ public class cndCheckPlots {
 				for(int i=0; i<Tracks.length; i++){
 						Tracks[i]=0;
 				}
-
+				float vertexTrigger=PARTbank.getFloat("vz",0);
+				int pidTrigger=PARTbank.getInt("pid",0);
+				if(pidTrigger!=11)continue;
+			
 				for(int iCND=0;iCND<CNDbank.rows();iCND++){
 						int layer = CNDbank.getInt("layer",iCND);
 						int trkID = CNDbank.getInt("trkID",iCND);
@@ -451,8 +454,13 @@ public class cndCheckPlots {
 								float beta = mom/(float)Math.sqrt(mom*mom+0.93827f*0.93827f);
 								float betaP = mom/(float)Math.sqrt(mom*mom+0.139f*0.139f);
 								float phase = 4.f*((TimeJitter+1.f)%6.f);
+							
+								
+								float vertexCorrCentral=vertex/29.92;
+								float vertexCorrForward=vertexTrigger/29.92;
+							
 								float vt = time - STT - (path/29.92f/beta);//-(vertex/29.92f);
-								float vtP = time - STT - (path/29.92f/betaP);//-(vertex/29.92f);//- vertex/29.92f;
+								float vtP = time - (STT-vertexCorrForward+vertexCorrCentral) - (path/29.92f/betaP);//-(vertex/29.92f);//- vertex/29.92f;
 								float rfp = (float)rfPeriod;
 								float vtPRF = ((time - RF - path/29.92f/betaP)+1000*rfp+(0.5f*rfp))%rfp - 0.5f*rfp;
 								float pathTH = CNDbank.getFloat("tlength",iCND);
@@ -572,7 +580,7 @@ public class cndCheckPlots {
 								if(event.hasBank("REC::Event"))RF = event.getBank("REC::Event").getFloat("RFTime",0);
 								if(event.hasBank("RUN::config"))TimeJitter = event.getBank("RUN::config").getLong("timestamp",0);
 								//else return;
-								if(event.hasBank("CND::hits") && event.hasBank("CVTRec::Tracks"))FillCND(event.getBank("CND::hits"),event.getBank("CVTRec::Tracks"));
+								if(event.hasBank("CND::hits") && event.hasBank("CVTRec::Tracks") && event.hasBank("REC::Particle"))FillCND(event.getBank("CND::hits"),event.getBank("CVTRec::Tracks"),event.getBank("REC::Particle"));
 						}
 
 						public void fit() {
