@@ -45,6 +45,7 @@ public class ana_2p2 {
 		occupancies ana_occ = new occupancies(runNum,useVolatile);
 		HTCC ana_htc = new HTCC(runNum,EB,useTB,useVolatile);
 		LTCC ana_ltc = new LTCC(runNum,EB,useTB,useVolatile);
+		RICH ana_rich = new RICH(runNum,EB,useTB,useVolatile);
 		cndCheckPlots ana_cnd = new cndCheckPlots(runNum,useTB,useVolatile);		
 		FT ana_ft = new FT(runNum,useTB,useVolatile);
 		dst_mon ana_dst_mon = new dst_mon(runNum,EB);
@@ -92,6 +93,7 @@ public class ana_2p2 {
 				ana_ft.processEvent(event);
 				ana_dst_mon.processEvent(event);
 				ana_band.processEvent(event);
+				ana_rich.processEvent(event);
 				//ana_deuteron.processEvent(event);
 				filecount++;count++;
 				if(count%10000 == 0){
@@ -131,6 +133,8 @@ public class ana_2p2 {
 		ana_dst_mon.write();
 		ana_band.plot();
 		ana_band.write();
+		ana_rich.plot();
+                ana_rich.write();
 		//ana_deuteron.plot();
         }
 }

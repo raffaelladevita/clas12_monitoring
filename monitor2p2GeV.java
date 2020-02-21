@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.util.*;
 
@@ -23,11 +22,12 @@ import org.jlab.detector.calib.utils.ConstantsManager;
 
 public class monitor2p2GeV {
 	boolean userTimeBased, write_volatile;
-	int Nevts, Nelecs, Ntrigs, runNum;
+	int Nevts, Nelecs, Ntrigs, runNum, Nelec_all, N_elec_lowQ2;
+	int event_number;
         public int Nmuons, Nmuontrigs;
 	public float rfPeriod, rfoffset1, rfoffset2;
 	public int rf_large_integer;
-	int[] Nmuonpairs, Ntrackspair, Nmuonpairs_v8, Ntrackspair_v8;
+	int[] Nmuonpairs, Ntrackspair, Nmuonpairs_v8, Ntrackspair_v8, Ntrackspairpn, Ntrackspairnp;
 	boolean[] trigger_bits;
 	public float EB, Ebeam;
 	public float RFtime1, RFtime2, startTime, BCG;public long TriggerWord;
@@ -58,10 +58,20 @@ public class monitor2p2GeV {
 
 	public H2F[] H_e_theta_mom_S;
 	public H1F[] H_e_W_S;
+	public H1F[] H_e_Q2_S;
 	public H2F[] H_e_W_phi_S;
         public H2F H_e_theta_phi, H_e_theta_mom, H_e_phi_mom, H_XY_ECal, H_ESampl_ECal, H_e_LTCC_xy, H_e_HTCC_xy, H_e_HTCC_txy, H_e_HTCC_nphe_txy, H_e_vxy, H_e_vz_phi, H_e_vz_p, H_e_vz_theta, H_e_TOF_xy, H_e_TOF_t_path;
         public H2F H_e_xB_Q2, H_e_W_Q2, H_e_xB_W;
 	public H1F H_e_W, H_e_Q2, H_e_xB, H_e_vz, H_e_LTCC_nphe, H_e_HTCC_nphe, H_e_vt1, H_e_vt2;
+
+        public H2F[] H_muontrig_theta_mom_S;
+        public H2F H_muontrig_theta_phi, H_muontrig_theta_mom, H_muontrig_phi_mom, H_muontrig_XY_ECal, H_muontrig_ESampl_ECal, H_muontrig_LTCC_xy, H_muontrig_HTCC_xy, H_muontrig_HTCC_txy;
+	public H2F H_muontrig_HTCC_nphe_txy, H_muontrig_vxy, H_muontrig_vz_phi, H_muontrig_vz_p, H_muontrig_vz_theta, H_muontrig_TOF_xy, H_muontrig_TOF_t_path;
+        public H1F H_muontrig_vz, H_muontrig_LTCC_nphe, H_muontrig_HTCC_nphe;
+	public H1F[] H_muontrig_ecal_en_neg_S, H_muontrig_ecal_en_pos_S, H_muontrig_pcal_en_neg_S, H_muontrig_pcal_en_pos_S;
+	public H2F[] H_muontrig_ECECOUT_en_S;
+
+	public H2F H_positive_theta_mom, H_negative_theta_mom, H_electron_theta_mom;
 
 	public H1F H_e_vz_S1, H_e_vz_S2, H_e_vz_S3, H_e_vz_S4, H_e_vz_S5, H_e_vz_S6;
 	public H1F H_e_FMMvz_S1, H_e_FMMvz_S2, H_e_FMMvz_S3, H_e_FMMvz_S4, H_e_FMMvz_S5, H_e_FMMvz_S6;
@@ -201,6 +211,8 @@ public class monitor2p2GeV {
 		Nmuonpairs = new int[3];
 		Ntrackspair_v8 = new int[6];
                 Nmuonpairs_v8 = new int[6];
+		Ntrackspairpn = new int[6];
+		Ntrackspairnp = new int[6];
 
 		tofvt1 = 0;
 		tofvt2 = 300;
@@ -223,6 +235,31 @@ public class monitor2p2GeV {
 			System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
 			System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
 		}
+
+		//Initialiing Two-sector trigger histograms
+		H_muontrig_ecal_en_neg_S = new H1F[6];
+		H_muontrig_ecal_en_pos_S = new H1F[6];
+                H_muontrig_pcal_en_neg_S = new H1F[6];
+		H_muontrig_pcal_en_pos_S = new H1F[6];
+		H_muontrig_ECECOUT_en_S = new H2F[6];
+                for(int i=0;i<6;i++){
+                        H_muontrig_ecal_en_neg_S[i] = new H1F(String.format("H_muontrig_ECAL_Energy_NegS%d",i+1),String.format("H_muontrig_ECAL_Energy_NegS%d",i+1),1000,-0.5,200.5);
+                        H_muontrig_ecal_en_neg_S[i].setTitle(String.format("Two-Sector Trig ECAL_En Neg, S%d",i+1));
+                        H_muontrig_ecal_en_neg_S[i].setTitleX("E_ecal (MeV)");
+                        H_muontrig_ecal_en_pos_S[i] = new H1F(String.format("H_muontrig_ECAL_Energy_PosS%d",i+1),String.format("H_muontrig_ECAL_Energy_Pos_S%d",i+1),1000,-0.5,200.5);
+                        H_muontrig_ecal_en_pos_S[i].setTitle(String.format("Two-Sector Trig ECAL_En Pos, S%d",i+1));
+                        H_muontrig_ecal_en_pos_S[i].setTitleX("E_ecal (MeV)");
+                        H_muontrig_pcal_en_neg_S[i] = new H1F(String.format("H_muontrig_PCAL_Energy_NegS%d",i+1),String.format("H_muontrig_PCAL_Energy_NegS%d",i+1),1000,-0.5,100.5);
+                        H_muontrig_pcal_en_neg_S[i].setTitle(String.format("Two-Sector Trig PCAL_En Neg, S%d",i+1));
+                        H_muontrig_pcal_en_neg_S[i].setTitleX("E_pcal (MeV)");
+                        H_muontrig_pcal_en_pos_S[i] = new H1F(String.format("H_muontrig_PCAL_Energy_PosS%d",i+1),String.format("H_muontrig_PCAL_Energy_PosS%d",i+1),1000,-0.5,100.5);
+                        H_muontrig_pcal_en_pos_S[i].setTitle(String.format("Two-Sector Trig PCAL_En Pos, S%d",i+1));
+                        H_muontrig_pcal_en_pos_S[i].setTitleX("E_pcal (MeV)");
+			H_muontrig_ECECOUT_en_S[i] = new H2F("H_muontrig_EC-ECOUT_en_S","H_muontrig_EC-ECOUT_en_S",200,0,400,200,0,200);
+                	H_muontrig_ECECOUT_en_S[i].setTitle("ECout vs EC");
+                	H_muontrig_ECECOUT_en_S[i].setTitleX("EC_energy (MeV)");
+                	H_muontrig_ECECOUT_en_S[i].setTitleY("ECout_energy (MeV)");
+                }
 
 		//Initializing rf histograms.
 		H_RFtimediff = new H1F("H_RFtimediff","H_RFtimediff",5000,-5.,5.);
@@ -1154,6 +1191,7 @@ public class monitor2p2GeV {
                 H_trig_DCR3_pos_S = new H2F[7];
 		H_trig_S_HTCC_theta = new H1F[6];
 		H_e_W_S = new H1F[6];
+		H_e_Q2_S = new H1F[6];
 		H_e_W_phi_S = new H2F[6];
 
 		for(int s=0;s<7;s++){
@@ -1179,6 +1217,9 @@ public class monitor2p2GeV {
 			if(EB==2.5f)H_e_W_S[s] = new H1F(String.format("H_e_W_S%d",s+1),String.format("H_e_W_S%d",s+1),100,0.5,2);
 			H_e_W_S[s].setTitle(String.format("e W S%d",s+1));
 			H_e_W_S[s].setTitleX("W (GeV)");
+			H_e_Q2_S[s] = new H1F(String.format("H_e_Q2_S%d",s+1),String.format("H_e_Q2_S%d",s+1),100,0.,EB*1.0f);
+			H_e_Q2_S[s].setTitle(String.format("e Q^2 S%d",s+1));
+                        H_e_Q2_S[s].setTitleX("Q^22 (GeV^2)");
 			H_e_W_phi_S[s] = new H2F(String.format("H_e_W_phi_S%d",s+1),String.format("H_e_W_phi_S%d",s+1),100,-45,45,100,0.5,EB/2.5);
 			if(EB==7.0f)H_e_W_phi_S[s] = new H2F(String.format("H_e_W_S%d",s+1),String.format("H_e_W_S%d",s+1),100,-45,45,100,0.5,3.2);
 			if(EB==6.0f)H_e_W_phi_S[s] = new H2F(String.format("H_e_W_S%d",s+1),String.format("H_e_W_S%d",s+1),100,-45,45,100,0.5,3.5);
@@ -1261,6 +1302,18 @@ public class monitor2p2GeV {
 		H_e_phi_mom.setTitle("electron #phi vs mom");
 		H_e_phi_mom.setTitleX("p (GeV/c)");
 		H_e_phi_mom.setTitleY("#phi (^o)");
+		H_positive_theta_mom = new H2F("H_positive_theta_mom","H_positive_theta_mom",100,0.75,EB,150,0,60);
+                H_positive_theta_mom.setTitle("positive particles' theta vs mom");
+                H_positive_theta_mom.setTitleX("p (GeV/c)");
+                H_positive_theta_mom.setTitleY("#theta (^o)");
+                H_negative_theta_mom = new H2F("H_negative_theta_mom","H_negative_theta_mom",100,0.75,EB,150,0,60);
+                H_negative_theta_mom.setTitle("negative particles' theta vs mom");
+                H_negative_theta_mom.setTitleX("p (GeV/c)");
+                H_negative_theta_mom.setTitleY("#theta (^o)");
+                H_electron_theta_mom = new H2F("H_electron_theta_mom","H_electron_theta_mom",100,0.75,EB,150,0,60);
+                H_electron_theta_mom.setTitle("Electron particles' theta vs mom");
+                H_electron_theta_mom.setTitleX("p (GeV/c)");
+                H_electron_theta_mom.setTitleY("#theta (^o)");
 		H_XY_ECal = new H2F("H_XY_ECal","H_XY_ECal",100,-400,400,100,-400,400);
                 H_XY_ECal.setTitle("Electron ECAL POS");
                 H_XY_ECal.setTitleX("X (cm)");
@@ -1778,6 +1831,31 @@ public class monitor2p2GeV {
 		}
 		return -1;
 	}
+
+	public void makeValidateRoads(DataBank bank){
+		for(int k = 0; k < bank.rows(); k++){
+                        float px = bank.getFloat("px" , k);
+                        float py = bank.getFloat("py" , k);
+                        float pz = bank.getFloat("pz" , k);
+                        float mom = (float)Math.sqrt(px*px+py*py+pz*pz);
+                        float theta = (float)Math.toDegrees(Math.atan2(Math.sqrt(px*px+py*py), pz));
+			int status = bank.getShort("status", k);
+                        boolean Forward = (status<4000);
+//System.out.print("Charge = " + bank.getByte("charge",k) + "\n");
+			if (Forward) {
+                        	if(bank.getByte("charge",k)>0){
+					H_positive_theta_mom.fill(mom,theta);
+				}
+				if(bank.getByte("charge",k)<0){
+                                	H_negative_theta_mom.fill(mom,theta);
+                        	}
+				if(bank.getInt("pid", k) == 11) {
+					H_electron_theta_mom.fill(mom,theta);
+				}
+			}
+		}
+	}
+
 	public int makePiPlusPID(DataBank bank){
 		boolean foundelec = false;
 		int npositives = 0;
@@ -1824,44 +1902,44 @@ public class monitor2p2GeV {
 	}
 
 	public int makePiMinusPID(DataBank bank){
-					boolean foundelec = false;
-					int npositives = 0;
-					int nnegatives = 0;
-					float mybeta = 0;
-					for(int k = 0; k < bank.rows(); k++){
-									int pid = bank.getInt("pid", k);
-									int status = bank.getShort("status", k);
-									if (status<0) status = -status;
-									byte q = bank.getByte("charge", k);
-									float thisbeta = bank.getFloat("beta", k);
-									boolean inDC = (status>=2000 && status<4000);
-									if(inDC && pid==11)foundelec=true;
-									if(inDC && q<0&&thisbeta>0)nnegatives++;
-									if(inDC && npositives==0&&q>0&&thisbeta>0)mybeta=thisbeta;
-									if(inDC && q>0&&thisbeta>0)npositives++;
-					}
-					if(foundelec && nnegatives==2 && mybeta>0){
-									for(int k = 0; k < bank.rows(); k++){
-													int pid = bank.getInt("pid", k);
-													byte q = bank.getByte("charge", k);
-													float px = bank.getFloat("px", k);
-													float py = bank.getFloat("py", k);
-													float pz = bank.getFloat("pz", k);
-													pim_mom = (float)Math.sqrt(px*px+py*py+pz*pz);
-													pim_theta = (float)Math.toDegrees(Math.acos(pz/pim_mom));
-													pim_phi = (float)Math.toDegrees(Math.atan2(py,px));
-													pim_vx = bank.getFloat("vx", k);
-													pim_vy = bank.getFloat("vy", k);
-													pim_vz = bank.getFloat("vz", k);
-													pim_beta = bank.getFloat("beta", k);
+		boolean foundelec = false;
+		int npositives = 0;
+		int nnegatives = 0;
+		float mybeta = 0;
+		for(int k = 0; k < bank.rows(); k++){
+			int pid = bank.getInt("pid", k);
+			int status = bank.getShort("status", k);
+			if (status<0) status = -status;
+			byte q = bank.getByte("charge", k);
+			float thisbeta = bank.getFloat("beta", k);
+			boolean inDC = (status>=2000 && status<4000);
+			if(inDC && pid==11)foundelec=true;
+			if(inDC && q<0&&thisbeta>0)nnegatives++;
+			if(inDC && npositives==0&&q>0&&thisbeta>0)mybeta=thisbeta;
+			if(inDC && q>0&&thisbeta>0)npositives++;
+		}
+		if(foundelec && nnegatives==2 && mybeta>0){
+			for(int k = 0; k < bank.rows(); k++){
+				int pid = bank.getInt("pid", k);
+				byte q = bank.getByte("charge", k);
+				float px = bank.getFloat("px", k);
+				float py = bank.getFloat("py", k);
+				float pz = bank.getFloat("pz", k);
+				pim_mom = (float)Math.sqrt(px*px+py*py+pz*pz);
+				pim_theta = (float)Math.toDegrees(Math.acos(pz/pim_mom));
+				pim_phi = (float)Math.toDegrees(Math.atan2(py,px));
+				pim_vx = bank.getFloat("vx", k);
+				pim_vy = bank.getFloat("vy", k);
+				pim_vz = bank.getFloat("vz", k);
+				pim_beta = bank.getFloat("beta", k);
 
-													if( q<0 && pim_mom>0.5 && pim_theta<40 && pim_theta>5 && pim_beta>0 && pid!=11){
-																	VPIM = new LorentzVector(px,py,pz,Math.sqrt(pim_mom*pim_mom+0.139*0.139));
-																	return k;
-													}
-									}
-					}
-					return -1;
+				if( q<0 && pim_mom>0.5 && pim_theta<40 && pim_theta>5 && pim_beta>0 && pid!=11){
+					VPIM = new LorentzVector(px,py,pz,Math.sqrt(pim_mom*pim_mom+0.139*0.139));
+					return k;
+				}
+			}
+		}
+		return -1;
 	}
 
 	public int makePiPlusPimPID(DataBank bank){
@@ -1946,11 +2024,13 @@ public class monitor2p2GeV {
 			e_theta = (float)Math.toDegrees(Math.acos(pz/e_mom));
 			e_vz = bank.getFloat("vz", k);
 			//if( inDC && pid == 11 && e_mom>0.2*Ebeam && e_mom<EB && e_theta>6 && Math.abs(e_vz)<200 ){}
+			//if( inDC && pid == 11 ){System.out.println("Electron in Part bank "+k);}
 			if( inDC && pid == 11 ){
 				e_phi = (float)Math.toDegrees(Math.atan2(py,px));
 				e_vx = bank.getFloat("vx", k);
 				e_vy = bank.getFloat("vy", k);
 				Ve = new LorentzVector(px,py,pz,e_mom);
+				//System.out.println("Returned electron index "+k);
 				return k;
 			}
 		}
@@ -2401,13 +2481,20 @@ public class monitor2p2GeV {
                  }
         }
 
+	public void getElectronTriggerInfo(DataBank trackbank, DataBank htccbank, DataBank calbank, DataBank ftofbank, DataBank part) {
+		for(int k = 0; k < trackbank.rows(); k++){
+			if (trackbank.getByte("q",k) == -1) {
+			}	
+		}
+	}
+
         public int isFTOFmatch(DataEvent event, int index){
 		int sectorftof=-1;
 		if(userTimeBased && event.hasBank("REC::Scintillator")){
 			DataBank FTOFbank = event.getBank("REC::Scintillator");
 				for(int l = 0; l < FTOFbank.rows(); l++) {
 					if(FTOFbank.getShort("pindex",l)==index && FTOFbank.getInt("detector",l)==12){
-                                                        if(FTOFbank.getInt("layer",l)==1) sectorftof=FTOFbank.getByte("sector",l);
+                                                        if(FTOFbank.getInt("layer",l)==2) sectorftof=FTOFbank.getByte("sector",l);
                                         }
 				}
 		}
@@ -2453,6 +2540,8 @@ public class monitor2p2GeV {
                 sectorn = new int[6];
                 sectorp = new int[6];
                 int sect = -1;
+		int sect_ecal = -1;
+		int sect_pcal = -1;
 		int tbit;
 
                 for (int j=0; j<3; j++) {
@@ -2469,23 +2558,49 @@ public class monitor2p2GeV {
 			if(inDC && isDCmatch(event,k)>0) {
 				sect = isDCmatch(event, k);
                         //if(inDC && isFTOFmatch(event,k)>0 && isECALmatch(event,k)>0 && isDCmatch(event,k)>0){
-				//System.out.println("charge="+q+" pid="+pid+" tofsect="+isFTOFmatch(event,k)+" ecalsect="+isECALmatch(event,k)+" dcsect="+isDCmatch(event,k)+" "+trigger_bits[7]+ " " +trigger_bits[8]+ " " +trigger_bits[9]);
+			//if (trigger_bits[7] || trigger_bits[8] || trigger_bits[9] || trigger_bits[10] || trigger_bits[11] || trigger_bits[12]) System.out.println("Event number="+event_number+" charge="+q+" pid="+pid+" tofsect="+isFTOFmatch(event,k)+" ecalsect="+isECALmatch(event,k)+" dcsect="+isDCmatch(event,k)+" Two-sector trigger bits: "+trigger_bits[7]+ " " +trigger_bits[8]+ " " +trigger_bits[9]+" "+trigger_bits[10]+ " " +trigger_bits[11]+ " " +trigger_bits[12]);
                                 float energy_ecal_E=0;
+				float energy_ecalout_E=0;
 				float energy_pcal_E=0;
                                 if(userTimeBased && event.hasBank("REC::Calorimeter")){
                                         DataBank ECALbank = event.getBank("REC::Calorimeter");
                                         for(int l = 0; l < ECALbank.rows(); l++)
 						if(ECALbank.getShort("pindex",l)==k){
-                                                	if(ECALbank.getInt("layer",l)==1) {sect=ECALbank.getByte("sector",l);energy_pcal_E=ECALbank.getFloat("energy",l);}
-							if(ECALbank.getInt("layer",l)==4 || ECALbank.getInt("layer",l)==7) {energy_ecal_E += ECALbank.getFloat("energy",l);}
+                                                	if(ECALbank.getInt("layer",l)==1) {sect_pcal=ECALbank.getByte("sector",l);energy_pcal_E=ECALbank.getFloat("energy",l);}
+							if(ECALbank.getInt("layer",l)==4 || ECALbank.getInt("layer",l)==7) {sect_ecal = ECALbank.getByte("sector",l);energy_ecal_E += ECALbank.getFloat("energy",l);}
+							if(ECALbank.getInt("layer",l)==7) {energy_ecalout_E = ECALbank.getFloat("energy",l);}
                                         }
 				//if (energy_ecal_E > 0.04 && energy_pcal_E > 0.01 && sect > 0) {
-				if (energy_ecal_E  >= 0.0 && energy_pcal_E >= 0.) {
-
-				//System.out.println("charge="+q+" pid="+pid+" tofsect="+isFTOFmatch(event,k)+" ecalsect="+isECALmatch(event,k)+" dcsect="+isDCmatch(event,k)+" pcalsect="+sect+ " " +trigger_bits[7]+ " " +trigger_bits[8]+ " " +trigger_bits[9]);
+				if (energy_ecal_E  > 0.0) { 
+					if (trigger_bits[sect+6]) {
+						H_muontrig_ecal_en_neg_S[sect-1].fill(energy_ecal_E*1000);
+					}
+					if (sect <=3 && trigger_bits[sect+9]) {
+						H_muontrig_ecal_en_pos_S[sect-1].fill(energy_ecal_E*1000); 
+//System.out.println("Event number="+event_number+" charge="+q+" pid="+pid+" tofsect="+isFTOFmatch(event,k)+" ecalsect="+sect_ecal+" dcsect="+isDCmatch(event,k)+" Two-sector trigger bits: "+trigger_bits[sect_ecal+6]+" ECal Energy = "+energy_ecal_E*1000.+" PCal Energy = "+energy_pcal_E*1000);
+					}
+					if (sect >=4 && trigger_bits[sect+3]) {
+                                                H_muontrig_ecal_en_pos_S[sect-1].fill(energy_ecal_E*1000);
+//System.out.println("Event number="+event_number+" charge="+q+" pid="+pid+" tofsect="+isFTOFmatch(event,k)+" ecalsect="+sect_ecal+" dcsect="+isDCmatch(event,k)+" Two-sector trigger bits: "+trigger_bits[sect_ecal+6]+" ECal Energy = "+energy_ecal_E*1000.+" PCal Energy = "+energy_pcal_E*1000);
+					}
+				}
+				if (energy_pcal_E  > 0.0) {
+                                        if (trigger_bits[sect+6]) {
+                                                H_muontrig_pcal_en_neg_S[sect-1].fill(energy_pcal_E*1000);
+                                        }
+                                        if (sect >=1 && sect <=3 && trigger_bits[sect+9]) {
+                                                H_muontrig_pcal_en_pos_S[sect-1].fill(energy_pcal_E*1000);
+                                        }
+                                        if (sect <= 6 && sect >=4 && trigger_bits[sect+3]) {
+                                                H_muontrig_pcal_en_pos_S[sect-1].fill(energy_pcal_E*1000);
+					}
+				}
+				if (energy_ecal_E >= 0. && energy_pcal_E >= 0.) {
 					if(q==1) sectorp[sect-1]++;
                                         if(q==-1) sectorn[sect-1]++;
-				//System.out.println("sector = "+sect+" Number of+ = "+sectorp[sect-1]+" Number of - = "+sectorn[sect-1]);
+				}
+				if (energy_ecal_E  > 0. && energy_ecalout_E > 0.) {
+					if (trigger_bits[sect+6]) {H_muontrig_ECECOUT_en_S[sect-1].fill(energy_ecal_E*1000,energy_ecalout_E*1000.);}
 				}
                                 }
                         }
@@ -2504,10 +2619,12 @@ public class monitor2p2GeV {
 					}
 				}
 			}
-			else if (runNum > 6296) {
+			else if (runNum > 6296 && runNum < 11000) {
                                 if (trigger_bits[tbit] || trigger_bits[tbit+3]) {
 					 //if ((sectorp[kk]>=1 && sectorn[kk+3]>=1) || (sectorn[kk]>=1 && sectorp[kk+3]>=1)) {
                                         if ((sectorp[kk]+sectorn[kk]) >=1 && (sectorp[kk+3]+sectorn[kk+3]) >=1) {
+						//System.out.println("Event number="+event_number+" Trigger Purity fill loop");
+                                                //System.out.println("Event number="+event_number+" sector = "+sect+" Number of+ = "+sectorp[sect-1]+" Number of - = "+sectorn[sect-1]);
                                                 H_trig_sector_muon.fill(kk+1);
                                                 H_trig_sector_muon_rat.fill(kk+1);
                                                 Nmuonpairs[kk]++;
@@ -2516,7 +2633,22 @@ public class monitor2p2GeV {
                                         }
                                 }
                         }
+			else if (runNum >= 11000) {
+				if (trigger_bits[tbit] || trigger_bits[tbit+3]) {
+					if ((sectorp[kk] >=1 && (sectorn[kk+3]) >=1) || (sectorn[kk] >=1 && (sectorp[kk+3]) >=1)) {
+						//System.out.println("Event number="+event_number+" Trigger Purity fill loop");
+						//System.out.println("Event number="+event_number+" sectorA = "+(kk+1)+" Number of+ = "+sectorp[kk]+" Number of - = "+sectorn[kk]+" sectorB = "+(kk+1+3)+" Number of+ = "+sectorp[kk+3]+" Number of - = "+sectorn[kk+3]);
+						H_trig_sector_muon.fill(kk+1);
+                                                H_trig_sector_muon_rat.fill(kk+1);
+                                                Nmuonpairs[kk]++;
+                                                Nmuons++;
+                                                Ntrackspairpn[kk] = sectorp[kk]+sectorn[kk+3];
+						Ntrackspairnp[kk] = sectorn[kk]+sectorp[kk+3];
+					}
+				}
+			}
                 }
+		//System.out.println("End Event number="+event_number+" Number of muon pairs = "+Nmuons);
                 return 1;
 	}
 
@@ -3281,6 +3413,7 @@ public class monitor2p2GeV {
 		for(int i=1;i<7;i++)trigger_bits[i]=false;
 		if(event.hasBank("RUN::config")){
 			DataBank bank = event.getBank("RUN::config");
+			event_number = bank.getInt("event",0);
 			TriggerWord = bank.getLong("trigger",0);
 			//startTime   = bank.getFloat("startTime",0);
 			String TriggerString = Long.toBinaryString(TriggerWord);
@@ -3397,6 +3530,7 @@ public class monitor2p2GeV {
 			pip_part_ind = makePiPlusPID(partBank);
 			pim_part_ind = makePiMinusPID(partBank);
 			makePiPlusPimPID(partBank);
+			makeValidateRoads(partBank);
 			// if(pim_part_ind>-1)System.out.println("in main : "+pim_part_ind+" , "+pip_part_ind);
 		}
 		if(e_part_ind==-1)return;
@@ -3532,7 +3666,7 @@ public class monitor2p2GeV {
                         H_e_Q2.fill(e_Q2);
 			H_e_xB.fill(e_xB);
 			H_e_W.fill(e_W);
-			if(e_sect>0&&e_sect<7)H_e_W_S[e_sect-1].fill(e_W);
+			if(e_sect>0&&e_sect<7&&trigger_bits[e_sect]){H_e_W_S[e_sect-1].fill(e_W); H_e_Q2_S[e_sect-1].fill(e_Q2);}
 			//if(pip_part_ind>-1 && Math.abs(pip_vert_time-e_vert_time)<35 && pip_track_chi2<500 && e_track_chi2<500){}
 			if(pim_part_ind==-1 && pip_part_ind>-1 && Math.abs(pip_vert_time-e_vert_time)<5 && Math.abs(pip_beta-1) <0.1 && pip_track_chi2<500 && e_track_chi2<500){
 				H_pip_beta_p.fill(pip_mom,pip_beta);
@@ -3671,6 +3805,33 @@ public class monitor2p2GeV {
 	} //End ProcessEvent
 
         public void plot() {
+
+		EmbeddedCanvas can_Verification = new EmbeddedCanvas();
+		can_Verification.setSize(2400,1600);
+                can_Verification.divide(3,2);
+                can_Verification.setAxisTitleSize(24);
+                can_Verification.setAxisFontSize(24);
+                can_Verification.setTitleSize(24);
+                can_Verification.cd(0);can_Verification.draw(H_positive_theta_mom);
+		can_Verification.getPad(0).getAxisZ().setLog(true);
+		can_Verification.cd(1);can_Verification.draw(H_negative_theta_mom);
+		can_Verification.getPad(1).getAxisZ().setLog(true);
+		can_Verification.cd(2);can_Verification.draw(H_electron_theta_mom);
+		can_Verification.getPad(2).getAxisZ().setLog(true);
+		//can_Verification.cd(3);can_Verification.draw(H_dcp_theta_mom);
+		//can_Verification.cd(4);can_Verification.draw(H_dcm_theta_mom);
+		can_Verification.cd(3);can_Verification.draw(H_positive_theta_mom);
+                can_Verification.cd(4);can_Verification.draw(H_negative_theta_mom);
+                can_Verification.cd(5);can_Verification.draw(H_electron_theta_mom);
+                if(runNum>0){
+                        if(!write_volatile)can_Verification.save(String.format("plots"+runNum+"/Verification.png"));
+                        if(write_volatile)can_Verification.save(String.format("/volatile/clas12/rgb/spring19/plots"+runNum+"/Verification.png"));
+                        System.out.println(String.format("save plots"+runNum+"/Verification.png"));
+                }
+                else{
+                        can_Verification.save(String.format("plots/Verification.png"));
+                        System.out.println(String.format("save plots/Verification.png"));
+                }
 
 		EmbeddedCanvas can_TOF = new EmbeddedCanvas();
 		can_TOF.setSize(2400,1600);
@@ -3861,6 +4022,30 @@ public class monitor2p2GeV {
 			System.out.println(String.format("save plots/trig_sect.png"));
 		}
 
+		EmbeddedCanvas can_twosecttrig = new EmbeddedCanvas();
+		can_twosecttrig.setSize(3000,2000);
+		can_twosecttrig.divide(6,5);
+		can_twosecttrig.setAxisTitleSize(24);
+                can_twosecttrig.setAxisFontSize(24);
+                can_twosecttrig.setTitleSize(24);
+		for(int s=0;s<6;s++){
+                	can_twosecttrig.cd(s);can_twosecttrig.draw(H_muontrig_ecal_en_neg_S[s]);
+                       	can_twosecttrig.cd(s+6);can_twosecttrig.draw(H_muontrig_ecal_en_pos_S[s]); 
+			can_twosecttrig.cd(s+12);can_twosecttrig.draw(H_muontrig_pcal_en_neg_S[s]);
+			can_twosecttrig.cd(s+18);can_twosecttrig.draw(H_muontrig_pcal_en_pos_S[s]);
+			can_twosecttrig.cd(s+24);can_twosecttrig.draw(H_muontrig_ECECOUT_en_S[s]);
+                }
+		
+		if(runNum>0){
+                        if(!write_volatile)can_twosecttrig.save(String.format("plots"+runNum+"/twosect_trig.png"));
+                        if(write_volatile)can_twosecttrig.save(String.format("/volatile/clas12/rgb/spring19/plots"+runNum+"/twosect_trig.png"));
+                        System.out.println(String.format("save plots"+runNum+"/twosect_trig.png"));
+                }
+                else{
+                        can_twosecttrig.save(String.format("plots/twosect_trig.png"));
+                        System.out.println(String.format("save plots/twosect_trig.png"));
+                }
+
 		EmbeddedCanvas can_e_pip = new EmbeddedCanvas();
 		can_e_pip.setSize(3500,3000);//checkpoint_central
 		can_e_pip.divide(7,6);
@@ -4049,6 +4234,15 @@ public class monitor2p2GeV {
 		F1D elasticElec = new F1D("elasticElec",String.format("2*57.296*asin(sqrt( 0.938*("+Ebeam+"-x)/(2*"+Ebeam+"*x) ))"),0.5,Ebeam);
 		elasticElec.setLineWidth(1);elasticElec.setLineColor(2);
 		can_e_ecal.draw(elasticElec,"same");
+		F1D Q2_1 = new F1D("Q2=0.5",String.format("acos((2*"+Ebeam+"*x-0.5)/(2*"+Ebeam+"*x))*180./3.141597"),0.1,Ebeam);
+		Q2_1.setLineWidth(3);Q2_1.setLineColor(2);
+		can_e_ecal.draw(Q2_1,"same");
+		F1D Q2_2 = new F1D("Q2=1.0",String.format("acos((2*"+Ebeam+"*x-1.)/(2*"+Ebeam+"*x))*180./3.141597"),0.1,Ebeam);
+                Q2_2.setLineWidth(3);Q2_2.setLineColor(2);
+                can_e_ecal.draw(Q2_2,"same");
+		F1D Q2_3 = new F1D("Q2=2.0",String.format("acos((2*"+Ebeam+"*x-2.)/(2*"+Ebeam+"*x))*180./3.141597"),0.1,Ebeam);
+                Q2_3.setLineWidth(3);Q2_3.setLineColor(2);
+                can_e_ecal.draw(Q2_3,"same");
 		can_e_ecal.getPad(1).getAxisY().setRange(0, 40);
 		can_e_ecal.cd(2);can_e_ecal.draw(H_e_phi_mom);
 
@@ -4321,8 +4515,8 @@ public class monitor2p2GeV {
 		}
 
 		EmbeddedCanvas can_e_phys = new EmbeddedCanvas();
-		can_e_phys.setSize(1500,1500);
-		can_e_phys.divide(3,1);
+		can_e_phys.setSize(6000,1500);
+		can_e_phys.divide(6,3);
 		can_e_phys.setAxisTitleSize(18);
 		can_e_phys.setAxisFontSize(18);
 		can_e_phys.setTitleSize(18);
@@ -4332,6 +4526,13 @@ public class monitor2p2GeV {
 		can_e_phys.getPad(1).getAxisZ().setLog(true);
 		can_e_phys.cd(2);can_e_phys.draw(H_e_xB_W);
 		can_e_phys.getPad(2).getAxisZ().setLog(true);
+		for(int s=0;s<6;s++){
+			can_e_phys.cd(s+6);can_e_phys.draw(H_e_Q2_S[s]);
+			can_e_phys.getPad(s+6).getAxisY().setLog(true);
+		}
+		for(int s=0;s<6;s++){
+                        can_e_phys.cd(s+12);can_e_phys.draw(H_e_Q2_S[s]);
+                }
 		if(runNum>0){
 			if(!write_volatile)can_e_phys.save(String.format("plots"+runNum+"/e_phys.png"));
 			if(write_volatile)can_e_phys.save(String.format("/volatile/clas12/rgb/spring19/plots"+runNum+"/e_phys.png"));
@@ -4513,6 +4714,18 @@ public class monitor2p2GeV {
 
 	}
         public void write() {
+
+		TDirectory verify = new TDirectory();
+                verify.mkdir("/roads");
+                verify.cd("/roads");
+		verify.addDataSet(H_positive_theta_mom,H_negative_theta_mom,H_electron_theta_mom);                
+		if(write_volatile) if(runNum>0)verify.writeFile("/volatile/clas12/rgb/spring19/plots"+runNum+"/verify_distributions_"+runNum+".hipo");
+
+                if(!write_volatile){
+                        if(runNum>0)verify.writeFile("plots"+runNum+"/verify_distributions_"+runNum+".hipo");
+                        else verify.writeFile("plots/verify_distributions.hipo");
+                }
+
                 TDirectory dirout = new TDirectory();
 		dirout.mkdir("/elec/");
 		dirout.cd("/elec/");
