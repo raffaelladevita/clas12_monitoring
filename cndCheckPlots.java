@@ -443,7 +443,7 @@ public class cndCheckPlots {
 								}
 						}
 
-						if(layer>0 && layer<4 && trkID>-1 && STT>-999 && pidTrigger==11){
+						if(layer>0 && layer<4 && trkID>-1 && STT>-999){
 								float tx = CNDbank.getFloat("tx",iCND);
 								float ty = CNDbank.getFloat("ty",iCND);
 								float tz = CNDbank.getFloat("tz",iCND);
