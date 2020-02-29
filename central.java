@@ -262,7 +262,7 @@ public class central {
 							H_CVT_t[pad].fill(CTOFTime-STT);
 							H_CVT_t[49].fill(CTOFTime-STT);
 							H_CTOF_edep_pad_neg.fill(pad,edep_cor);
-							H_CVT_t_neg.fill(CTOFTime-STT);
+							if(p>0.5) H_CVT_t_neg.fill(CTOFTime-STT);
 							H_CTOF_neg_mass.fill(CTOFmass);
 							H_CTOF_edep_neg.fill(edep_cor);
 							//pi- fiducial cut borrowing from Pierre's CND
@@ -276,7 +276,7 @@ public class central {
 						}
 						if (charge>0 && e_part_ind != -1) {
 							H_CTOF_edep_pad_pos.fill(pad,edep_cor);
-							H_CVT_t_pos.fill(CTOFTime-STT);
+							if(p>0.5) H_CVT_t_pos.fill(CTOFTime-STT);
 							H_CTOF_pos_mass.fill(CTOFmass);
 						}
 						matched = true;
