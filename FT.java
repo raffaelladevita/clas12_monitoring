@@ -116,11 +116,11 @@ public class FT {
 			hi_hodo_ematch_2D[layer] = new H2F(String.format("hi_hodo_ematch_2D_l%d",layer+1), String.format("hi_hodo_ematch_2D_l%d",layer+1), 100, 0, 10 , 118, 0, 118);
             hi_hodo_ematch_2D[layer].setTitleX("E (MeV)");
             hi_hodo_ematch_2D[layer].setTitleY("Tile");
-			hi_hodo_tmatch[layer] = new H1F(String.format("hi_hodo_tmatch_l%d",layer+1),  String.format("hi_hodo_tmatch_l%d",layer+1), 100, -50, 50);
+			hi_hodo_tmatch[layer] = new H1F(String.format("hi_hodo_tmatch_l%d",layer+1),  String.format("hi_hodo_tmatch_l%d",layer+1), 400, -50, 50);
 			hi_hodo_tmatch[layer].setTitleX(String.format("T-T_start (ns)"));
 			hi_hodo_tmatch[layer].setTitleY(String.format("Counts"));
             hi_hodo_tmatch[layer].setFillColor(3);
-            hi_hodo_tmatch_2D[layer] = new H2F(String.format("hi_hodo_tmatch_2D_l%d",layer+1),  String.format("hi_hodo_tmatch_2D_l%d",layer+1), 100, -50, 50, 118, 0, 118);
+            hi_hodo_tmatch_2D[layer] = new H2F(String.format("hi_hodo_tmatch_2D_l%d",layer+1),  String.format("hi_hodo_tmatch_2D_l%d",layer+1), 200, -50, 50, 118, 0, 118);
             hi_hodo_tmatch_2D[layer].setTitleX("E (MeV)");
             hi_hodo_tmatch_2D[layer].setTitleY("Tile");
 
@@ -138,7 +138,7 @@ public class FT {
                 f_charge_landau_board[counter].setParameter(4,0.0);
                 f_charge_landau_board[counter].setOptStat(1111111);
                 f_charge_landau_board[counter].setLineWidth(2);
-                hi_hodo_tmatch_board[counter] = new H1F(String.format("hi_hodo_tmatch_l%d_b%d",layer+1,board+1),  String.format("hi_hodo_tmatch_l%d_b%d",layer+1,board+1), 100, -50, 50);
+                hi_hodo_tmatch_board[counter] = new H1F(String.format("hi_hodo_tmatch_l%d_b%d",layer+1,board+1),  String.format("hi_hodo_tmatch_l%d_b%d",layer+1,board+1), 200, -50, 50);
                 hi_hodo_tmatch_board[counter].setTitleX(String.format("T-T_start (ns)"));
                 hi_hodo_tmatch_board[counter].setTitleY(String.format("Counts"));
                 hi_hodo_tmatch_board[counter].setFillColor(3);
@@ -240,7 +240,7 @@ public class FT {
             }
 	}
 
-	public void fillFTHodo(DataBank HodoHits, DataBank HodoClusters) {
+	public void fillFTHodo(DataBank HodoHits, DataBank HodoClusters, DataBank ftParticles) {
 		for(int i=0; i<HodoHits.rows(); i++) {
 			int hodoC = HodoHits.getShort("clusterID",i);
 			int hodoS = HodoHits.getByte("sector",i);
@@ -296,7 +296,14 @@ public class FT {
                     hi_hodo_ematch[hodoL-1].fill(hodoHitE);
                     hi_hodo_ematch_2D[hodoL-1].fill(hodoHitE,tile);
                     hi_hodo_ematch_board[counter].fill(hodoHitE);
-                    if(startTime > -100) {
+                    int charge = 0;
+                    for(int k=0; k<ftParticles.rows(); k++) {
+                        if(ftParticles.getShort("hodoID",k)==clusterId) {
+                            charge=1;
+                            break;
+                        }
+                    }
+                    if(startTime > -100 && charge==1) {
                         hi_hodo_tmatch[hodoL-1].fill(hodoHitT-path/29.97-startTime);
                         hi_hodo_tmatch_board[counter].fill(hodoHitT-path/29.97-startTime);
                         hi_hodo_tmatch_2D[hodoL-1].fill(hodoHitT-path/29.97-startTime,tile);
@@ -318,7 +325,8 @@ public class FT {
                 double     cz = ftPart.getFloat("cz", loop);
                 int     calID = ftPart.getShort("calID", loop);
                 int    hodoID = ftPart.getShort("hodoID", loop);
-
+                double  theta = Math.toDegrees(Math.acos(cz));
+                
                 double energyR  = 0;
                 int    size     = 0;
                 double path     = 0;
@@ -333,27 +341,28 @@ public class FT {
                         time     = CalClusters.getFloat("time", i)-path/29.97;
                     }
                 }
-		hi_cal_clsize.fill(size);
+		boolean  good = energy>0.5 && energyR>0.3 && size > 3 && theta>2.5 && theta<4.5;
+                hi_cal_clsize.fill(size);
                 hi_cal_e_all.fill(energy);
                 hi_cal_clsize_en.fill(size, energy);
 
 		if (charge != 0) {
                     hi_cal_clsize_ch.fill(size);
                     hi_cal_e_ch.fill(energy);
-                    hi_cal_theta_ch.fill(Math.toDegrees(Math.acos(cz)));
+                    hi_cal_theta_ch.fill(theta);
                     hi_cal_phi_ch.fill(Math.toDegrees(Math.atan2(cy,cx)));
-                    if(rfTime!=-1000) {
+                    if(rfTime!=-1000 && good) {
 			hi_cal_time_ch.fill((time-rfTime+(rf_large_integer+0.5)*rfPeriod)%rfPeriod-0.5*rfPeriod);
                         if(energy>2) hi_cal_time_cut_ch.fill((time-rfTime+(rf_large_integer+0.5)*rfPeriod)%rfPeriod-0.5*rfPeriod);
                         hi_cal_time_e_ch.fill(energy,(time-rfTime+(rf_large_integer+0.5)*rfPeriod)%rfPeriod-0.5*rfPeriod);
-                        hi_cal_time_theta_ch.fill(Math.toDegrees(Math.acos(cz)),(time-rfTime+(rf_large_integer+0.5)*rfPeriod)%rfPeriod-0.5*rfPeriod);
+                        hi_cal_time_theta_ch.fill(theta,(time-rfTime+(rf_large_integer+0.5)*rfPeriod)%rfPeriod-0.5*rfPeriod);
                     }
                 }
 		else {
                     Particle recParticle = new Particle(22, energy*cx, energy*cy, energy*cz, 0,0,0);
                     if(energy>0.5 && size>3) gammas.add(recParticle);
                     hi_cal_e_neu.fill(energy);
-                    if(startTime!=-1000 && trigger==11) {
+                    if(startTime!=-1000 && trigger==11 && good) {
                         hi_cal_time_neu.fill(time-startTime);
                         if(energy>2) hi_cal_time_cut_neu.fill(time-startTime);
                         hi_cal_time_e_neu.fill(energy,time-startTime);
@@ -418,7 +427,7 @@ public class FT {
 
 		//Main Processing
 		if (ftParticles != null /*&& trigger_bits[25]*/) {
-			if (ftHodoHits != null && ftHodoClusters != null) fillFTHodo(ftHodoHits, ftHodoClusters);
+			if (ftHodoHits != null && ftHodoClusters != null && ftParticles != null) fillFTHodo(ftHodoHits, ftHodoClusters, ftParticles);
 			if (ftCalClusters != null) fillFTCalo(ftParticles, ftCalClusters);
 		} //End if ftParticle is not null
 		
