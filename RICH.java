@@ -43,13 +43,13 @@ public class RICH{
 		trigger_bits = new boolean[32];
 
 		String histitle = String.format("RICH  T_meas - T_calc Photons");
-		H_dt = new H1F(String.format("H_RICH_dt"),histitle,400,-50,50);
+		H_dt = new H1F(String.format("H_RICH_dt"),histitle,500,-150,50);
               	H_dt.setTitle(histitle);
                	H_dt.setTitleX("T_meas - T_calc (ns)");
                	H_dt.setTitleY("counts");
 
 		histitle = String.format("RICH Delta T vs channel");
-		H_dt_channel = new H2F(String.format("H_RICH_dt_channel"),histitle,nPMTS*nANODES,0.5,0.5+nPMTS*nANODES, 400, -50, 50);
+		H_dt_channel = new H2F(String.format("H_RICH_dt_channel"),histitle,nPMTS*nANODES,0.5,0.5+nPMTS*nANODES, 500, -150, 50);
 		H_dt_channel.setTitle(histitle);
                 H_dt_channel.setTitleX("channel");
                 H_dt_channel.setTitleY("T_meas - T_calc (ns)");
