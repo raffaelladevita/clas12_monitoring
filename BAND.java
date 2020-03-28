@@ -54,7 +54,7 @@ public class BAND{
 		H_BAND_adcCor = new H1F[2];
 		H_BAND_meantimeadc = new H1F[2];
 		H_BAND_meantimetdc = new H1F[2];
-
+  		H_BAND_lasertimeadc = new H1F[2];
 		speedoflight = 29.9792458f;
 
 		rfPeriod = 4.008f;
@@ -78,13 +78,13 @@ public class BAND{
 			H_BAND_adcCor[s] = new H1F(String.format("H_BAND_ADC_LR_SectorCombination%d",s+1),String.format("H_BAND_ADC_LR_SectorCombination %d",s+1),200,0.,6000.);
           	H_BAND_adcCor[s].setTitleX("sqrt( adcLcorr * adcRcorr )");
            	H_BAND_adcCor[s].setTitleY("events");
-			H_BAND_meantimeadc[s] = new H1F(String.format("H_BAND_MeanTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeFADC_SectorCombination %d",s+1),200,0.,500.);
-			H_BAND_meantimeadc[s].setTitleX("meantimeFadc – sqrt(x^2+y^2+z^2)/c (ns)");
+			H_BAND_meantimeadc[s] = new H1F(String.format("H_BAND_MeanTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeFADC_SectorCombination %d",s+1),200,0.,400.);
+			H_BAND_meantimeadc[s].setTitleX("meantimeFadc - sqrt(x^2+y^2+z^2)/c (ns)");
 			H_BAND_meantimeadc[s].setTitleY("events");
-			H_BAND_meantimetdc[s] = new H1F(String.format("H_BAND_MeanTimeTDC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeTDC_SectorCombination %d",s+1),200,200.,700.);
-            H_BAND_meantimetdc[s].setTitleX("meantimeTDC – sqrt(x^2+y^2+z^2)/c (ns)");
+			H_BAND_meantimetdc[s] = new H1F(String.format("H_BAND_MeanTimeTDC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeTDC_SectorCombination %d",s+1),250,200.,700.);
+            H_BAND_meantimetdc[s].setTitleX("meantimeTDC -  sqrt(x^2+y^2+z^2)/c (ns)");
             H_BAND_meantimetdc[s].setTitleY("events"); 
-			H_BAND_lasertimeadc[s] = new H1F(String.format("H_BAND_LaserTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_LaserTimeFADC_SectorCombination %d",s+1),400,100.,900.);
+			H_BAND_lasertimeadc[s] = new H1F(String.format("H_BAND_LaserTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_LaserTimeFADC_SectorCombination %d",s+1),400,250.,650.);
             H_BAND_lasertimeadc[s].setTitleX("meantimeFADC (ns)");
             H_BAND_lasertimeadc[s].setTitleY("events");                         
 		}
@@ -97,12 +97,13 @@ public class BAND{
 				int sect = 0;
 		
 				sect = bankhits.getInt("sector",k);
-		        time_fadc = bankhits.getFloat("timeFadc",k);
-		       							
+				
+  			        time_fadc = bankhits.getFloat("time",k);
+		       		//ignore sector 1 here					
 				if (sect == 3 || sect == 4) {
 					H_BAND_lasertimeadc[0].fill(time_fadc);
 				}
-				if (sect == 1 || sect == 2 || sect == 5) {
+				if (sect == 2 || sect == 5) {
 					H_BAND_lasertimeadc[1].fill(time_fadc);
 				}
 			}
