@@ -75,16 +75,16 @@ public class BAND{
 		}
 
 		for(int s=0;s<2;s++){
-			H_BAND_adcCor[s] = new H1F(String.format("H_BAND_ADC_LR_SectorCombination%d",s+1),String.format("H_BAND_ADC_LR_SectorCombination %d",s+1),200,0.,6000.);
+			H_BAND_adcCor[s] = new H1F(String.format("H_BAND_ADC_LR_SectorCombination%d",s+1),String.format("H_BAND_ADC_LR_SectorCombination %d",s+1),200,1.,5001.);
           	H_BAND_adcCor[s].setTitleX("sqrt( adcLcorr * adcRcorr )");
            	H_BAND_adcCor[s].setTitleY("events");
-			H_BAND_meantimeadc[s] = new H1F(String.format("H_BAND_MeanTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeFADC_SectorCombination %d",s+1),200,0.,400.);
+			H_BAND_meantimeadc[s] = new H1F(String.format("H_BAND_MeanTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeFADC_SectorCombination %d",s+1),200,1.,401.);
 			H_BAND_meantimeadc[s].setTitleX("meantimeFadc - sqrt(x^2+y^2+z^2)/c (ns)");
 			H_BAND_meantimeadc[s].setTitleY("events");
 			H_BAND_meantimetdc[s] = new H1F(String.format("H_BAND_MeanTimeTDC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeTDC_SectorCombination %d",s+1),250,200.,700.);
             H_BAND_meantimetdc[s].setTitleX("meantimeTDC -  sqrt(x^2+y^2+z^2)/c (ns)");
             H_BAND_meantimetdc[s].setTitleY("events"); 
-			H_BAND_lasertimeadc[s] = new H1F(String.format("H_BAND_LaserTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_LaserTimeFADC_SectorCombination %d",s+1),400,250.,650.);
+			H_BAND_lasertimeadc[s] = new H1F(String.format("H_BAND_LaserTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_LaserTimeFADC_SectorCombination %d",s+1),400,1.,401.);
             H_BAND_lasertimeadc[s].setTitleX("meantimeFADC (ns)");
             H_BAND_lasertimeadc[s].setTitleY("events");                         
 		}
@@ -149,11 +149,7 @@ public class BAND{
 	public void processEvent(DataEvent event){
 		e_part_ind = -1;
 		RFtime=0;
-		//DataBank bandhits = null;
-		//if(event.hasBank("BAND::hits")) {
-		//	bandhits = event.getBank("BAND::hits");
-		//	fill_Histograms_Hits(bandhits);
-                //                }
+		
 		if(event.hasBank("RUN::config")){
 			DataBank confbank = event.getBank("RUN::config");
 			long TriggerWord = confbank.getLong("trigger",0);
