@@ -31,7 +31,7 @@ public class BAND{
         public int e_part_ind, e_sect, e_track_ind, pip_part_ind, pipm_part_ind, pip_sect, pim_sect;
         public float RFtime, e_mom, e_theta, e_phi, e_vx, e_vy, e_vz, e_ecal_X, e_ecal_Y, e_ecal_Z, e_ecal_E, e_track_chi2, e_vert_time, e_vert_time_RF, e_Q2, e_xB, e_W;
 
-	public H1F[] H_BAND_adcCor, H_BAND_meantimeadc, H_BAND_meantimetdc;
+	public H1F[] H_BAND_adcCor, H_BAND_meantimeadc, H_BAND_meantimetdc, H_BAND_lasertimeadc;
 	public float speedoflight;
 
 	public IndexedTable InverseTranslationTable;
@@ -54,7 +54,7 @@ public class BAND{
 		H_BAND_adcCor = new H1F[2];
 		H_BAND_meantimeadc = new H1F[2];
 		H_BAND_meantimetdc = new H1F[2];
-
+  		H_BAND_lasertimeadc = new H1F[2];
 		speedoflight = 29.9792458f;
 
 		rfPeriod = 4.008f;
@@ -75,52 +75,72 @@ public class BAND{
 		}
 
 		for(int s=0;s<2;s++){
-			H_BAND_adcCor[s] = new H1F(String.format("H_BAND_ADC_LR_SectorCombination%d",s+1),String.format("H_BAND_ADC_LR_SectorCombination %d",s+1),200,0.,6000.);
-                	H_BAND_adcCor[s].setTitleX("sqrt( adcLcorr * adcRcorr )");
-                	H_BAND_adcCor[s].setTitleY("events");
-			H_BAND_meantimeadc[s] = new H1F(String.format("H_BAND_MeanTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeFADC_SectorCombination %d",s+1),200,0.,500.);
-			H_BAND_meantimeadc[s].setTitleX("meantimeFadc – sqrt(x^2+y^2+z^2)/c (ns)");
+			H_BAND_adcCor[s] = new H1F(String.format("H_BAND_ADC_LR_SectorCombination%d",s+1),String.format("H_BAND_ADC_LR_SectorCombination %d",s+1),200,1.,5001.);
+          	H_BAND_adcCor[s].setTitleX("sqrt( adcLcorr * adcRcorr )");
+           	H_BAND_adcCor[s].setTitleY("events");
+			H_BAND_meantimeadc[s] = new H1F(String.format("H_BAND_MeanTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeFADC_SectorCombination %d",s+1),200,1.,401.);
+			H_BAND_meantimeadc[s].setTitleX("meantimeFadc - sqrt(x^2+y^2+z^2)/c (ns)");
 			H_BAND_meantimeadc[s].setTitleY("events");
-			H_BAND_meantimetdc[s] = new H1F(String.format("H_BAND_MeanTimeTDC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeTDC_SectorCombination %d",s+1),200,200.,700.);
-                        H_BAND_meantimetdc[s].setTitleX("meantimeTDC – sqrt(x^2+y^2+z^2)/c (ns)");
-                        H_BAND_meantimetdc[s].setTitleY("events"); 
+			H_BAND_meantimetdc[s] = new H1F(String.format("H_BAND_MeanTimeTDC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeTDC_SectorCombination %d",s+1),250,200.,700.);
+            H_BAND_meantimetdc[s].setTitleX("meantimeTDC -  sqrt(x^2+y^2+z^2)/c (ns)");
+            H_BAND_meantimetdc[s].setTitleY("events"); 
+			H_BAND_lasertimeadc[s] = new H1F(String.format("H_BAND_LaserTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_LaserTimeFADC_SectorCombination %d",s+1),400,1.,401.);
+            H_BAND_lasertimeadc[s].setTitleX("meantimeFADC (ns)");
+            H_BAND_lasertimeadc[s].setTitleY("events");                         
 		}
 	}
 
-	public void fill_Histograms_Hits(DataBank bankhits) {
-		for(int k = 0; k < bankhits.rows(); k++){
-			float adcL;
-			float adcR;
-			float time_fadc;
-			float time_tdc;
-			float x, y, z, L;
-			int sect = 0;
-			float histo1, histo2, histo3;
-
-                        sect = bankhits.getInt("sector",k);
-
-			adcL = bankhits.getFloat("adcLcorr",k);
-			adcR = bankhits.getFloat("adcRcorr",k);
-			histo1 = (float)Math.sqrt(adcL*adcR);
-
-			x = bankhits.getFloat("x",k);
-			y = bankhits.getFloat("y",k);
-			z = bankhits.getFloat("z",k);
-			time_fadc = bankhits.getFloat("meantimeFadc",k);
-			time_tdc = bankhits.getFloat("meantimeTdc",k);
-			L = (float)Math.sqrt(x*x+y*y+z*z);
-			histo2 = time_fadc - L/speedoflight;
-			histo3 = time_tdc - L/speedoflight;
-			
-			if (sect == 3 || sect == 4) {
-				H_BAND_adcCor[0].fill(histo1);
-				H_BAND_meantimeadc[0].fill(histo2);
-				H_BAND_meantimetdc[0].fill(histo3);
+	public void fill_Histograms_Hits(DataBank bankhits, int lasercondition) {
+		if (lasercondition == 1) { //for laser hits
+			for(int k = 0; k < bankhits.rows(); k++){
+				float time_fadc;
+				int sect = 0;
+		
+				sect = bankhits.getInt("sector",k);
+				
+  			        time_fadc = bankhits.getFloat("time",k);
+		       		//ignore sector 1 here					
+				if (sect == 3 || sect == 4) {
+					H_BAND_lasertimeadc[0].fill(time_fadc);
+				}
+				if (sect == 2 || sect == 5) {
+					H_BAND_lasertimeadc[1].fill(time_fadc);
+				}
 			}
-			if (sect == 1 || sect == 2 || sect == 5) {
-				H_BAND_adcCor[1].fill(histo1);
-				H_BAND_meantimeadc[1].fill(histo2);
-                                H_BAND_meantimetdc[1].fill(histo3);
+			
+		}
+		else {
+			for(int k = 0; k < bankhits.rows(); k++){
+				float time_fadc;
+				float time_tdc;
+				float x, y, z, L;
+				int sect = 0;
+				float histo1, histo2, histo3;
+
+				sect = bankhits.getInt("sector",k);
+				
+			    histo1 = bankhits.getFloat("energy",k);
+
+		        x = bankhits.getFloat("x",k);
+		        y = bankhits.getFloat("y",k);
+		        z = bankhits.getFloat("z",k);
+		        time_fadc = bankhits.getFloat("timeFadc",k);
+		        time_tdc = bankhits.getFloat("time",k);
+
+				L = (float)Math.sqrt(x*x+y*y+z*z);
+				histo2 = time_fadc - L/speedoflight;
+				histo3 = time_tdc - L/speedoflight;
+			
+				if (sect == 3 || sect == 4) {
+					H_BAND_adcCor[0].fill(histo1);
+					H_BAND_meantimeadc[0].fill(histo2);
+					H_BAND_meantimetdc[0].fill(histo3);
+				}
+				if (sect == 1 || sect == 2 || sect == 5) {
+					H_BAND_adcCor[1].fill(histo1);
+					H_BAND_meantimeadc[1].fill(histo2);
+                    H_BAND_meantimetdc[1].fill(histo3);
+				}
 			}
 		}
 	}
@@ -129,11 +149,7 @@ public class BAND{
 	public void processEvent(DataEvent event){
 		e_part_ind = -1;
 		RFtime=0;
-		//DataBank bandhits = null;
-		//if(event.hasBank("BAND::hits")) {
-		//	bandhits = event.getBank("BAND::hits");
-		//	fill_Histograms_Hits(bandhits);
-                //                }
+		
 		if(event.hasBank("RUN::config")){
 			DataBank confbank = event.getBank("RUN::config");
 			long TriggerWord = confbank.getLong("trigger",0);
@@ -144,7 +160,7 @@ public class BAND{
 				}    
 			}
                 	DataBank partBank = null, trackBank = null, trackDetBank = null, ecalBank = null, cherenkovBank = null, scintillBank = null;
-			DataBank trajBank = null, ltccadcBank = null, ltccClusters = null, bandhits = null;
+			DataBank trajBank = null, ltccadcBank = null, ltccClusters = null, bandhits = null, bandlaser = null;
                 	if(userTimeBased){
                         	if(event.hasBank("REC::Particle"))partBank = event.getBank("REC::Particle");
                         	if(event.hasBank("REC::Track"))trackBank = event.getBank("REC::Track");
@@ -158,6 +174,10 @@ public class BAND{
 				if(event.hasBank("BAND::hits")) {
 					bandhits = event.getBank("BAND::hits");
 				}
+				if(event.hasBank("BAND::laser")) {
+					bandlaser = event.getBank("BAND::laser");
+				}
+				
                 	}
                 	if(!userTimeBased){
                         	if(event.hasBank("RECHB::Particle"))partBank = event.getBank("RECHB::Particle");
@@ -170,18 +190,22 @@ public class BAND{
 				if(event.hasBank("LTCC::adc"))ltccadcBank = event.getBank("LTCC::adc");
 				if(event.hasBank("LTCC::clusters"))ltccClusters = event.getBank("LTCC::clusters");
 				if(event.hasBank("BAND::hits")) bandhits = event.getBank("BAND::hits");
+				if(event.hasBank("BAND::laser")) bandlaser = event.getBank("BAND::laser");				
                 	}
 
 			if(bandhits!=null) {
-				fill_Histograms_Hits(bandhits);
+				fill_Histograms_Hits(bandhits, 0); //Fill only histograms for real BAND hits
+			}
+			if(bandlaser!=null) {
+				fill_Histograms_Hits(bandlaser,1); //Fill only histograms for BAND laser hits
 			}
 		}
 	}
 
         public void plot() {
 		EmbeddedCanvas can_BAND  = new EmbeddedCanvas();
-		can_BAND.setSize(2500,1500);
-		can_BAND.divide(3,1);
+		can_BAND.setSize(2500,2000);
+		can_BAND.divide(2,2);
 		can_BAND.setAxisTitleSize(24);
 		can_BAND.setAxisFontSize(30);
 		can_BAND.setTitleSize(24);
@@ -189,12 +213,15 @@ public class BAND{
 		H_BAND_adcCor[0].setLineColor(2);
 		H_BAND_meantimeadc[0].setLineColor(2);
 		H_BAND_meantimetdc[0].setLineColor(2);
+		H_BAND_lasertimeadc[0].setLineColor(2);		
 		H_BAND_adcCor[1].setLineColor(4);
-                H_BAND_meantimeadc[1].setLineColor(4);
-                H_BAND_meantimetdc[1].setLineColor(4);
+        H_BAND_meantimeadc[1].setLineColor(4);
+        H_BAND_meantimetdc[1].setLineColor(4);
+        H_BAND_lasertimeadc[1].setLineColor(4);    
 		can_BAND.cd(0);can_BAND.draw(H_BAND_adcCor[0]);can_BAND.draw(H_BAND_adcCor[1],"same");
 		can_BAND.cd(1);can_BAND.draw(H_BAND_meantimeadc[0]);can_BAND.draw(H_BAND_meantimeadc[1],"same");
 		can_BAND.cd(2);can_BAND.draw(H_BAND_meantimetdc[0]);can_BAND.draw(H_BAND_meantimetdc[1],"same");
+		can_BAND.cd(3);can_BAND.draw(H_BAND_lasertimeadc[0]);can_BAND.draw(H_BAND_lasertimeadc[1],"same");		
 		if(runNum>0){
 			if(!write_volatile)can_BAND.save(String.format("plots"+runNum+"/BAND.png"));
 			if(write_volatile)can_BAND.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/BAND.png"));
@@ -264,7 +291,7 @@ public class BAND{
 		dirout.mkdir("/BAND/");
 		dirout.cd("/BAND/");
 		for(int j=0;j<2;j++){
-			dirout.addDataSet(H_BAND_adcCor[j], H_BAND_meantimeadc[j], H_BAND_meantimetdc[j]);
+			dirout.addDataSet(H_BAND_adcCor[j], H_BAND_meantimeadc[j], H_BAND_meantimetdc[j], H_BAND_lasertimeadc[j]);
 		}
 		if(!write_volatile){
 			if(runNum>0)dirout.writeFile("plots"+runNum+"/out_BAND_"+runNum+".hipo");
