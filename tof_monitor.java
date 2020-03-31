@@ -47,29 +47,29 @@ public class tof_monitor {
 		public long timestamp;
 
 		public IndexedTable InverseTranslationTable;
-        	public IndexedTable calibrationTranslationTable;
-        	public IndexedTable rfTable, rfTableOffset;
-        	public ConstantsManager ccdb;
+    	public IndexedTable calibrationTranslationTable;
+    	public IndexedTable rfTable, rfTableOffset;
+    	public ConstantsManager ccdb;
 
-	public tof_monitor(int reqrunNum, boolean reqTimeBased, boolean reqwrite_volatile) {
+		public tof_monitor(int reqrunNum, boolean reqTimeBased, boolean reqwrite_volatile) {
 		runNum = reqrunNum;userTimeBased=reqTimeBased;
 	
 		rfPeriod = 4.008f;
-               	ccdb = new ConstantsManager();
-               	ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset"}));
-               	rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
-               	if (rfTable.hasEntry(1, 1, 1)){
-               		System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
-               		rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
-               	}
-               	rf_large_integer = 1000;
-               	rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
-               	if (rfTableOffset.hasEntry(1, 1, 1)){
-               		rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
-               		rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
-               		System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
-               		System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
-                }
+       	ccdb = new ConstantsManager();
+       	ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset"}));
+       	rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
+       	if (rfTable.hasEntry(1, 1, 1)){
+       		System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
+       		rfPeriod = (float)rfTable.getDoubleValue("clock",1,1,1);
+       	}
+       	rf_large_integer = 1000;
+       	rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
+       	if (rfTableOffset.hasEntry(1, 1, 1)){
+       		rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
+       		rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
+       		System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
+       		System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
+        }
 		p1a_counter_thickness = 5.0f; //cm
 		phase_offset = 3; //RGA Fall 2018, RGB Spring 2019, RGA Spring 2019
 		p1b_counter_thickness = 6.0f; //cm
@@ -111,11 +111,11 @@ public class tof_monitor {
 		p1b_pad_dt = new H2F[6];
 		p2_pad_dt = new H2F[6];
 		p1a_pad_dt_calib = new H2F[6];
-                p1b_pad_dt_calib = new H2F[6];
-                p2_pad_dt_calib = new H2F[6];
+        p1b_pad_dt_calib = new H2F[6];
+        p2_pad_dt_calib = new H2F[6];
 		p1a_dt_calib_all = new H1F[6];
-                p1b_dt_calib_all = new H1F[6];
-                p2_dt_calib_all = new H1F[6];
+        p1b_dt_calib_all = new H1F[6];
+        p2_dt_calib_all = new H1F[6];
 		p1a_edep = new H1F[6][3];
 		p1b_edep = new H1F[6][3];
 		p2_edep = new H1F[6];
@@ -166,29 +166,29 @@ public class tof_monitor {
 			p2_pad_dt[s].setTitleY("time");
 //FTOF vertex time differences are to be plotted in 25-ps-wide bins
 			p1a_pad_dt_calib[s] = new H2F(String.format("p1a_pad_dt_S%d",s+1),String.format("p1a_pad_dt_S%d",s+1),25,0,25,160,-2.000,2.000);
-                        p1a_pad_dt_calib[s].setTitle(String.format("p1a S%d FTOF vertex t - RFTime",s+1));
-                        p1a_pad_dt_calib[s].setTitleX("paddle");
-                        p1a_pad_dt_calib[s].setTitleY("FTOF vertex t - RFTime (ns)");
-                        p1b_pad_dt_calib[s] = new H2F(String.format("p1b_pad_dt_S%d",s+1),String.format("p1b_pad_dt_S%d",s+1),65,0,65,160,-2.000,2.000);
-                        p1b_pad_dt_calib[s].setTitle(String.format("p1b S%d FTOF vertex t - RFTime",s+1));
-                        p1b_pad_dt_calib[s].setTitleX("paddle");
-                        p1b_pad_dt_calib[s].setTitleY("FTOF vertex t - RFTime (ns)");
-                        p2_pad_dt_calib[s] = new H2F(String.format("p2_pad_dt_S%d",s+1),String.format("p2_pad_dt_S%d",s+1),5,1,6,960,-12,12);
-                        p2_pad_dt_calib[s].setTitle(String.format("p2 S%d FTOF vertex t - RFTime",s+1));
-                        p2_pad_dt_calib[s].setTitleX("paddle");
-                        p2_pad_dt_calib[s].setTitleY("FTOF vertex t - RFTime (ns)");
+            p1a_pad_dt_calib[s].setTitle(String.format("p1a S%d FTOF vertex t - RFTime",s+1));
+            p1a_pad_dt_calib[s].setTitleX("paddle");
+            p1a_pad_dt_calib[s].setTitleY("FTOF vertex t - RFTime (ns)");
+            p1b_pad_dt_calib[s] = new H2F(String.format("p1b_pad_dt_S%d",s+1),String.format("p1b_pad_dt_S%d",s+1),65,0,65,160,-2.000,2.000);
+            p1b_pad_dt_calib[s].setTitle(String.format("p1b S%d FTOF vertex t - RFTime",s+1));
+            p1b_pad_dt_calib[s].setTitleX("paddle");
+            p1b_pad_dt_calib[s].setTitleY("FTOF vertex t - RFTime (ns)");
+            p2_pad_dt_calib[s] = new H2F(String.format("p2_pad_dt_S%d",s+1),String.format("p2_pad_dt_S%d",s+1),5,1,6,960,-12,12);
+            p2_pad_dt_calib[s].setTitle(String.format("p2 S%d FTOF vertex t - RFTime",s+1));
+            p2_pad_dt_calib[s].setTitleX("paddle");
+            p2_pad_dt_calib[s].setTitleY("FTOF vertex t - RFTime (ns)");
 			p1a_dt_calib_all[s] = new H1F(String.format("p1a_dt_S%d",s+1),String.format("p1a_dt_S%d",s+1),160,-2.000,2.000);
 			p1a_dt_calib_all[s].setTitle(String.format("p1a S%d FTOF vertex t - RFTime",s+1));
-                        p1a_dt_calib_all[s].setTitleX("FTOF vertex t - RFTime (ns)");
-                        p1a_dt_calib_all[s].setTitleY("counts");
-                        p1b_dt_calib_all[s] = new H1F(String.format("p1b_dt_S%d",s+1),String.format("p1b_dt_S%d",s+1),160,-2.000,2.000);
-                        p1b_dt_calib_all[s].setTitle(String.format("p1b S%d FTOF vertex t - RFTime",s+1));
-                        p1b_dt_calib_all[s].setTitleX("FTOF vertex t - RFTime (ns)");
-                        p1b_dt_calib_all[s].setTitleY("counts");
-                        p2_dt_calib_all[s] = new H1F(String.format("p2_dt_S%d",s+1),String.format("p2_dt_S%d",s+1),960,-12,12);
-                        p2_dt_calib_all[s].setTitle(String.format("p2 S%d FTOF vertex t - RFTime",s+1));
-                        p2_dt_calib_all[s].setTitleX("FTOF vertex t - RFTime (ns)");
-                        p2_dt_calib_all[s].setTitleY("counts");
+            p1a_dt_calib_all[s].setTitleX("FTOF vertex t - RFTime (ns)");
+            p1a_dt_calib_all[s].setTitleY("counts");
+            p1b_dt_calib_all[s] = new H1F(String.format("p1b_dt_S%d",s+1),String.format("p1b_dt_S%d",s+1),160,-2.000,2.000);
+            p1b_dt_calib_all[s].setTitle(String.format("p1b S%d FTOF vertex t - RFTime",s+1));
+            p1b_dt_calib_all[s].setTitleX("FTOF vertex t - RFTime (ns)");
+            p1b_dt_calib_all[s].setTitleY("counts");
+            p2_dt_calib_all[s] = new H1F(String.format("p2_dt_S%d",s+1),String.format("p2_dt_S%d",s+1),960,-12,12);
+            p2_dt_calib_all[s].setTitle(String.format("p2 S%d FTOF vertex t - RFTime",s+1));
+            p2_dt_calib_all[s].setTitleX("FTOF vertex t - RFTime (ns)");
+            p2_dt_calib_all[s].setTitleY("counts");
 
 			float[] DCcellsizeSL = {0.9f,0.9f,1.3f,1.3f,2.0f,2.0f};
 		
@@ -197,46 +197,46 @@ public class tof_monitor {
 			p1a_edep[s][0].setTitleX("E (MeV)");
 			p1a_edep[s][0].setTitleY("counts");
 			p1a_edep[s][1] = new H1F(String.format("p1a_edep_midangles_S%d",s+1),"p1a_edep_midangles",100,0.,30.);
-                       	p1a_edep[s][1].setTitle(String.format("p1a PathLCorrected Edep, mid angles, S%d",s+1));
-                       	p1a_edep[s][1].setTitleX("E (MeV)");
-                       	p1a_edep[s][1].setTitleY("counts");
+           	p1a_edep[s][1].setTitle(String.format("p1a PathLCorrected Edep, mid angles, S%d",s+1));
+           	p1a_edep[s][1].setTitleX("E (MeV)");
+           	p1a_edep[s][1].setTitleY("counts");
 			p1a_edep[s][2] = new H1F(String.format("p1a_edep_largeangles_S%d",s+1),"p1a_edep_largeangles",100,0.,30.);
-                       	p1a_edep[s][2].setTitle(String.format("p1a PathLCorrected Edep, large angles, S%d",s+1));
-                       	p1a_edep[s][2].setTitleX("E (MeV)");
-                       	p1a_edep[s][2].setTitleY("counts");
+           	p1a_edep[s][2].setTitle(String.format("p1a PathLCorrected Edep, large angles, S%d",s+1));
+           	p1a_edep[s][2].setTitleX("E (MeV)");
+           	p1a_edep[s][2].setTitleY("counts");
 
-                       	p1b_edep[s][0] = new H1F(String.format("p1b_edep_smallangles_S%d",s+1),"p1b_edep_smallangles",100,0.,30.);
-                       	p1b_edep[s][0].setTitle(String.format("p1b PathLCorrected Edep, small angles, S%d",s+1));
-                       	p1b_edep[s][0].setTitleX("E (MeV)");
-                       	p1b_edep[s][0].setTitleY("counts");
-                       	p1b_edep[s][1] = new H1F(String.format("p1b_edep_midangles_S%d",s+1),"p1b_edep_midangles",100,0.,30.);
-                       	p1b_edep[s][1].setTitle(String.format("p1b PathLCorrected Edep, mid angles, S%d",s+1));
-                       	p1b_edep[s][1].setTitleX("E (MeV)");
-                       	p1b_edep[s][1].setTitleY("counts");
-                       	p1b_edep[s][2] = new H1F(String.format("p1b_edep_largeangles_S%d",s+1),"p1b_edep_largeangles",100,0.,30.);
-                       	p1b_edep[s][2].setTitle(String.format("p1b PathLCorrected Edep, large angles, S%d",s+1));
-                       	p1b_edep[s][2].setTitleX("E (MeV)");
-                       	p1b_edep[s][2].setTitleY("counts");
+           	p1b_edep[s][0] = new H1F(String.format("p1b_edep_smallangles_S%d",s+1),"p1b_edep_smallangles",100,0.,30.);
+           	p1b_edep[s][0].setTitle(String.format("p1b PathLCorrected Edep, small angles, S%d",s+1));
+           	p1b_edep[s][0].setTitleX("E (MeV)");
+           	p1b_edep[s][0].setTitleY("counts");
+           	p1b_edep[s][1] = new H1F(String.format("p1b_edep_midangles_S%d",s+1),"p1b_edep_midangles",100,0.,30.);
+           	p1b_edep[s][1].setTitle(String.format("p1b PathLCorrected Edep, mid angles, S%d",s+1));
+           	p1b_edep[s][1].setTitleX("E (MeV)");
+           	p1b_edep[s][1].setTitleY("counts");
+           	p1b_edep[s][2] = new H1F(String.format("p1b_edep_largeangles_S%d",s+1),"p1b_edep_largeangles",100,0.,30.);
+           	p1b_edep[s][2].setTitle(String.format("p1b PathLCorrected Edep, large angles, S%d",s+1));
+           	p1b_edep[s][2].setTitleX("E (MeV)");
+           	p1b_edep[s][2].setTitleY("counts");
 
-                       	p2_edep[s] = new H1F(String.format("p2_edep_S%d",s+1),"p2_edep",100,0.,30.);
-                       	p2_edep[s].setTitle(String.format("p2 PathLCorrected Edep, S%d",s+1));
-                       	p2_edep[s].setTitleX("E (MeV)");
-                       	p2_edep[s].setTitleY("counts");
+           	p2_edep[s] = new H1F(String.format("p2_edep_S%d",s+1),"p2_edep",100,0.,30.);
+           	p2_edep[s].setTitle(String.format("p2 PathLCorrected Edep, S%d",s+1));
+           	p2_edep[s].setTitleX("E (MeV)");
+           	p2_edep[s].setTitleY("counts");
 
 			p1a_tdcadc_dt[s] =  new H1F(String.format("p1a_tdcadc_dt_S%d",s+1),"p1a_tdcadc",2250,-30.000,60.000);
-                        p1a_tdcadc_dt[s].setTitle(String.format("p1a t_tdc-t_fadc, S%d",s+1));
-                        p1a_tdcadc_dt[s].setTitleX("t_tdc-t_fadc (ns)");
-                        p1a_tdcadc_dt[s].setTitleY("counts");
+            p1a_tdcadc_dt[s].setTitle(String.format("p1a t_tdc-t_fadc, S%d",s+1));
+            p1a_tdcadc_dt[s].setTitleX("t_tdc-t_fadc (ns)");
+            p1a_tdcadc_dt[s].setTitleY("counts");
 
 			p1b_tdcadc_dt[s] =  new H1F(String.format("p1b_tdcadc_dt_S%d",s+1),"p1a_tdcadc",2250,-30.000,60.000);
-                        p1b_tdcadc_dt[s].setTitle(String.format("p1b t_tdc-t_fadc, S%d",s+1));
-                        p1b_tdcadc_dt[s].setTitleX("t_tdc-t_fadc (ns)");
-                        p1b_tdcadc_dt[s].setTitleY("counts");
+            p1b_tdcadc_dt[s].setTitle(String.format("p1b t_tdc-t_fadc, S%d",s+1));
+            p1b_tdcadc_dt[s].setTitleX("t_tdc-t_fadc (ns)");
+            p1b_tdcadc_dt[s].setTitleY("counts");
 
 			p2_tdcadc_dt[s] =  new H1F(String.format("p2_tdcadc_dt_S%d",s+1),"p1a_tdcadc",2250,-30.000,60.000);
-                        p2_tdcadc_dt[s].setTitle(String.format("p2 t_tdc-t_fadc, S%d",s+1));
-                        p2_tdcadc_dt[s].setTitleX("t_tdc-t_fadc (ns)");
-                        p2_tdcadc_dt[s].setTitleY("counts"); 
+            p2_tdcadc_dt[s].setTitle(String.format("p2 t_tdc-t_fadc, S%d",s+1));
+            p2_tdcadc_dt[s].setTitleX("t_tdc-t_fadc (ns)");
+            p2_tdcadc_dt[s].setTitleY("counts"); 
 
 			for(int sl=0;sl<6;sl++){
 				DC_residuals_trkDoca[s][sl] = new H2F(String.format("DC_residuals_trkDoca_%d_%d",s+1,sl+1),String.format("DC_residuals_trkDoca_%d_%d",s+1,sl+1),100,0,DCcellsizeSL[sl],100,-1,1);
@@ -247,9 +247,9 @@ public class tof_monitor {
 				DC_residuals[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
 				DC_residuals[s][sl].setTitleX("residual (cm)");
 				DC_time[s][sl] = new H1F(String.format("DC_Time_%d_%d",s+1,sl+1),String.format("DC_Time_%d_%d",s+1,sl+1),200,-100,1000);
-                               	DC_time[s][sl].setTitle(String.format("DC Time S%d SL%d",s+1,sl+1));
-                               	DC_time[s][sl].setTitleX("time (ns)");
-                        	DC_time[s][sl].setLineWidth(4);
+               	DC_time[s][sl].setTitle(String.format("DC Time S%d SL%d",s+1,sl+1));
+               	DC_time[s][sl].setTitleX("time (ns)");
+            	DC_time[s][sl].setLineWidth(4);
 				f_time_invertedS[s][sl] = new F1D(String.format("Inverted_S_%d_%d",s+1,sl+1),"[p0]/(1+exp(-[p1]*(x-[p2])))",-100,1000);
 				f_time_invertedS[s][sl].setOptStat("111111");
 			}
@@ -293,11 +293,11 @@ public class tof_monitor {
 			int TDC = ftoftdc.getInt("TDC",r);
 			for (int j=0;j<ftofadc.rows();j++) {
 				int sector_adc = ftofadc.getInt("sector",j);
-                        	int layer_adc = ftofadc.getInt("layer",j);
-                        	int component_adc = ftofadc.getInt("component",j);
+            	int layer_adc = ftofadc.getInt("layer",j);
+            	int component_adc = ftofadc.getInt("component",j);
 				int order_adc = ftofadc.getByte("order",j);
 				int adc_pmt = (component_adc-1)*2+order_adc+1;
-                        	float time_adc = ftofadc.getFloat("time",j);
+            	float time_adc = ftofadc.getFloat("time",j);
 				if (sector_adc == sector_tdc && layer_adc == layer_tdc && component_adc == component_tdc && adc_pmt == tdc_pmt) {
 					int triggerPhaseTOF = (int)((timestamp + phase_offset)%6);
 					float time_tdc = (float)TDC*0.02345f - (float)triggerPhaseTOF*4.f;
@@ -338,39 +338,67 @@ public class tof_monitor {
 						float timediff = -10.f;
 						float flighttime = -10.0f;
 						float vcor = -10.0f;
-						if (pid == 11) {flighttime = pathlength/29.98f; vcor = vz/29.98f;}
-						if (pid == 211 || pid == -211) {flighttime = pathlength/(float)(29.98f * mom/Math.sqrt(mom*mom+0.13957f*0.13957f)); vcor = vz/(float)(29.98f * mom/Math.sqrt(mom*mom+0.13957f*0.13957f));}
+						// electron's case
+						if (pid == 11) {
+							flighttime = pathlength/29.98f;
+							vcor = vz/29.98f;
+						}
+						// pi+, pi- case
+						else if (pid == 211 || pid == -211) {
+							flighttime = pathlength/(float)(29.98f * mom/Math.sqrt(mom*mom+0.13957f*0.13957f));
+							vcor = vz/(float)(29.98f * mom/Math.sqrt(mom*mom+0.13957f*0.13957f));
+						}
+						//proton case
+						else if (pid == 2212) {
+							flighttime = pathlength/(float)(29.98f * mom/Math.sqrt(mom*mom+0.93827f*0.93827f));
+							vcor = vz/(float)(29.98f * mom/Math.sqrt(mom*mom+0.93827f*0.93827f));
+						}
+						//otherwise skip
+						else continue;
+							
 						timediff = (float) (time - flighttime) - vt;
+
 						if (sc.getByte("layer",j)==1){
 							energy = energy*p1a_counter_thickness/path;
 						}
 						if (sc.getByte("layer",j)==2){
-                                                        energy = energy*p1b_counter_thickness/path;
-                                                }
+                            energy = energy*p1b_counter_thickness/path;
+                        }
 						if (sc.getByte("layer",j)==3){
-                                                        energy = energy*p2_counter_thickness/path;
-                                                }
-
-						if (charge == -1 && theta <= 11. && energy > 2.) {
-							if (sc.getByte("layer",j)==1) p1a_edep[sector-1][0].fill(energy);
-							if (sc.getByte("layer",j)==2) p1b_edep[sector-1][0].fill(energy);
-						}
-						if (charge == -1 && (theta > 11. && theta <=23) && energy > 2.) {
-							if (sc.getByte("layer",j)==1) p1a_edep[sector-1][1].fill(energy);
-                                                        if (sc.getByte("layer",j)==2) p1b_edep[sector-1][1].fill(energy);
-						}
-						if (charge == -1 && theta > 23. && energy > 2.) {
-							if (sc.getByte("layer",j)==1) p1a_edep[sector-1][2].fill(energy);
-                                                        if (sc.getByte("layer",j)==2) p1b_edep[sector-1][2].fill(energy);
-						}
-						if (charge ==-1 && energy >2.){
-							if (sc.getByte("layer",j)==3) p2_edep[sector-1].fill(energy);
+							energy = energy*p2_counter_thickness/path;
 						}
 
-						if (pid == 11 || pid == 211 || pid == -211) {
-							if (sc.getByte("layer",j)==1) {p1a_pad_dt_calib[sector-1].fill(pad,timediff); p1a_dt_calib_all[sector-1].fill(timediff);}
-							if (sc.getByte("layer",j)==2) {p1b_pad_dt_calib[sector-1].fill(pad,timediff); p1b_dt_calib_all[sector-1].fill(timediff);}
-							if (sc.getByte("layer",j)==3) {p2_pad_dt_calib[sector-1].fill(pad,timediff); p2_dt_calib_all[sector-1].fill(timediff);}
+						// panel 1a and 1b, use e-, pi+, pi-
+						if (pid == 11 || pid == 211 || pid == -211){
+							if (sc.getByte("layer",j)==1){
+								p1a_pad_dt_calib[sector-1].fill(pad,timediff);
+								p1a_dt_calib_all[sector-1].fill(timediff);
+								if (energy > 2.){
+									if (theta <= 11.) p1a_edep[sector-1][0].fill(energy);
+									if (theta > 11. && theta <=23) p1a_edep[sector-1][1].fill(energy);
+									if (theta > 23.) p1a_edep[sector-1][2].fill(energy);
+								}
+							}
+							if (sc.getByte("layer",j)==2){
+								p1b_pad_dt_calib[sector-1].fill(pad,timediff);
+								p1b_dt_calib_all[sector-1].fill(timediff);
+								if (energy > 2.){
+									if (theta <= 11.) p1b_edep[sector-1][0].fill(energy);
+									if (theta > 11. && theta <=23) p1b_edep[sector-1][1].fill(energy);
+									if (theta > 23.) p1b_edep[sector-1][2].fill(energy);
+								}
+							}
+						}
+
+						// panel 2, use p, pi+, p-
+						if (pid == 2212 || pid == 211 || pid == -211) {
+							if (sc.getByte("layer",j)==3){
+								p2_pad_dt_calib[sector-1].fill(pad,timediff);
+								p2_dt_calib_all[sector-1].fill(timediff);
+								if (energy >2.){
+								 p2_edep[sector-1].fill(energy);
+								}
+							}
 						}
 					}
 				}
@@ -584,14 +612,14 @@ public class tof_monitor {
 		}
 	}
 
-        public void plot() {
-                EmbeddedCanvas can_TOF_occ = new EmbeddedCanvas();
-                can_TOF_occ.setSize(3000,5000);
-                can_TOF_occ.divide(6,9);
-                can_TOF_occ.setAxisTitleSize(18);
-                can_TOF_occ.setAxisFontSize(18);
-                can_TOF_occ.setTitleSize(18);
-                for(int s=0;s<6;s++){
+    public void plot() {
+        EmbeddedCanvas can_TOF_occ = new EmbeddedCanvas();
+        can_TOF_occ.setSize(3000,5000);
+        can_TOF_occ.divide(6,9);
+        can_TOF_occ.setAxisTitleSize(18);
+        can_TOF_occ.setAxisFontSize(18);
+        can_TOF_occ.setTitleSize(18);
+        for(int s=0;s<6;s++){
 			can_TOF_occ.cd(s);can_TOF_occ.draw(p1a_pad_vt[s]);
 			//can_TOF_occ.getPad(6+s).getAxisZ().setLog(true);
 			can_TOF_occ.cd(6+s);can_TOF_occ.draw(p1b_pad_vt[s]);
@@ -622,54 +650,55 @@ public class tof_monitor {
 		}
 
 		EmbeddedCanvas can_TOF_calib = new EmbeddedCanvas();
-                can_TOF_calib.setSize(3000,5000);
-                can_TOF_calib.divide(6,13);
-                can_TOF_calib.setAxisTitleSize(18);
-                can_TOF_calib.setAxisFontSize(18);
-                can_TOF_calib.setTitleSize(18);
-                for(int s=0;s<6;s++){
-                        can_TOF_calib.cd(s);can_TOF_calib.draw(p1a_pad_dt_calib[s]);
+        can_TOF_calib.setSize(3000,5000);
+        can_TOF_calib.divide(6,13);
+        can_TOF_calib.setAxisTitleSize(18);
+        can_TOF_calib.setAxisFontSize(18);
+        can_TOF_calib.setTitleSize(18);
+        for(int s=0;s<6;s++){
+            can_TOF_calib.cd(s);can_TOF_calib.draw(p1a_pad_dt_calib[s]);
 			can_TOF_calib.cd(s+6);can_TOF_calib.draw(p1a_dt_calib_all[s]);
-                        can_TOF_calib.cd(s+12);can_TOF_calib.draw(p1b_pad_dt_calib[s]);
-                        can_TOF_calib.cd(s+18);can_TOF_calib.draw(p1b_dt_calib_all[s]);
-                        can_TOF_calib.cd(s+24);can_TOF_calib.draw(p2_pad_dt_calib[s]);
-                        can_TOF_calib.cd(s+30);can_TOF_calib.draw(p2_dt_calib_all[s]);
+            can_TOF_calib.cd(s+12);can_TOF_calib.draw(p1b_pad_dt_calib[s]);
+            can_TOF_calib.cd(s+18);can_TOF_calib.draw(p1b_dt_calib_all[s]);
+            can_TOF_calib.cd(s+24);can_TOF_calib.draw(p2_pad_dt_calib[s]);
+            can_TOF_calib.cd(s+30);can_TOF_calib.draw(p2_dt_calib_all[s]);
 			for (int k=0;k<3;k++) {
 				can_TOF_calib.cd(6*s+36+k);can_TOF_calib.draw(p1a_edep[s][k]);
 				can_TOF_calib.cd(6*s+36+k+3);can_TOF_calib.draw(p1b_edep[s][k]);
 			}	
-		can_TOF_calib.cd(s+72);can_TOF_calib.draw(p2_edep[s]);
-                }
-                if(runNum>0){
-                        if(!write_volatile)can_TOF_calib.save(String.format("plots"+runNum+"/TOF_calib.png"));
-                        if(write_volatile)can_TOF_calib.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/TOF_calib.png"));
-                        System.out.println(String.format("saved plots"+runNum+"/TOF_calib.png"));
-                }
-                else{
-                        can_TOF_occ.save(String.format("plots/TOF_calib.png"));
-                        System.out.println(String.format("saved plots/TOF_calib.png"));
-                }
+			can_TOF_calib.cd(s+72);can_TOF_calib.draw(p2_edep[s]);
+        }
+
+        if(runNum>0){
+                if(!write_volatile)can_TOF_calib.save(String.format("plots"+runNum+"/TOF_calib.png"));
+                if(write_volatile)can_TOF_calib.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/TOF_calib.png"));
+                System.out.println(String.format("saved plots"+runNum+"/TOF_calib.png"));
+        }
+        else{
+            can_TOF_occ.save(String.format("plots/TOF_calib.png"));
+            System.out.println(String.format("saved plots/TOF_calib.png"));
+        }
 
 		EmbeddedCanvas can_TOF_ADCTDC = new EmbeddedCanvas();
-                can_TOF_ADCTDC.setSize(3000,3000);
-                can_TOF_ADCTDC.divide(6,3);
-                can_TOF_ADCTDC.setAxisTitleSize(18);
-                can_TOF_ADCTDC.setAxisFontSize(18);
-                can_TOF_ADCTDC.setTitleSize(18);
-                for(int s=0;s<6;s++){
-                        can_TOF_ADCTDC.cd(s);can_TOF_ADCTDC.draw(p1a_tdcadc_dt[s]);
-                        can_TOF_ADCTDC.cd(s+6);can_TOF_ADCTDC.draw(p1b_tdcadc_dt[s]);
-                        can_TOF_ADCTDC.cd(s+12);can_TOF_ADCTDC.draw(p2_tdcadc_dt[s]);
-                }
-                if(runNum>0){
-                        if(!write_volatile)can_TOF_ADCTDC.save(String.format("plots"+runNum+"/TOF_adctdc_timediff.png"));
-                        if(write_volatile)can_TOF_ADCTDC.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/TOF_adctdc_timediff.png"));
-                        System.out.println(String.format("saved plots"+runNum+"/TOF_adctdc_timediff.png"));
-                }
-                else{
-                        can_TOF_ADCTDC.save(String.format("plots/TOF_adctdc_timediff.png"));
-                        System.out.println(String.format("saved plots/TOF_adctdc_timediff.png"));
-                }
+        can_TOF_ADCTDC.setSize(3000,3000);
+        can_TOF_ADCTDC.divide(6,3);
+        can_TOF_ADCTDC.setAxisTitleSize(18);
+        can_TOF_ADCTDC.setAxisFontSize(18);
+        can_TOF_ADCTDC.setTitleSize(18);
+        for(int s=0;s<6;s++){
+            can_TOF_ADCTDC.cd(s);can_TOF_ADCTDC.draw(p1a_tdcadc_dt[s]);
+            can_TOF_ADCTDC.cd(s+6);can_TOF_ADCTDC.draw(p1b_tdcadc_dt[s]);
+            can_TOF_ADCTDC.cd(s+12);can_TOF_ADCTDC.draw(p2_tdcadc_dt[s]);
+        }
+        if(runNum>0){
+            if(!write_volatile)can_TOF_ADCTDC.save(String.format("plots"+runNum+"/TOF_adctdc_timediff.png"));
+            if(write_volatile)can_TOF_ADCTDC.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/TOF_adctdc_timediff.png"));
+            System.out.println(String.format("saved plots"+runNum+"/TOF_adctdc_timediff.png"));
+        }
+        else{
+            can_TOF_ADCTDC.save(String.format("plots/TOF_adctdc_timediff.png"));
+            System.out.println(String.format("saved plots/TOF_adctdc_timediff.png"));
+        }
 
 		EmbeddedCanvas can_DC_resd_trkDoca  = new EmbeddedCanvas();
 		can_DC_resd_trkDoca.setSize(3000,3000);
@@ -731,14 +760,14 @@ public class tof_monitor {
                         can_DC_time.save(String.format("plots/DC_time.png"));
                         System.out.println(String.format("saved plots/DC_time.png"));
                 }
-	}
+		}
 
-        public void write() {
-                TDirectory dirout = new TDirectory();
-                dirout.mkdir("/tof/");
-                dirout.cd("/tof/");
-                for(int s=0;s<6;s++){
-                        dirout.addDataSet(p1a_pad_vt[s],p1b_pad_vt[s],p2_pad_vt[s],p1a_pad_dt[s],p1b_pad_dt[s],p2_pad_dt[s]);
+    public void write() {
+        TDirectory dirout = new TDirectory();
+        dirout.mkdir("/tof/");
+        dirout.cd("/tof/");
+        for(int s=0;s<6;s++){
+            dirout.addDataSet(p1a_pad_vt[s],p1b_pad_vt[s],p2_pad_vt[s],p1a_pad_dt[s],p1b_pad_dt[s],p2_pad_dt[s]);
 			dirout.addDataSet(p1a_pad_dt_calib[s],p1b_pad_dt_calib[s],p2_pad_dt_calib[s],p1a_dt_calib_all[s],p1b_dt_calib_all[s],p2_dt_calib_all[s],p2_edep[s]); 
 			dirout.addDataSet(p1a_tdcadc_dt[s], p1b_tdcadc_dt[s], p2_tdcadc_dt[s]);
 			for (int i=0;i<3;i++) {
@@ -750,7 +779,7 @@ public class tof_monitor {
 		for(int s=0;s<6;s++)for(int sl=0;sl<6;sl++){
 			dirout.addDataSet(DC_residuals_trkDoca[s][sl],DC_time[s][sl]);
 		}
-                if(write_volatile)if(runNum>0)dirout.writeFile("/volatile/clas12/rga/spring18/plots"+runNum+"/out_TOF_"+runNum+".hipo");
+        if(write_volatile)if(runNum>0)dirout.writeFile("/volatile/clas12/rga/spring18/plots"+runNum+"/out_TOF_"+runNum+".hipo");
 
 		if(!write_volatile){
 			if(runNum>0)dirout.writeFile("plots"+runNum+"/out_TOF_"+runNum+".hipo");
@@ -758,32 +787,31 @@ public class tof_monitor {
 		}
 	}
 ////////////////////////////////////////////////
-        public static void main(String[] args) {
-                System.setProperty("java.awt.headless", "true");
+    public static void main(String[] args) {
+        System.setProperty("java.awt.headless", "true");
 		GStyle.setPalette("kRainBow");
-                int count = 0;
+        int count = 0;
 		int runNum = 0;
 		boolean useTB = true;
 		boolean useVolatile = false;
-                String filelist = "list_of_files.txt";
+        String filelist = "list_of_files.txt";
 		if(args.length>0)runNum = Integer.parseInt(args[0]);
 		if(args.length>1)filelist = args[1];
 		if(args.length>2)if(Integer.parseInt(args[2])==0)useTB=false;
 		tof_monitor ana = new tof_monitor(runNum,useTB,useVolatile);
-                List<String> toProcessFileNames = new ArrayList<String>();
-                File file = new File(filelist);
-                Scanner read;
-                try {
-                        read = new Scanner(file);
-                        do {
-                                String filename = read.next();
-                                toProcessFileNames.add(filename);
-
-                        }while (read.hasNext());
-                        read.close();
-                }catch(IOException e){
-                        e.printStackTrace();
-                }
+        List<String> toProcessFileNames = new ArrayList<String>();
+        File file = new File(filelist);
+        Scanner read;
+        try {
+                read = new Scanner(file);
+                do {
+                    String filename = read.next();
+                    toProcessFileNames.add(filename);
+                }while (read.hasNext());
+                read.close();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
 		int maxevents = 50000000;
 		if(args.length>2)maxevents=Integer.parseInt(args[2]);
 		int progresscount=0;int filetot = toProcessFileNames.size();
@@ -808,5 +836,5 @@ public class tof_monitor {
 		ana.analyze();
 		ana.plot();
 		ana.write();
-        }
+    }
 }
