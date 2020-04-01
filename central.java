@@ -223,7 +223,7 @@ public class central {
 	}
 
 
-	public void FillCVTCTOF(DataBank CVTbank, DataBank CTOFbank){
+	public void FillCVTCTOF(DataBank CVTbank, DataBank CTOFbank, DataBank partBank, DataBank scintillBank){
 		for(int iCTOF=0;iCTOF<CTOFbank.rows();iCTOF++){
 			float e = CTOFbank.getFloat("energy",iCTOF);
 			float pathlthroughbar = CTOFbank.getFloat("pathLengthThruBar",iCTOF);
@@ -351,18 +351,20 @@ public class central {
 	public void processEvent(DataEvent event) {
 		BackToBack = false;
 		e_part_ind=-1;
-		DataBank eventBank = null, trackDetBank = null, partBank = null;
+		DataBank eventBank = null, trackDetBank = null, partBank = null, scintillBank = null;
 		DataBank tofadc = null, toftdc = null;
-                if(userTimeBased){
-                        if(event.hasBank("REC::Event"))eventBank = event.getBank("REC::Event");
-                        if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
+        if(userTimeBased){
+            if(event.hasBank("REC::Event"))eventBank = event.getBank("REC::Event");
+            if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
 			if(event.hasBank("REC::Particle"))partBank = event.getBank("REC::Particle");
-                }
-                if(!userTimeBased){
-                        if(event.hasBank("RECHB::Event"))eventBank = event.getBank("RECHB::Event");
+			if(event.hasBank("REC::Scintillator"))scintillBank = event.getBank("REC::Scintillator");
+        }
+        if(!userTimeBased){
+            if(event.hasBank("RECHB::Event"))eventBank = event.getBank("RECHB::Event");
 			if(event.hasBank("RECHB::Particle"))partBank = event.getBank("RECHB::Particle");
-                        if(event.hasBank("HitBasedTrkg::HBTracks"))trackDetBank = event.getBank("HitBasedTrkg::HBTracks");
-                }
+            if(event.hasBank("HitBasedTrkg::HBTracks"))trackDetBank = event.getBank("HitBasedTrkg::HBTracks");
+			if(event.hasBank("RECHB::Scintillator"))scintillBank = event.getBank("RECHB::Scintillator");
+        }
 
 		if(eventBank!=null)STT = eventBank.getFloat("startTime",0);
 		if(eventBank!=null)RFT = eventBank.getFloat("RFTime",0); else return;
@@ -371,7 +373,7 @@ public class central {
                 if(event.hasBank("CTOF::tdc")) toftdc = event.getBank("CTOF::tdc");
 		if(partBank!=null) e_part_ind = makeElectron(partBank);
 		if(trackDetBank != null && event.hasBank("CVTRec::Tracks"))FillTracks(trackDetBank,event.getBank("CVTRec::Tracks"));
-		if(BackToBack && event.hasBank("CVTRec::Tracks") && event.hasBank("CTOF::hits"))FillCVTCTOF(event.getBank("CVTRec::Tracks"),event.getBank("CTOF::hits"));
+		if(BackToBack && event.hasBank("CVTRec::Tracks") && event.hasBank("CTOF::hits") && partBank!=null && scintillBank!=null) FillCVTCTOF(event.getBank("CVTRec::Tracks"),event.getBank("CTOF::hits"), partBank, scintillBank);
 		if(toftdc!=null && tofadc!=null) fillCTOFadctdcHist(tofadc,toftdc);
 	}
 
