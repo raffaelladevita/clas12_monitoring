@@ -51,6 +51,8 @@ public class central {
 	public IndexedTable InverseTranslationTable;
     	public IndexedTable calibrationTranslationTable;
     	public IndexedTable rfTable, rfTableOffset;
+    	public IndexedTable targetTable;
+    	public double targetPos;
 
     	public ConstantsManager ccdb;
 
@@ -61,27 +63,31 @@ public class central {
 		CTOF_counter_thickness = 3.0f; //cm
 		phase_offset = 3; //RGA Fall 2018, RGB Spring 2019, RGA Spring 2019
 		rfPeriod = 4.008;
-                ccdb = new ConstantsManager();
-                ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset"}));
-                rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
-                if (rfTable.hasEntry(1, 1, 1)){
-                	System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
-                	rfPeriod = rfTable.getDoubleValue("clock",1,1,1);
-                }
+        ccdb = new ConstantsManager();
+        ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset","/geometry/target"}));
+        rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
+        if (rfTable.hasEntry(1, 1, 1)){
+        	System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
+        	rfPeriod = rfTable.getDoubleValue("clock",1,1,1);
+        }
 		rf_large_integer = 1000;
 		rfTableOffset = ccdb.getConstants(runNum,"/calibration/eb/rf/offset");
-                if (rfTableOffset.hasEntry(1, 1, 1)){
-                        rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
-                        rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
-                        System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
-                        System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
-                }
+        if (rfTableOffset.hasEntry(1, 1, 1)){
+                rfoffset1 = (float)rfTableOffset.getDoubleValue("offset",1,1,1);
+                rfoffset2 = (float)rfTableOffset.getDoubleValue("offset",1,1,2);
+                System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
+                System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
+        }
 
-                CTOF_shft = new float[]{0.00f , -300.51f , -297.72f , -295.05f , -301.03f , -298.19f , -295.41f , -299.74f , -298.30f , -295.21f ,
-                                        -300.22f , -297.35f , -295.28f , -299.14f , 0.00f , -294.51f , -298.80f , -298.30f , -295.49f , -298.81f ,
-                                        -297.23f , -294.44f , -298.96f , -296.27f , -295.30f , -298.74f , -296.44f , -293.98f , -299.07f , -296.08f ,
-                                        -293.52f , -297.96f , -296.42f , -294.40f , -298.90f , -297.14f , -295.28f , -299.03f , -297.71f , -294.35f ,
-                                        -298.81f , -296.75f , -293.77f , -298.96f , -297.65f , -294.67f , -299.73f , -297.76f , -295.87f , -297.10f};//2476
+        targetTable = ccdb.getConstants(runNum,"/geometry/target");
+		// targetPos = (float) targetTable.getDoubleValue("position",0,0,0);
+		targetPos = -3.0; //for some reasons, targetPos from ccdb is just 0.
+
+        CTOF_shft = new float[]{0.00f , -300.51f , -297.72f , -295.05f , -301.03f , -298.19f , -295.41f , -299.74f , -298.30f , -295.21f ,
+                                -300.22f , -297.35f , -295.28f , -299.14f , 0.00f , -294.51f , -298.80f , -298.30f , -295.49f , -298.81f ,
+                                -297.23f , -294.44f , -298.96f , -296.27f , -295.30f , -298.74f , -296.44f , -293.98f , -299.07f , -296.08f ,
+                                -293.52f , -297.96f , -296.42f , -294.40f , -298.90f , -297.14f , -295.28f , -299.03f , -297.71f , -294.35f ,
+                                -298.81f , -296.75f , -293.77f , -298.96f , -297.65f , -294.67f , -299.73f , -297.76f , -295.87f , -297.10f};//2476
 
 
 		H_CTOF_edep_neg = new H1F[49];
