@@ -228,74 +228,115 @@ public class central {
 			float e = CTOFbank.getFloat("energy",iCTOF);
 			float pathlthroughbar = CTOFbank.getFloat("pathLengthThruBar",iCTOF);
 			int trackid = CTOFbank.getInt("trkID",iCTOF);
+			
+			// Implemented from Calibration Suite
+			// Find the matching CVTRec::Tracks bank
+			int iCVT = -1;
+			for (int i = 0; i < CVTbank.rows(); i++) {
+				if (CVTbank.getShort("ID",i)==trackid) {
+					iCVT = i;
+					break;
+				}
+			}
+			// Implemented from Calibration Suite
+			// Find the pindex
+			int pIdx = -1;
+			for (int i = 0; i < scintillBank.rows(); i++) {
+				if (scintillBank.getShort("index",i)==iCTOF &&
+						scintillBank.getByte("detector",i)==4) {
+					pIdx = scintillBank.getShort("pindex", i);
+					break;
+				}
+			}
+
+
 			if(!Float.isNaN(e) && trackid>-1 && e>2.){
 				boolean matched = false;
-				for(int iCVT=0;iCVT<CVTbank.rows() && !matched;iCVT++){
-					float mom = CVTbank.getFloat("p",iCVT);
-					float momt = CVTbank.getFloat("pt", iCVT);
-					float cx = CVTbank.getFloat("c_x",iCVT)*0.1f;
-					float cy = CVTbank.getFloat("c_y",iCVT)*0.1f;
-					float cz = CVTbank.getFloat("c_z",iCVT)*0.1f;
-					float cphi = (float)Math.toDegrees(Math.atan2(cy,cx));
-					int charge = CVTbank.getInt("q",iCVT);
-					float tandip = CVTbank.getFloat("tandip", iCVT);
-					int pad = CTOFbank.getInt("component",iCTOF);
-					float x = CTOFbank.getFloat("x",iCTOF)*0.1f;
-					float y = CTOFbank.getFloat("y",iCTOF)*0.1f;
-					float z = CTOFbank.getFloat("z",iCTOF)*0.1f;
-					float t = CTOFbank.getFloat("time",iCTOF);
-					float p = CTOFbank.getFloat("pathLength",iCTOF);
-					float phi = (float)Math.toDegrees(Math.atan2(y,x));
-					float pz = momt * tandip;
-					float theta = (float)Math.toDegrees(Math.acos(pz/Math.sqrt( pz*pz + momt*momt )));
-					//float beta =  mom/(float)Math.sqrt(mom*mom+0.93827f*0.93827f);
-					float beta =  mom/(float)Math.sqrt(mom*mom+0.13957061f*0.13957061f);
-					//float DelPhi = phi-cphi+190;
-					float DelPhi = phi-cphi;
+				// for(int iCVT=0;iCVT<CVTbank.rows() && !matched;iCVT++){
+				float mom = CVTbank.getFloat("p",iCVT);
+				float momt = CVTbank.getFloat("pt", iCVT);
+				float cx = CVTbank.getFloat("c_x",iCVT)*0.1f;
+				float cy = CVTbank.getFloat("c_y",iCVT)*0.1f;
+				float cz = CVTbank.getFloat("c_z",iCVT)*0.1f;
+				float cphi = (float)Math.toDegrees(Math.atan2(cy,cx));
+				int charge = CVTbank.getInt("q",iCVT);
+				float track_redchi2 = CVTbank.getFloat("chi2", iCVT)/CVTbank.getShort("ndf", iCVT);
+				float tandip = CVTbank.getFloat("tandip", iCVT);
+				float vz = CVTbank.getFloat("z0", iCVT)*0.1f;
+				int pad = CTOFbank.getInt("component",iCTOF);
+				float x = CTOFbank.getFloat("x",iCTOF)*0.1f;
+				float y = CTOFbank.getFloat("y",iCTOF)*0.1f;
+				float z = CTOFbank.getFloat("z",iCTOF)*0.1f;
+				float t = CTOFbank.getFloat("time",iCTOF);
+				float p = CTOFbank.getFloat("pathLength",iCTOF);
+				float phi = (float)Math.toDegrees(Math.atan2(y,x));
+				float pz = momt * tandip;
+				float theta = (float)Math.toDegrees(Math.acos(pz/Math.sqrt( pz*pz + momt*momt )));
+				int pid = partBank.getInt("pid",pIdx);
+				//float beta =  mom/(float)Math.sqrt(mom*mom+0.93827f*0.93827f);
+				// float beta =  mom/(float)Math.sqrt(mom*mom+0.13957061f*0.13957061f);
+				double mass = 0.0;
+				if (pid == 2212) {
+					mass = 0.938272;
+				}
+				else if (pid == 11 || pid == -11) {
+					mass = 0.000511;
+				}
+				else if (pid == 13 || pid == -13) {
+					mass = 0.105658;
+				}
+				else if (pid == 211 || pid == -211) {
+					mass = 0.13957;
+				}
+				else continue;
+				float beta =  mom/(float)Math.sqrt(mom*mom+mass*mass);
+				//float DelPhi = phi-cphi+190;
+				float DelPhi = phi-cphi;
 
-					//like FTOF in dst_mon
-					double CTOFbeta = p/(29.98f*(t-STT));
-					double CTOFmass = mom * mom * ( 1/(CTOFbeta*CTOFbeta) - 1);
-					double edep_cor = (double)e*CTOF_counter_thickness/pathlthroughbar;
+				//like FTOF in dst_mon
+				double CTOFbeta = p/(29.98f*(t-STT));
+				double CTOFmass = mom * mom * ( 1/(CTOFbeta*CTOFbeta) - 1);
+				double edep_cor = (double)e*CTOF_counter_thickness/pathlthroughbar;
 
-					while(DelPhi>180)DelPhi-=360;
-					while(DelPhi<-180)DelPhi+=360;
-					if( Math.abs(DelPhi)<30 && z<4.7){}
-					if( Math.abs(DelPhi)<180){
-						H_CVT_CTOF_phi.fill(cphi,phi);
-						H_CVT_CTOF_z.fill(cz,z);
-						float CTOFTime = t - p/29.92f/beta;
-						//float CTOFTime = t - p/29.92f/beta - CTOF_shft[pad];
-						if (charge < 0 && e_part_ind != -1) {
-							H_CTOF_pos.fill(phi,z);
-							H_CTOF_edep_phi.fill(phi,edep_cor);
-                                                        H_CTOF_edep_z.fill(z,edep_cor);
-                                                        H_CTOF_path_mom.fill(mom,p);
-							H_CVT_t_STT.fill(STT,CTOFTime);
-							H_CVT_t_pad.fill(pad,CTOFTime-STT);
-							H_CVT_t[pad-1].fill(CTOFTime-STT);
-							H_CVT_t[48].fill(CTOFTime-STT);
-							H_CTOF_edep_pad_neg.fill(pad,edep_cor);
-							if(p>0.5) H_CVT_t_neg.fill(CTOFTime-STT);
-							H_CTOF_neg_mass.fill(CTOFmass);
-							H_CTOF_edep_neg[pad-1].fill(edep_cor);
-							H_CTOF_edep_neg[48].fill(edep_cor);
-							//pi- fiducial cut borrowing from Pierre's CND
-							if (Math.sqrt(Math.abs(CTOFmass))<0.38 && CTOFmass>-0.35*0.35){
-								double thisTime =CTOFTime-RFT;
-                                                                thisTime = (thisTime+(rf_large_integer+0.5)*rfPeriod) % rfPeriod;
-                                                                thisTime = thisTime - rfPeriod/2;
-								H_CTOF_vt_pim.fill(thisTime,CTOFTime-STT);
-								H_CTOF_edep_pim.fill(edep_cor);
-							}			
-						}
-						if (charge>0 && e_part_ind != -1) {
-							H_CTOF_edep_pad_pos.fill(pad,edep_cor);
-							if(p>0.5) H_CVT_t_pos.fill(CTOFTime-STT);
-							H_CTOF_pos_mass.fill(CTOFmass);
-						}
-						matched = true;
+				while(DelPhi>180)DelPhi-=360;
+				while(DelPhi<-180)DelPhi+=360;
+				if( Math.abs(DelPhi)<30 && z<4.7){}
+				if( Math.abs(DelPhi)<180){
+					H_CVT_CTOF_phi.fill(cphi,phi);
+					H_CVT_CTOF_z.fill(cz,z);
+					float CTOFTime = t - p/29.92f/beta;
+					CTOFTime = CTOFTime - (float) (vz - targetPos)/29.98f; //vertex location corrected. from calibration suite
+					//float CTOFTime = t - p/29.92f/beta - CTOF_shft[pad];
+					if (charge < 0 && e_part_ind != -1) {
+						H_CTOF_pos.fill(phi,z);
+						H_CTOF_edep_phi.fill(phi,edep_cor);
+                        H_CTOF_edep_z.fill(z,edep_cor);
+                        H_CTOF_path_mom.fill(mom,p);
+						H_CVT_t_STT.fill(STT,CTOFTime);
+						H_CVT_t_pad.fill(pad,CTOFTime-STT);
+						H_CVT_t[pad-1].fill(CTOFTime-STT);
+						H_CVT_t[48].fill(CTOFTime-STT);
+						H_CTOF_edep_pad_neg.fill(pad,edep_cor);
+						if(p>0.5 && track_redchi2 <30) H_CVT_t_neg.fill(CTOFTime-STT);
+						H_CTOF_neg_mass.fill(CTOFmass);
+						H_CTOF_edep_neg[pad-1].fill(edep_cor);
+						H_CTOF_edep_neg[48].fill(edep_cor);
+						//pi- fiducial cut borrowing from Pierre's CND
+						if (Math.sqrt(Math.abs(CTOFmass))<0.38 && CTOFmass>-0.35*0.35){
+							double thisTime =CTOFTime-RFT;
+                            thisTime = (thisTime+(rf_large_integer+0.5)*rfPeriod) % rfPeriod;
+                            thisTime = thisTime - rfPeriod/2;
+							H_CTOF_vt_pim.fill(thisTime,CTOFTime-STT);
+							H_CTOF_edep_pim.fill(edep_cor);
+						}			
 					}
+					if (charge>0 && e_part_ind != -1) {
+						H_CTOF_edep_pad_pos.fill(pad,edep_cor);
+						if(p>0.5 && track_redchi2 <30) H_CVT_t_pos.fill(CTOFTime-STT);
+						H_CTOF_pos_mass.fill(CTOFmass);
+					}
+					matched = true;
+					// }
 				}
 			}
 		}
