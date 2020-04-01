@@ -155,12 +155,13 @@ public class central {
 		H_CVT_t_pad.setTitle("CTOF vertex t - STT  vs pad, neg. tracks");
 		H_CVT_t_pad.setTitleX("pad");
 		H_CVT_t_pad.setTitleY("CTOF vertex t - STT (ns)");
-		H_CVT_t = new H1F[50];
-		for(int p=0;p<50;p++){
+		H_CVT_t = new H1F[49];
+		for(int p=0;p<49;p++){
 			H_CVT_t[p] = new H1F(String.format("H_CVT_t_p%d",p+1),String.format("H_CVT_t_p%d",p+1),250,MinCTOF,MaxCTOF);
 			H_CVT_t[p].setTitle(String.format("pad %d CTOF vertex t - STT, neg. tracks",p+1));
 			H_CVT_t[p].setTitleX("Delta_t (ns)");
 		}
+		H_CVT_t[48].setTitle("all pad, CTOF vertex t - STT, neg. tracks");
                 H_CVT_t_pos = new H1F("H_CVT_t_pos","H_CVT_t_pos",250,MinCTOF,MaxCTOF);
                 H_CVT_t_pos.setTitle("All CTOF pads, CTOF vertex t - STT, pos. tracks");
                 H_CVT_t_pos.setTitleX("CTOF vertex t - STT (ns)");
@@ -259,8 +260,8 @@ public class central {
                                                         H_CTOF_path_mom.fill(mom,p);
 							H_CVT_t_STT.fill(STT,CTOFTime);
 							H_CVT_t_pad.fill(pad,CTOFTime-STT);
-							H_CVT_t[pad].fill(CTOFTime-STT);
-							H_CVT_t[49].fill(CTOFTime-STT);
+							H_CVT_t[pad-1].fill(CTOFTime-STT);
+							H_CVT_t[48].fill(CTOFTime-STT);
 							H_CTOF_edep_pad_neg.fill(pad,edep_cor);
 							if(p>0.5) H_CVT_t_neg.fill(CTOFTime-STT);
 							H_CTOF_neg_mass.fill(CTOFmass);
@@ -403,7 +404,7 @@ public class central {
 		System.out.print("\n");
 		for(int p=30;p<40;p++)System.out.print(String.format("%1.2ff , ",H_CVT_t[p].getMean()));
 		System.out.print("\n");
-		for(int p=40;p<50;p++)System.out.print(String.format("%1.2ff , ",H_CVT_t[p].getMean()));
+		for(int p=40;p<49;p++)System.out.print(String.format("%1.2ff , ",H_CVT_t[p].getMean()));
 		System.out.print("\n");
 	}
         public void write(){
@@ -411,7 +412,7 @@ public class central {
                 dirout.mkdir("/ctof/");
                 dirout.cd("/ctof/");
                 dirout.addDataSet(H_CVT_t_pad,H_CTOF_edep_phi);
-                for(int p=0;p<50;p++)dirout.addDataSet(H_CVT_t[p]);
+                for(int p=0;p<49;p++)dirout.addDataSet(H_CVT_t[p]);
                 dirout.addDataSet(H_CVT_t_pos, H_CVT_t_neg);
                 dirout.addDataSet(H_CTOF_pos_mass, H_CTOF_neg_mass, H_CTOF_vt_pim, H_CTOF_edep_pim);
 		dirout.addDataSet(H_CVT_t_neg,H_CTOF_edep_neg,H_CTOF_tdcadc_dt);
