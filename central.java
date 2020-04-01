@@ -274,22 +274,22 @@ public class central {
 				float theta = (float)Math.toDegrees(Math.acos(pz/Math.sqrt( pz*pz + momt*momt )));
 				int pid = partBank.getInt("pid",pIdx);
 				//float beta =  mom/(float)Math.sqrt(mom*mom+0.93827f*0.93827f);
-				// float beta =  mom/(float)Math.sqrt(mom*mom+0.13957061f*0.13957061f);
-				double mass = 0.0;
-				if (pid == 2212) {
-					mass = 0.938272;
-				}
-				else if (pid == 11 || pid == -11) {
-					mass = 0.000511;
-				}
-				else if (pid == 13 || pid == -13) {
-					mass = 0.105658;
-				}
-				else if (pid == 211 || pid == -211) {
-					mass = 0.13957;
-				}
-				else continue;
-				float beta =  mom/(float)Math.sqrt(mom*mom+mass*mass);
+				float beta =  mom/(float)Math.sqrt(mom*mom+0.13957061f*0.13957061f);
+				// double mass = 0.0;
+				// if (pid == 2212) {
+				// 	mass = 0.938272;
+				// }
+				// else if (pid == 11 || pid == -11) {
+				// 	mass = 0.000511;
+				// }
+				// else if (pid == 13 || pid == -13) {
+				// 	mass = 0.105658;
+				// }
+				// else if (pid == 211 || pid == -211) {
+				// 	mass = 0.13957;
+				// }
+				// else continue;
+				// float beta =  mom/(float)Math.sqrt(mom*mom+mass*mass);
 				//float DelPhi = phi-cphi+190;
 				float DelPhi = phi-cphi;
 
