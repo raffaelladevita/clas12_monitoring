@@ -46,7 +46,7 @@ public class central {
 	public H1F H_CTOF_pos_mass, H_CTOF_neg_mass;
 	public H2F H_CTOF_vt_pim;
 	public H1F H_CTOF_edep_pim;
-	public H1F H_CTOF_edep_neg;
+	public H1F[] H_CTOF_edep_neg;
 
 	public IndexedTable InverseTranslationTable;
     	public IndexedTable calibrationTranslationTable;
@@ -83,10 +83,17 @@ public class central {
                                         -293.52f , -297.96f , -296.42f , -294.40f , -298.90f , -297.14f , -295.28f , -299.03f , -297.71f , -294.35f ,
                                         -298.81f , -296.75f , -293.77f , -298.96f , -297.65f , -294.67f , -299.73f , -297.76f , -295.87f , -297.10f};//2476
 
-		H_CTOF_edep_neg = new H1F("PathLCorrected Edep","PathLCorrected Edep",150,0.,30.);
-		H_CTOF_edep_neg.setTitle("PathLCorrected Edep");
-		H_CTOF_edep_neg.setTitleX("E (MeV)");
-		H_CTOF_edep_neg.setTitleY("counts");
+
+		H_CTOF_edep_neg = new H1F[49];
+		for(int p=0;p<48;p++){
+			H_CTOF_edep_neg[p] = new H1F(String.format("PathLCorrected Edep_p%d",p+1),String.format("PathLCorrected Edep_p%d",p+1),150,0.,30.);
+			H_CTOF_edep_neg[p].setTitleX("E (MeV)");
+			H_CTOF_edep_neg[p].setTitleY("counts");
+		}
+		H_CTOF_edep_neg[48] = new H1F("PathLCorrected Edep","PathLCorrected Edep",150,0.,30.);
+		H_CTOF_edep_neg[48].setTitleX("E (MeV)");
+		H_CTOF_edep_neg[48].setTitleY("counts");
+
 		H_CTOF_pos = new H2F("H_CTOF_pos","H_CTOF_pos",50,-180,180,100,-10,5);
 		//H_CTOF_pos = new H2F("H_CTOF_pos","H_CTOF_pos",50,-180,180,100,-20,10);
 		H_CTOF_pos.setTitle("CTOF hits z vs #phi");
@@ -265,7 +272,8 @@ public class central {
 							H_CTOF_edep_pad_neg.fill(pad,edep_cor);
 							if(p>0.5) H_CVT_t_neg.fill(CTOFTime-STT);
 							H_CTOF_neg_mass.fill(CTOFmass);
-							H_CTOF_edep_neg.fill(edep_cor);
+							H_CTOF_edep_neg[pad-1].fill(edep_cor);
+							H_CTOF_edep_neg[48].fill(edep_cor);
 							//pi- fiducial cut borrowing from Pierre's CND
 							if (Math.sqrt(Math.abs(CTOFmass))<0.38 && CTOFmass>-0.35*0.35){
 								double thisTime =CTOFTime-RFT;
@@ -377,7 +385,7 @@ public class central {
 		can_central.cd(5);can_central.draw(H_CTOF_edep_z);
 		can_central.cd(6);can_central.draw(H_CTOF_edep_pad_pos);
 		can_central.cd(7);can_central.draw(H_CTOF_edep_pad_neg);
-		can_central.cd(8);can_central.draw(H_CTOF_edep_neg);
+		can_central.cd(8);can_central.draw(H_CTOF_edep_neg[48]);
 		can_central.cd(9);can_central.draw(H_vz_DC_CVT);
 		can_central.cd(10);can_central.draw(H_phi_DC_CVT);
 		can_central.cd(11);can_central.draw(H_CVT_t_STT);
@@ -412,10 +420,13 @@ public class central {
                 dirout.mkdir("/ctof/");
                 dirout.cd("/ctof/");
                 dirout.addDataSet(H_CVT_t_pad,H_CTOF_edep_phi);
-                for(int p=0;p<49;p++)dirout.addDataSet(H_CVT_t[p]);
+                for(int p=0;p<49;p++){
+                	dirout.addDataSet(H_CVT_t[p]);
+                	dirout.addDataSet(H_CTOF_edep_neg[p]);
+                }
                 dirout.addDataSet(H_CVT_t_pos, H_CVT_t_neg);
                 dirout.addDataSet(H_CTOF_pos_mass, H_CTOF_neg_mass, H_CTOF_vt_pim, H_CTOF_edep_pim);
-		dirout.addDataSet(H_CVT_t_neg,H_CTOF_edep_neg,H_CTOF_tdcadc_dt);
+		dirout.addDataSet(H_CVT_t_neg,H_CTOF_tdcadc_dt);
 
 		if(write_volatile)if(runNum>0)dirout.writeFile("/volatile/clas12/rga/spring18/plots"+runNum+"/out_CTOF_"+runNum+".hipo");
                 
