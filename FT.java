@@ -116,11 +116,11 @@ public class FT {
 			hi_hodo_ematch_2D[layer] = new H2F(String.format("hi_hodo_ematch_2D_l%d",layer+1), String.format("hi_hodo_ematch_2D_l%d",layer+1), 100, 0, 10 , 118, 0, 118);
             hi_hodo_ematch_2D[layer].setTitleX("E (MeV)");
             hi_hodo_ematch_2D[layer].setTitleY("Tile");
-			hi_hodo_tmatch[layer] = new H1F(String.format("hi_hodo_tmatch_l%d",layer+1),  String.format("hi_hodo_tmatch_l%d",layer+1), 400, -50, 50);
+			hi_hodo_tmatch[layer] = new H1F(String.format("hi_hodo_tmatch_l%d",layer+1),  String.format("hi_hodo_tmatch_l%d",layer+1), 400, -20, 20);
 			hi_hodo_tmatch[layer].setTitleX(String.format("T-T_start (ns)"));
 			hi_hodo_tmatch[layer].setTitleY(String.format("Counts"));
             hi_hodo_tmatch[layer].setFillColor(3);
-            hi_hodo_tmatch_2D[layer] = new H2F(String.format("hi_hodo_tmatch_2D_l%d",layer+1),  String.format("hi_hodo_tmatch_2D_l%d",layer+1), 200, -50, 50, 118, 0, 118);
+            hi_hodo_tmatch_2D[layer] = new H2F(String.format("hi_hodo_tmatch_2D_l%d",layer+1),  String.format("hi_hodo_tmatch_2D_l%d",layer+1), 200, -20, 20, 118, 0, 118);
             hi_hodo_tmatch_2D[layer].setTitleX("E (MeV)");
             hi_hodo_tmatch_2D[layer].setTitleY("Tile");
 
@@ -303,7 +303,7 @@ public class FT {
                             break;
                         }
                     }
-                    if(startTime > -100 && charge==1) {
+                    if(startTime > -100 && charge==1 && trigger==11) {
                         hi_hodo_tmatch[hodoL-1].fill(hodoHitT-path/29.97-startTime);
                         hi_hodo_tmatch_board[counter].fill(hodoHitT-path/29.97-startTime);
                         hi_hodo_tmatch_2D[hodoL-1].fill(hodoHitT-path/29.97-startTime,tile);
