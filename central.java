@@ -317,7 +317,7 @@ public class central {
 						H_CVT_t[pad-1].fill(CTOFTime-STT);
 						H_CVT_t[48].fill(CTOFTime-STT);
 						H_CTOF_edep_pad_neg.fill(pad,edep_cor);
-						if(p>0.5 && track_redchi2 <30) H_CVT_t_neg.fill(CTOFTime-STT);
+						if(p>0.4 && track_redchi2 <30) H_CVT_t_neg.fill(CTOFTime-STT);
 						H_CTOF_neg_mass.fill(CTOFmass);
 						H_CTOF_edep_neg[pad-1].fill(edep_cor);
 						H_CTOF_edep_neg[48].fill(edep_cor);
@@ -332,7 +332,7 @@ public class central {
 					}
 					if (charge>0 && e_part_ind != -1) {
 						H_CTOF_edep_pad_pos.fill(pad,edep_cor);
-						if(p>0.5 && track_redchi2 <30) H_CVT_t_pos.fill(CTOFTime-STT);
+						if(p>0.4 && track_redchi2 <30) H_CVT_t_pos.fill(CTOFTime-STT);
 						H_CTOF_pos_mass.fill(CTOFmass);
 					}
 					matched = true;
