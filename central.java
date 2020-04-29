@@ -30,6 +30,7 @@ public class central {
 	public float[] CTOF_shft;
 	public double rfPeriod, rfoffset1, rfoffset2;
 	public int e_part_ind;
+	public int counter, counterm;
 
 	public H2F H_CTOF_pos, H_CTOF_edep_phi, H_CTOF_edep_z, H_CTOF_path_mom;
 	public H2F H_CTOF_edep_pad_neg, H_CTOF_edep_pad_pos;
@@ -59,6 +60,8 @@ public class central {
 	public central(int reqrunNum, boolean reqTimeBased, boolean reqwrite_volatile) {
 		runNum = reqrunNum;userTimeBased=reqTimeBased;
 		write_volatile = reqwrite_volatile;
+		counter = 0;
+		counterm = 0;
 
 		CTOF_counter_thickness = 3.0f; //cm
 		phase_offset = 3; //RGA Fall 2018, RGB Spring 2019, RGA Spring 2019
@@ -154,9 +157,9 @@ public class central {
 			MinCTOF=-5;MaxCTOF=5;
 		}
 		MinCTOF=-5;MaxCTOF=5;
-		H_CVT_t_STT = new H2F("H_CVT_t_STT","H_CVT_t_STT",100,minSTT,maxSTT,100,minSTT+(MinCTOF+MaxCTOF)/2,maxSTT+(MinCTOF+MaxCTOF)/2);
-		H_CVT_t_STT.setTitle("CTOF vertex t vs STT, neg. tracks");
-		H_CVT_t_STT.setTitleX("STT (ns)");
+		H_CVT_t_STT = new H2F("H_CVT_t_STT","H_CVT_t_STT",100,0.,maxSTT,100,0.,maxSTT+(MinCTOF+MaxCTOF)/2);
+		H_CVT_t_STT.setTitle("CTOF vertex t vs Pion vertex t, neg. tracks");
+		H_CVT_t_STT.setTitleX("Pion vertex t (ns)");
 		H_CVT_t_STT.setTitleY("CTOF vertex t (ns)");
 		try {
 				Thread.sleep(5000);// in ms
@@ -165,9 +168,9 @@ public class central {
 		}
 		System.out.println("CTOF range "+MinCTOF+" to "+MaxCTOF);
 		H_CVT_t_pad = new H2F("H_CVT_t_pad","H_CVT_t_pad",50,0.5,50.5,250,MinCTOF,MaxCTOF);
-		H_CVT_t_pad.setTitle("CTOF vertex t - STT  vs pad, neg. tracks");
+		H_CVT_t_pad.setTitle("CTOF vertex t - Pion vertex t  vs pad, neg. tracks");
 		H_CVT_t_pad.setTitleX("pad");
-		H_CVT_t_pad.setTitleY("CTOF vertex t - STT (ns)");
+		H_CVT_t_pad.setTitleY("CTOF vertex t - Pion vertex t (ns)");
 		H_CVT_t = new H1F[49];
 		for(int p=0;p<49;p++){
 			H_CVT_t[p] = new H1F(String.format("H_CVT_t_p%d",p+1),String.format("H_CVT_t_p%d",p+1),250,MinCTOF,MaxCTOF);
@@ -176,12 +179,12 @@ public class central {
 		}
 		H_CVT_t[48].setTitle("all pad, CTOF vertex t - STT, neg. tracks");
 		H_CVT_t_pos = new H1F("H_CVT_t_pos","H_CVT_t_pos",250,MinCTOF,MaxCTOF);
-		H_CVT_t_pos.setTitle("All CTOF pads, CTOF vertex t - STT, pos. tracks");
-		H_CVT_t_pos.setTitleX("CTOF vertex t - STT (ns)");
+		H_CVT_t_pos.setTitle("All CTOF pads, CTOF vertex t - Pion vertex t, pos. tracks");
+		H_CVT_t_pos.setTitleX("CTOF vertex t - Pion vertex t (ns)");
 
 		H_CVT_t_neg = new H1F("H_CVT_t_neg","H_CVT_t_neg",250,MinCTOF,MaxCTOF);
-		H_CVT_t_neg.setTitle("All CTOF pads, CTOF vertex t - STT, neg. tracks");
-		H_CVT_t_neg.setTitleX("CTOF vertex t - STT (ns)");
+		H_CVT_t_neg.setTitle("All CTOF pads, CTOF vertex t - Pion vertex t, neg. tracks");
+		H_CVT_t_neg.setTitleX("CTOF vertex t - Pion vertex t (ns)");
 
 		H_CTOF_pos_mass = new H1F("H_CTOF_pos_mass","H_CTOF_pos_mass",100,-0.5,3.5);
 		H_CTOF_pos_mass.setTitle("pos Mass^2");
@@ -241,10 +244,24 @@ public class central {
 			// Implemented from Calibration Suite
 			// Find the pindex
 			int pIdx = -1;
+			float timediff = -10.f;
+			float flighttime = -10.0f;
+			float mompart=-10.f; 
+			float time = -10.f;
+			float vt =-10.f;
+			float pathlength = -10.f;
 			for (int i = 0; i < scintillBank.rows(); i++) {
-				if (scintillBank.getShort("index",i)==iCTOF &&
-						scintillBank.getByte("detector",i)==4) {
+				if (scintillBank.getShort("index",i)==iCTOF && scintillBank.getByte("detector",i)==4) {
+					pathlength = scintillBank.getFloat("path",i);
+					time = scintillBank.getFloat("time",i);
 					pIdx = scintillBank.getShort("pindex", i);
+					float px = partBank.getFloat("px",pIdx);
+					float py = partBank.getFloat("py",pIdx);
+                                        float pz = partBank.getFloat("pz",pIdx);
+                                        vt = partBank.getFloat("vt",pIdx);
+					mompart = (float)Math.sqrt(px*px+py*py+pz*pz);
+					flighttime = pathlength/(float)(29.98f*mompart/Math.sqrt(mompart*mompart+0.13957f*0.13957f)); 
+					timediff = (float)(time - flighttime) -vt;	
 					break;
 				}
 			}
@@ -252,7 +269,6 @@ public class central {
 
 			if(!Float.isNaN(e) && trackid>-1 && e>2.){
 				boolean matched = false;
-				// for(int iCVT=0;iCVT<CVTbank.rows() && !matched;iCVT++){
 				float mom = CVTbank.getFloat("p",iCVT);
 				float momt = CVTbank.getFloat("pt", iCVT);
 				float cx = CVTbank.getFloat("c_x",iCVT)*0.1f;
@@ -273,24 +289,7 @@ public class central {
 				float pz = momt * tandip;
 				float theta = (float)Math.toDegrees(Math.acos(pz/Math.sqrt( pz*pz + momt*momt )));
 				int pid = partBank.getInt("pid",pIdx);
-				//float beta =  mom/(float)Math.sqrt(mom*mom+0.93827f*0.93827f);
 				float beta =  mom/(float)Math.sqrt(mom*mom+0.13957061f*0.13957061f);
-				// double mass = 0.0;
-				// if (pid == 2212) {
-				// 	mass = 0.938272;
-				// }
-				// else if (pid == 11 || pid == -11) {
-				// 	mass = 0.000511;
-				// }
-				// else if (pid == 13 || pid == -13) {
-				// 	mass = 0.105658;
-				// }
-				// else if (pid == 211 || pid == -211) {
-				// 	mass = 0.13957;
-				// }
-				// else continue;
-				// float beta =  mom/(float)Math.sqrt(mom*mom+mass*mass);
-				//float DelPhi = phi-cphi+190;
 				float DelPhi = phi-cphi;
 
 				//like FTOF in dst_mon
@@ -304,20 +303,25 @@ public class central {
 				if( Math.abs(DelPhi)<180){
 					H_CVT_CTOF_phi.fill(cphi,phi);
 					H_CVT_CTOF_z.fill(cz,z);
-					float CTOFTime = t - p/29.92f/beta;
-					CTOFTime = CTOFTime - (float) (vz - targetPos)/29.98f; //vertex location corrected. from calibration suite
-					//float CTOFTime = t - p/29.92f/beta - CTOF_shft[pad];
+					float CTOF_vtime = t - p/(float)(29.98f*mom/Math.sqrt(mom*mom+0.13957f*0.13957f));
+					float CTOFTime;
+					//CTOFTime = CTOFTime - (float) (vz - targetPos)/29.98f; //vertex location corrected. from calibration suite
+					if (vt!=-10. && vt!=-1. && Math.abs(mom-mompart)<0.001 && Math.abs(p-pathlength)<0.001) CTOFTime = CTOF_vtime - vt;
+					else CTOFTime = -10.f;
 					if (charge < 0 && e_part_ind != -1) {
 						H_CTOF_pos.fill(phi,z);
 						H_CTOF_edep_phi.fill(phi,edep_cor);
 						H_CTOF_edep_z.fill(z,edep_cor);
 						H_CTOF_path_mom.fill(mom,p);
-						H_CVT_t_STT.fill(STT,CTOFTime);
-						H_CVT_t_pad.fill(pad,CTOFTime-STT);
-						H_CVT_t[pad-1].fill(CTOFTime-STT);
-						H_CVT_t[48].fill(CTOFTime-STT);
 						H_CTOF_edep_pad_neg.fill(pad,edep_cor);
-						if(p>0.4 && track_redchi2 <30) H_CVT_t_neg.fill(CTOFTime-STT);
+						if(mom>0.4 && track_redchi2 <30 && CTOFTime!=-10.) { 
+							H_CVT_t_pad.fill(pad,CTOFTime);
+							H_CVT_t_neg.fill(CTOFTime);
+							H_CVT_t[pad-1].fill(CTOFTime);
+							H_CVT_t[48].fill(CTOFTime);
+							H_CVT_t_STT.fill(vt,CTOF_vtime);
+							//System.out.println(String.format("Part momentum: "+mompart+" CVT momentum: "+mom+" Scintillator time: "+time+" CTOF time: "+t+" Scntillator pathlength: "+pathlength+" CTOF pathlength: "+p+" vt from part: "+vt+" VertTDiff: "+CTOFTime+"\n"));
+						}
 						H_CTOF_neg_mass.fill(CTOFmass);
 						H_CTOF_edep_neg[pad-1].fill(edep_cor);
 						H_CTOF_edep_neg[48].fill(edep_cor);
@@ -332,7 +336,7 @@ public class central {
 					}
 					if (charge>0 && e_part_ind != -1) {
 						H_CTOF_edep_pad_pos.fill(pad,edep_cor);
-						if(p>0.4 && track_redchi2 <30) H_CVT_t_pos.fill(CTOFTime-STT);
+						if(mom>0.4 && track_redchi2 <30 && CTOFTime!=-10.) H_CVT_t_pos.fill(CTOFTime);
 						H_CTOF_pos_mass.fill(CTOFmass);
 					}
 					matched = true;

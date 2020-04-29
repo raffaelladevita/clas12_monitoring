@@ -121,7 +121,7 @@ public class FT {
 			hi_hodo_tmatch[layer].setTitleY(String.format("Counts"));
             hi_hodo_tmatch[layer].setFillColor(3);
             hi_hodo_tmatch_2D[layer] = new H2F(String.format("hi_hodo_tmatch_2D_l%d",layer+1),  String.format("hi_hodo_tmatch_2D_l%d",layer+1), 200, -20, 20, 118, 0, 118);
-            hi_hodo_tmatch_2D[layer].setTitleX("E (MeV)");
+            hi_hodo_tmatch_2D[layer].setTitleX("T-T_start (ns)");
             hi_hodo_tmatch_2D[layer].setTitleY("Tile");
 
             for (int board=0; board < 15; board ++){
@@ -445,9 +445,9 @@ public class FT {
         	initTimeGaussFitPar(ftime_ch,hi_cal_time_cut_ch);
         	DataFitter.fit(ftime_ch,hi_cal_time_cut_ch,"LQ");
         	hi_cal_time_cut_ch.setFunction(null);
-        	initTimeGaussFitPar(ftime_neu,hi_cal_time_cut_neu);
-        	DataFitter.fit(ftime_neu,hi_cal_time_cut_neu,"LQ");
-        	hi_cal_time_cut_neu.setFunction(null);
+        	initTimeGaussFitPar(ftime_neu,hi_cal_time_neu);
+        	DataFitter.fit(ftime_neu,hi_cal_time_neu,"LQ");
+        	hi_cal_time_neu.setFunction(null);
 		//Fit pi0 mass
         	double hAmp  = hpi0sum.getBinContent(hpi0sum.getMaximumBin());
         	double hMean = hpi0sum.getAxis().getBinCenter(hpi0sum.getMaximumBin());
@@ -499,13 +499,13 @@ public class FT {
                 can_FT.setAxisFontSize(30);
                 can_FT.setTitleSize(30);
                	can_FT.cd(0);can_FT.draw(hi_hodo_eall[0]);can_FT.draw(hi_hodo_ematch[0],"same");can_FT.draw(f_charge_landau[0],"same");
-		can_FT.cd(1);can_FT.getPad(1).getAxisZ().setLog(true);can_FT.draw(hi_hodo_ematch_2D[0]);
+		can_FT.cd(1);can_FT.draw(hi_hodo_ematch_2D[0]);
 		can_FT.cd(2);can_FT.draw(hi_hodo_eall[1]);can_FT.draw(hi_hodo_ematch[1],"same");can_FT.draw(f_charge_landau[1],"same");
-		can_FT.cd(3);can_FT.getPad(4).getAxisZ().setLog(true);can_FT.draw(hi_hodo_ematch_2D[1]);
+		can_FT.cd(3);can_FT.draw(hi_hodo_ematch_2D[1]);
 		can_FT.cd(4);can_FT.draw(hi_hodo_tmatch[0]);
-		can_FT.cd(5);can_FT.getPad(7).getAxisZ().setLog(true);can_FT.draw(hi_hodo_tmatch_2D[0]);
+		can_FT.cd(5);can_FT.draw(hi_hodo_tmatch_2D[0]);
 		can_FT.cd(6);can_FT.draw(hi_hodo_tmatch[1]);
-		can_FT.cd(7);can_FT.getPad(10).getAxisZ().setLog(true);can_FT.draw(hi_hodo_tmatch_2D[1]);	
+		can_FT.cd(7);can_FT.draw(hi_hodo_tmatch_2D[1]);	
 		can_FT.cd(8);can_FT.getPad(12).getAxisY().setLog(true);can_FT.draw(hi_cal_nclusters);
 		can_FT.cd(9);can_FT.getPad(13).getAxisY().setLog(true);can_FT.draw(hi_cal_clsize);can_FT.draw(hi_cal_clsize_ch,"same");
 		can_FT.cd(10);can_FT.getPad(14).getAxisZ().setLog(true);can_FT.draw(hi_cal_clsize_en);
@@ -515,7 +515,7 @@ public class FT {
 		can_FT.cd(16);can_FT.draw(hi_cal_time_ch);can_FT.draw(hi_cal_time_cut_ch,"same");can_FT.draw(ftime_ch,"same");
 		can_FT.cd(17);can_FT.draw(hi_cal_time_e_ch);
 		can_FT.cd(18);can_FT.draw(hi_cal_time_theta_ch);
-		can_FT.cd(20);can_FT.draw(hi_cal_time_neu);can_FT.draw(hi_cal_time_cut_neu,"same");can_FT.draw(ftime_neu,"same");
+		can_FT.cd(20);can_FT.draw(hi_cal_time_neu);can_FT.draw(ftime_neu,"same");
 		can_FT.cd(21);can_FT.draw(hi_cal_time_e_neu);
 		can_FT.cd(22);can_FT.draw(hi_cal_time_theta_neu);
 		can_FT.cd(24);can_FT.draw(hpi0sum);can_FT.draw(fpi0,"same");
