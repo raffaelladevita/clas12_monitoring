@@ -27,6 +27,8 @@ public class tof_monitor {
 	public boolean hasRF;
 	public float RFTime, rfoffset1, rfoffset2;
 	public float rfPeriod;
+	public float[] mean_tdiff;
+	public int[] nev;
 	public int rf_large_integer;
 	public int e_part_ind;
 	public H2F p1a_pad_occ, p1b_pad_occ, p2_pad_occ;
@@ -127,7 +129,14 @@ public class tof_monitor {
 		DC_time = new H1F[6][6];
 		f_time_invertedS = new F1D[6][6];
 
+		mean_tdiff = new float[6];
+		nev = new int[6];
+
 		for(int s=0;s<6;s++){
+
+			mean_tdiff[s] = 0.f;
+			nev[s] = 0;
+
 			p1a_pad_vt[s] = new H2F(String.format("p1a_pad_vt_S%d",s+1),String.format("p1a_pad_vt_S%d",s+1),25,0,25,100,-rfPeriod/2,rfPeriod/2);
 			p1a_pad_vt[s].setTitle(String.format("p1a S%d time",s+1));
 			p1a_pad_vt[s].setTitleX("paddle");
@@ -315,7 +324,7 @@ public class tof_monitor {
 		}	
 	}
 
-	public void fillTOFCalibHists(DataBank part, DataBank sc, DataBank hits){
+	public void fillTOFCalibHists(DataBank part, DataBank sc, DataBank hits, DataBank trk){
 		for(int k=0;k<part.rows();k++) {
 			byte charge = part.getByte("charge",k);
 			int pid = part.getInt("pid",k);
@@ -325,7 +334,15 @@ public class tof_monitor {
 			float vz = part.getFloat("vz",k);
 			float vt = part.getFloat("vt",k);
 			float mom = (float)Math.sqrt(px*px+py*py+pz*pz);
-			float theta = (float)Math.toDegrees(Math.acos(pz/mom));;
+			float theta = (float)Math.toDegrees(Math.acos(pz/mom));
+			float reducedchi2 = 10000.f;
+
+			for (int j=0;j<trk.rows();j++) {
+				if (trk.getShort("pindex",j)==k) {
+					reducedchi2 = trk.getFloat("chi2",j)/trk.getShort("NDF",j);
+				}
+			}
+
 			for (int j=0;j<sc.rows();j++) {
 				if (sc.getShort("pindex",j)==k) {
 					if (sc.getByte("detector",j)==12 && e_part_ind != -1) {
@@ -390,11 +407,13 @@ public class tof_monitor {
 							}
 						}
 
-						// panel 2, use p, pi+, p-
+						// panel 2, use p, pi+, p-; cuts are from calibration suite
 						if (pid == 2212 || pid == 211 || pid == -211) {
 							if (sc.getByte("layer",j)==3){
-								p2_pad_dt_calib[sector-1].fill(pad,timediff);
-								p2_dt_calib_all[sector-1].fill(timediff);
+								if (energy > 0.5 && vz > -10. && vz < 5.0 && mom > 0.4 && mom <10. && reducedchi2 < 5000.) {
+									p2_pad_dt_calib[sector-1].fill(pad,timediff);
+									p2_dt_calib_all[sector-1].fill(timediff);
+								}
 								if (energy >2.){
 								 p2_edep[sector-1].fill(energy);
 								}
@@ -533,18 +552,20 @@ public class tof_monitor {
 		hasRF = false;
 		e_part_ind = -1;
 		DataBank trackDetBank = null, hitBank = null, partBank = null, tofhits = null, scintillator = null;
-		DataBank tofadc = null, toftdc = null;
+		DataBank tofadc = null, toftdc = null, track = null;
 		if(userTimeBased){
 			if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
 			if(event.hasBank("TimeBasedTrkg::TBHits")){hitBank = event.getBank("TimeBasedTrkg::TBHits");}
 			if(event.hasBank("REC::Particle"))partBank = event.getBank("REC::Particle");
 			if(event.hasBank("REC::Scintillator"))scintillator = event.getBank("REC::Scintillator");
+			if(event.hasBank("REC::Track"))track = event.getBank("REC::Track");
 		}
 		if(!userTimeBased){
 			if(event.hasBank("HitBasedTrkg::HBTracks"))trackDetBank = event.getBank("HitBasedTrkg::HBTracks");
 			if(event.hasBank("HitBasedTrkg::HBHits"))hitBank = event.getBank("HitBasedTrkg::HBHits");
 			if(event.hasBank("RECHB::Particle"))partBank = event.getBank("RECHB::Particle");
 			if(event.hasBank("RECHB::Scintillator"))scintillator = event.getBank("RECHB::Scintillator");
+			if(event.hasBank("RECHB::Track"))track = event.getBank("REC::Track");
 		}
 
 		if(event.hasBank("FTOF::hits")) tofhits = event.getBank("FTOF::hits");
@@ -556,7 +577,7 @@ public class tof_monitor {
 		if(!hasRF)return;
 		if(partBank!=null) e_part_ind = makeElectron(partBank);
 		if(event.hasBank("FTOF::hits") && trackDetBank!=null)fillTOFHists(event.getBank("FTOF::hits") , trackDetBank);
-		if (partBank!=null && scintillator!=null && tofhits!=null) fillTOFCalibHists(partBank,scintillator,tofhits);
+		if (partBank!=null && scintillator!=null && tofhits!=null && track!=null) fillTOFCalibHists(partBank,scintillator,tofhits,track);
 		if(userTimeBased && hitBank!=null)fillDC(hitBank);
 		if(toftdc!=null && tofadc!=null) fillTOFadctdcHists(tofadc,toftdc);
 	}
