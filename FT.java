@@ -185,7 +185,7 @@ public class FT {
         	hi_cal_time_neu.setFillColor(44);
         	hi_cal_time_cut_neu = new H1F("hi_cal_time_cut_neu", "T-T_start(ns)", "Counts", 100, -2,2);
         	hi_cal_time_cut_neu.setFillColor(4);
-        	ftime_neu = new F1D("ftime_neu", "[amp]*gaus(x,[mean],[sigma])", -1., 1.);
+        	ftime_neu = new F1D("ftime_neu", "[amp]*gaus(x,[mean],[sigma])", -0.3, 0.3);
         	ftime_neu.setParameter(0, 0.0);
         	ftime_neu.setParameter(1, 0.0);
         	ftime_neu.setParameter(2, 2.0);
@@ -446,6 +446,10 @@ public class FT {
         	DataFitter.fit(ftime_ch,hi_cal_time_cut_ch,"LQ");
         	hi_cal_time_cut_ch.setFunction(null);
         	initTimeGaussFitPar(ftime_neu,hi_cal_time_neu);
+		double Mean = hi_cal_time_neu.getAxis().getBinCenter(hi_cal_time_neu.getMaximumBin());
+                double Min = (Mean - 0.35);
+                double Max = (Mean + 0.35);
+                ftime_neu.setRange(Min, Max);
         	DataFitter.fit(ftime_neu,hi_cal_time_neu,"LQ");
         	hi_cal_time_neu.setFunction(null);
 		//Fit pi0 mass
