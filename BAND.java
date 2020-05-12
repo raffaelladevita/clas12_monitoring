@@ -100,7 +100,7 @@ public class BAND{
 				sect = bankhits.getInt("sector",k);
 
   			time_fadc = bankhits.getFloat("time",k);
-				
+
 				if (sect == 3 || sect == 4) {
 					H_BAND_lasertimeadc[0].fill(time_fadc);
 				}
@@ -129,8 +129,8 @@ public class BAND{
 		    time_tdc = bankhits.getFloat("time",k);
 				status = bankhits.getInt("status",k);
 				L = (float)Math.sqrt(x*x+y*y+z*z);
-				histo2 = time_fadc - startTime - L/speedoflight;
-				histo3 = time_tdc - startTime - L/speedoflight;
+				histo2 = time_fadc - starttime - L/speedoflight;
+				histo3 = time_tdc - starttime - L/speedoflight;
 
 				if ( (sect == 3 || sect == 4) && status == 0) {
 					H_BAND_adcCor[0].fill(histo1);
