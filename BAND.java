@@ -26,6 +26,7 @@ public class BAND{
 	int runNum;
 	boolean[] trigger_bits;
 	public float EBeam;
+	public float starttime;
 	public float rfPeriod, rfoffset1, rfoffset2;
 	public int rf_large_integer;
         public int e_part_ind, e_sect, e_track_ind, pip_part_ind, pipm_part_ind, pip_sect, pim_sect;
@@ -44,17 +45,17 @@ public class BAND{
         	runNum = reqR;userTimeBased=reqTimeBased;
 		write_volatile = reqwrite_volatile;
 		EBeam = 2.2f;
-                if(reqEb>0 && reqEb<4)EBeam=2.22f;
-                if(reqEb>4 && reqEb<7.1)EBeam=6.42f;
-                if(reqEb>7.1 && reqEb<9)EBeam=7.55f;
-                if(reqEb>9)EBeam=10.6f;
+		if(reqEb>0 && reqEb<4)EBeam=2.22f;
+		if(reqEb>4 && reqEb<7.1)EBeam=6.42f;
+		if(reqEb>7.1 && reqEb<9)EBeam=7.55f;
+		if(reqEb>9)EBeam=10.6f;
 		EBeam = reqEb;
 		trigger_bits = new boolean[32];
 
 		H_BAND_adcCor = new H1F[2];
 		H_BAND_meantimeadc = new H1F[2];
 		H_BAND_meantimetdc = new H1F[2];
-  		H_BAND_lasertimeadc = new H1F[2];
+  	H_BAND_lasertimeadc = new H1F[2];
 		speedoflight = 29.9792458f;
 
 		rfPeriod = 4.008f;
@@ -83,10 +84,10 @@ public class BAND{
 			H_BAND_meantimeadc[s].setTitleY("events");
 			H_BAND_meantimetdc[s] = new H1F(String.format("H_BAND_MeanTimeTDC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeTDC_SectorCombination %d",s+1),250,200.,700.);
             H_BAND_meantimetdc[s].setTitleX("meantimeTDC -  sqrt(x^2+y^2+z^2)/c (ns)");
-            H_BAND_meantimetdc[s].setTitleY("events"); 
+            H_BAND_meantimetdc[s].setTitleY("events");
 			H_BAND_lasertimeadc[s] = new H1F(String.format("H_BAND_LaserTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_LaserTimeFADC_SectorCombination %d",s+1),400,1.,401.);
             H_BAND_lasertimeadc[s].setTitleX("meantimeFADC (ns)");
-            H_BAND_lasertimeadc[s].setTitleY("events");                         
+            H_BAND_lasertimeadc[s].setTitleY("events");
 		}
 	}
 
@@ -95,19 +96,19 @@ public class BAND{
 			for(int k = 0; k < bankhits.rows(); k++){
 				float time_fadc;
 				int sect = 0;
-		
+
 				sect = bankhits.getInt("sector",k);
+
+  			time_fadc = bankhits.getFloat("time",k);
 				
-  			        time_fadc = bankhits.getFloat("time",k);
-		       		//ignore sector 1 here					
 				if (sect == 3 || sect == 4) {
 					H_BAND_lasertimeadc[0].fill(time_fadc);
 				}
-				if (sect == 2 || sect == 5) {
+				if (sect == 1 || sect == 2 || sect == 5) {
 					H_BAND_lasertimeadc[1].fill(time_fadc);
 				}
 			}
-			
+
 		}
 		else {
 			for(int k = 0; k < bankhits.rows(); k++){
@@ -116,30 +117,30 @@ public class BAND{
 				float x, y, z, L;
 				int sect = 0;
 				float histo1, histo2, histo3;
-
+				int status = 0;
 				sect = bankhits.getInt("sector",k);
-				
-			    histo1 = bankhits.getFloat("energy",k);
 
-		        x = bankhits.getFloat("x",k);
-		        y = bankhits.getFloat("y",k);
-		        z = bankhits.getFloat("z",k);
-		        time_fadc = bankhits.getFloat("timeFadc",k);
-		        time_tdc = bankhits.getFloat("time",k);
+			  histo1 = bankhits.getFloat("energy",k);
 
+		    x = bankhits.getFloat("x",k);
+		    y = bankhits.getFloat("y",k);
+		    z = bankhits.getFloat("z",k);
+		    time_fadc = bankhits.getFloat("timeFadc",k);
+		    time_tdc = bankhits.getFloat("time",k);
+				status = bankhits.getInt("status",k);
 				L = (float)Math.sqrt(x*x+y*y+z*z);
-				histo2 = time_fadc - L/speedoflight;
-				histo3 = time_tdc - L/speedoflight;
-			
-				if (sect == 3 || sect == 4) {
+				histo2 = time_fadc - startTime - L/speedoflight;
+				histo3 = time_tdc - startTime - L/speedoflight;
+
+				if ( (sect == 3 || sect == 4) && status == 0) {
 					H_BAND_adcCor[0].fill(histo1);
 					H_BAND_meantimeadc[0].fill(histo2);
 					H_BAND_meantimetdc[0].fill(histo3);
 				}
-				if (sect == 1 || sect == 2 || sect == 5) {
+				if ( (sect == 1 || sect == 2 || sect == 5) && status == 0) {
 					H_BAND_adcCor[1].fill(histo1);
 					H_BAND_meantimeadc[1].fill(histo2);
-                    H_BAND_meantimetdc[1].fill(histo3);
+					H_BAND_meantimetdc[1].fill(histo3);
 				}
 			}
 		}
@@ -149,25 +150,26 @@ public class BAND{
 	public void processEvent(DataEvent event){
 		e_part_ind = -1;
 		RFtime=0;
-		
+		starttime = 0;
 		if(event.hasBank("RUN::config")){
-			DataBank confbank = event.getBank("RUN::config");
-			long TriggerWord = confbank.getLong("trigger",0);
-			for (int i = 31; i >= 0; i--) {trigger_bits[i] = (TriggerWord & (1 << i)) != 0;} 
-			if(event.hasBank("RUN::rf")){
-				for(int r=0;r<event.getBank("RUN::rf").rows();r++){
-					if(event.getBank("RUN::rf").getInt("id",r)==1)RFtime=event.getBank("RUN::rf").getFloat("time",r) + rfoffset1;
-				}    
-			}
-                	DataBank partBank = null, trackBank = null, trackDetBank = null, ecalBank = null, cherenkovBank = null, scintillBank = null;
-			DataBank trajBank = null, ltccadcBank = null, ltccClusters = null, bandhits = null, bandlaser = null;
-                	if(userTimeBased){
-                        	if(event.hasBank("REC::Particle"))partBank = event.getBank("REC::Particle");
-                        	if(event.hasBank("REC::Track"))trackBank = event.getBank("REC::Track");
-                        	if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
-                        	if(event.hasBank("REC::Calorimeter")) ecalBank = event.getBank("REC::Calorimeter");
-                        	if(event.hasBank("REC::Cherenkov"))cherenkovBank = event.getBank("REC::Cherenkov");
-                        	if(event.hasBank("REC::Scintillator"))scintillBank = event.getBank("REC::Scintillator");
+				DataBank confbank = event.getBank("RUN::config");
+				long TriggerWord = confbank.getLong("trigger",0);
+				for (int i = 31; i >= 0; i--) {trigger_bits[i] = (TriggerWord & (1 << i)) != 0;}
+				if(event.hasBank("RUN::rf")){
+					for(int r=0;r<event.getBank("RUN::rf").rows();r++){
+						if(event.getBank("RUN::rf").getInt("id",r)==1)RFtime=event.getBank("RUN::rf").getFloat("time",r) + rfoffset1;
+					}
+				}
+				DataBank partBank = null, trackBank = null, trackDetBank = null, ecalBank = null, cherenkovBank = null, scintillBank = null;
+				DataBank trajBank = null, ltccadcBank = null, ltccClusters = null, bandhits = null, bandlaser = null;
+				if(userTimeBased){
+				if(event.hasBank("REC::Particle")) partBank = event.getBank("REC::Particle");
+				if(event.hasBank("REC::Event")) starttime = event.getBank("REC::Event").getFloat("startTime",0);
+				if(event.hasBank("REC::Track"))trackBank = event.getBank("REC::Track");
+				if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
+				if(event.hasBank("REC::Calorimeter")) ecalBank = event.getBank("REC::Calorimeter");
+				if(event.hasBank("REC::Cherenkov"))cherenkovBank = event.getBank("REC::Cherenkov");
+				if(event.hasBank("REC::Scintillator"))scintillBank = event.getBank("REC::Scintillator");
 				if(event.hasBank("REC::Traj"))trajBank = event.getBank("REC::Traj");
 				if(event.hasBank("LTCC::adc"))ltccadcBank = event.getBank("LTCC::adc");
 				if(event.hasBank("LTCC::clusters"))ltccClusters = event.getBank("LTCC::clusters");
@@ -177,20 +179,20 @@ public class BAND{
 				if(event.hasBank("BAND::laser")) {
 					bandlaser = event.getBank("BAND::laser");
 				}
-				
-                	}
-                	if(!userTimeBased){
-                        	if(event.hasBank("RECHB::Particle"))partBank = event.getBank("RECHB::Particle");
-                        	if(event.hasBank("RECHB::Track"))trackBank = event.getBank("RECHB::Track");
-                        	if(event.hasBank("HitBasedTrkg::HBTracks"))trackDetBank = event.getBank("HitBasedTrkg::HBTracks");
-                        	if(event.hasBank("RECHB::Calorimeter")) ecalBank = event.getBank("RECHB::Calorimeter");
-                        	if(event.hasBank("RECHB::Cherenkov"))cherenkovBank = event.getBank("RECHB::Cherenkov");
-                        	if(event.hasBank("RECHB::Scintillator"))scintillBank = event.getBank("RECHB::Scintillator");
+
+			}
+				if(!userTimeBased){
+				if(event.hasBank("RECHB::Particle"))partBank = event.getBank("RECHB::Particle");
+				if(event.hasBank("RECHB::Track"))trackBank = event.getBank("RECHB::Track");
+				if(event.hasBank("HitBasedTrkg::HBTracks"))trackDetBank = event.getBank("HitBasedTrkg::HBTracks");
+				if(event.hasBank("RECHB::Calorimeter")) ecalBank = event.getBank("RECHB::Calorimeter");
+				if(event.hasBank("RECHB::Cherenkov"))cherenkovBank = event.getBank("RECHB::Cherenkov");
+				if(event.hasBank("RECHB::Scintillator"))scintillBank = event.getBank("RECHB::Scintillator");
 				if(event.hasBank("RECHB::Traj"))trajBank = event.getBank("RECHB::Traj");
 				if(event.hasBank("LTCC::adc"))ltccadcBank = event.getBank("LTCC::adc");
 				if(event.hasBank("LTCC::clusters"))ltccClusters = event.getBank("LTCC::clusters");
 				if(event.hasBank("BAND::hits")) bandhits = event.getBank("BAND::hits");
-				if(event.hasBank("BAND::laser")) bandlaser = event.getBank("BAND::laser");				
+				if(event.hasBank("BAND::laser")) bandlaser = event.getBank("BAND::laser");
                 	}
 
 			if(bandhits!=null) {
@@ -213,15 +215,15 @@ public class BAND{
 		H_BAND_adcCor[0].setLineColor(2);
 		H_BAND_meantimeadc[0].setLineColor(2);
 		H_BAND_meantimetdc[0].setLineColor(2);
-		H_BAND_lasertimeadc[0].setLineColor(2);		
+		H_BAND_lasertimeadc[0].setLineColor(2);
 		H_BAND_adcCor[1].setLineColor(4);
         H_BAND_meantimeadc[1].setLineColor(4);
         H_BAND_meantimetdc[1].setLineColor(4);
-        H_BAND_lasertimeadc[1].setLineColor(4);    
+        H_BAND_lasertimeadc[1].setLineColor(4);
 		can_BAND.cd(0);can_BAND.draw(H_BAND_adcCor[0]);can_BAND.draw(H_BAND_adcCor[1],"same");
 		can_BAND.cd(1);can_BAND.draw(H_BAND_meantimeadc[0]);can_BAND.draw(H_BAND_meantimeadc[1],"same");
 		can_BAND.cd(2);can_BAND.draw(H_BAND_meantimetdc[0]);can_BAND.draw(H_BAND_meantimetdc[1],"same");
-		can_BAND.cd(3);can_BAND.draw(H_BAND_lasertimeadc[0]);can_BAND.draw(H_BAND_lasertimeadc[1],"same");		
+		can_BAND.cd(3);can_BAND.draw(H_BAND_lasertimeadc[0]);can_BAND.draw(H_BAND_lasertimeadc[1],"same");
 		if(runNum>0){
 			if(!write_volatile)can_BAND.save(String.format("plots"+runNum+"/BAND.png"));
 			if(write_volatile)can_BAND.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/BAND.png"));
@@ -254,15 +256,15 @@ public class BAND{
                 Scanner read;
                 try {
                         read = new Scanner(file);
-                        do { 
+                        do {
                                 String filename = read.next();
                                 toProcessFileNames.add(filename);
 
                         }while (read.hasNext());
                         read.close();
-                }catch(IOException e){ 
+                }catch(IOException e){
                         e.printStackTrace();
-                }   
+                }
                 int progresscount=0;int filetot = toProcessFileNames.size();
                 for (String runstrg : toProcessFileNames) if( count<maxevents ){
                         progresscount++;
@@ -273,14 +275,14 @@ public class BAND{
                         HipoDataSource reader = new HipoDataSource();
                         reader.open(runstrg);
                         int filecount = 0;
-                        while(reader.hasEvent()&& count<maxevents ) { 
+                        while(reader.hasEvent()&& count<maxevents ) {
                                 DataEvent event = reader.getNextEvent();
                                 ana.processEvent(event);
                                 filecount++;count++;
                                 if(count%10000 == 0) System.out.println(count/1000 + "k events (this is BAND analysis on "+runstrg+") ; progress : "+progresscount+"/"+filetot);
-                        }   
+                        }
                         reader.close();
-                }   
+                }
                 System.out.println("Total : " + count + " events");
                 ana.plot();
                 ana.write();
