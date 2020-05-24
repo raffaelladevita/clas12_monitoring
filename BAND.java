@@ -77,17 +77,17 @@ public class BAND{
 
 		for(int s=0;s<2;s++){
 			H_BAND_adcCor[s] = new H1F(String.format("H_BAND_ADC_LR_SectorCombination%d",s+1),String.format("H_BAND_ADC_LR_SectorCombination %d",s+1),200,1.,5001.);
-          	H_BAND_adcCor[s].setTitleX("sqrt( adcLcorr * adcRcorr )");
-           	H_BAND_adcCor[s].setTitleY("events");
+          		H_BAND_adcCor[s].setTitleX("sqrt( adcLcorr * adcRcorr )");
+           		H_BAND_adcCor[s].setTitleY("events");
 			H_BAND_meantimeadc[s] = new H1F(String.format("H_BAND_MeanTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeFADC_SectorCombination %d",s+1),200,-100.,301.);
 			H_BAND_meantimeadc[s].setTitleX("meantimeFadc - STT - sqrt(x^2+y^2+z^2)/c (ns)");
 			H_BAND_meantimeadc[s].setTitleY("events");
 			H_BAND_meantimetdc[s] = new H1F(String.format("H_BAND_MeanTimeTDC_SectorCombination%d",s+1),String.format("H_BAND_MeanTimeTDC_SectorCombination %d",s+1),350,-50.,650.);
-            H_BAND_meantimetdc[s].setTitleX("meantimeTDC -  STT - sqrt(x^2+y^2+z^2)/c (ns)");
-            H_BAND_meantimetdc[s].setTitleY("events");
-			H_BAND_lasertimeadc[s] = new H1F(String.format("H_BAND_LaserTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_LaserTimeFADC_SectorCombination %d",s+1),500,1.,501.);
-            H_BAND_lasertimeadc[s].setTitleX("meantimeFADC (ns)");
-            H_BAND_lasertimeadc[s].setTitleY("events");
+            		H_BAND_meantimetdc[s].setTitleX("meantimeTDC -  STT - sqrt(x^2+y^2+z^2)/c (ns)");
+            		H_BAND_meantimetdc[s].setTitleY("events");
+			H_BAND_lasertimeadc[s] = new H1F(String.format("H_BAND_LaserTimeFADC_SectorCombination%d",s+1),String.format("H_BAND_LaserTimeFADC_SectorCombination %d",s+1),400,300,700.);
+            		H_BAND_lasertimeadc[s].setTitleX("meantimeFADC (ns)");
+            		H_BAND_lasertimeadc[s].setTitleY("events");
 		}
 	}
 
