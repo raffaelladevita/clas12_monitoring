@@ -29,7 +29,7 @@ public class RICH{
 	public int nPMTS, nANODES;
 
 	public H2F H_dt_channel;
-	public H1F H_dt;
+	public H1F H_dt, H_FWHM, H_ProjY;
   
 
 	public RICH(int reqR, float reqEb, boolean reqTimeBased, boolean reqwrite_volatile){
@@ -53,6 +53,18 @@ public class RICH{
 		H_dt_channel.setTitle(histitle);
                 H_dt_channel.setTitleX("channel");
                 H_dt_channel.setTitleY("T_meas - T_calc (ns)");
+
+		histitle = String.format("RICH Full-Width at Half Maximum");
+		H_FWHM = new H1F(String.format("H_RICH_FWHM"),histitle,nPMTS,0.5,0.5+nPMTS);
+		H_FWHM.setTitle(histitle);
+		H_FWHM.setTitleX("PMT number");
+		H_FWHM.setTitleY("FWHM");
+
+		histitle = String.format("Projection Y Test");
+                H_ProjY = new H1F(String.format("H_ProjY"),histitle,500,-150,50);
+                H_ProjY.setTitle(histitle);
+                H_ProjY.setTitleX("dT (ns)");
+                H_ProjY.setTitleY("events");
 		    
 	}
         public void getPhotons(DataBank part, DataBank hadr, DataBank phot, DataBank hits){
@@ -102,6 +114,58 @@ public class RICH{
 		}
         }    
 
+	public void FillFWHMHistogram() {
+
+		for (int p=0; p<nPMTS; p++) {
+			String name = "Y Projection";
+
+			int a1 = p*nANODES + 1;
+    			int a2 = a1 + nANODES - 1;
+
+			double yMin = H_dt_channel.getYAxis().min();
+        		double yMax = H_dt_channel.getYAxis().max();
+        		int yNum = H_dt_channel.getYAxis().getNBins();
+			H1F projY = new H1F(name, yNum, yMin, yMax);
+
+			double height = 0.0;
+        		for (int y = 0; y < yNum; y++) {
+            			height = 0.0;
+            			for (int x = a1-1; x < a2; x++) {
+                			height += H_dt_channel.getBinContent(x,y);
+					//System.out.println("x: "+x+"y: "+y+" "+H_dt_channel.getBinContent(x,y));
+            			}
+            		projY.setBinContent(y, height);
+			//if (p == 80) H_ProjY.setBinContent(y, height);
+        		}
+
+
+
+			int halfmax = (int) projY.getBinContent(projY.getMaximumBin())/2;
+			int nbins = projY.getXaxis().getNBins();
+
+			float[] hcontent;
+			hcontent = projY.getData();
+			for (int c=0;c<nbins;c++) {
+			}
+
+  			/* Getting the FWHM */
+			int bin1 = 0;
+			int bin2 = 0;
+			/* The first bin above halfmax */
+			for (int c=0;c<nbins;c++) {
+				if (hcontent[c]>=halfmax) {bin1=c; break;}
+			}
+			/* The last bin above halfmax */
+			for (int c=bin1+1;c<nbins;c++) {
+				if (hcontent[c]<=halfmax) {bin2=c-1; break;}
+			}	
+      			double fwhm = projY.getDataX(bin2+1) - projY.getDataX(bin1); //If bin1 = 70 and bin2 = 74, the FWHM is 5 bins, but bin2-bin1 yields only 4, thus (bin2+1) is used in the first term of the difference
+			//if (p == 80) System.out.println(p+" "+fwhm+" bin1: "+bin1+" bin2: "+bin2+" halfmax: "+halfmax);
+      			H_FWHM.fill(p+1,fwhm);
+		}
+		
+	}
+
 	public void processEvent(DataEvent event){
 		if(event.hasBank("RUN::config")){
 			DataBank confbank = event.getBank("RUN::config");
@@ -126,20 +190,21 @@ public class RICH{
 			//if( (trigger_bits[1] || trigger_bits[2] || trigger_bits[3] || trigger_bits[4] || trigger_bits[5] || trigger_bits[6]) && partBank!=null)e_part_ind = makeElectron(partBank);
 			if (eventBank!=null) {
 				if ((eventBank.rows() > 0) && (confbank.rows() > 0)) {
-					if(partBank!=null && hadrBank!=null && photBank!=null && hitBank!=null) getPhotons(partBank,hadrBank,photBank,hitBank);
+					if(partBank!=null && hadrBank!=null && photBank!=null && hitBank!=null) {getPhotons(partBank,hadrBank,photBank,hitBank);}
 					}
 			}
 		}
 	}
         public void plot() {
 		EmbeddedCanvas can_RICH  = new EmbeddedCanvas();
-		can_RICH.setSize(3500,4000);
-                can_RICH.divide(1,2);
+		can_RICH.setSize(3500,6000);
+                can_RICH.divide(1,3);
                 can_RICH.setAxisTitleSize(18);
                 can_RICH.setAxisFontSize(18);
                 can_RICH.setTitleSize(18);
                 can_RICH.cd(0);can_RICH.draw(H_dt);
 		can_RICH.cd(1);can_RICH.draw(H_dt_channel);
+		can_RICH.cd(2);can_RICH.draw(H_FWHM);
                 if(runNum>0){
                         if(!write_volatile)can_RICH.save(String.format("plots"+runNum+"/RICH.png"));
                         if(write_volatile)can_RICH.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/RICH.png"));
@@ -200,6 +265,7 @@ public class RICH{
                         reader.close();
                 }   
                 System.out.println("Total : " + count + " events");
+		ana.FillFWHMHistogram();
                 ana.plot();
 	        ana.write();
         }   
