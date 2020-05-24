@@ -1,13 +1,9 @@
 #!/bin/csh
 
-if ( !($?COATJAVA) ) then
-  set my_java = "6.3.1"
-  set java_path = "/group/clas12/packages/coatjava"
-  setenv COATJAVA ${java_path}/${my_java}/
-  echo "COATJAVA version is set to the defaul $my_java. Update this script, if want a newer version. "
-else
-  echo "COATJAVA is set to \$COATJAVA"
-endif
+set my_java = "6c.5.7"
+set java_path = "/group/clas12/packages/coatjava"
+setenv COATJAVA ${java_path}/${my_java}/
+echo "COATJAVA version is set to the defaul $my_java. Update this script, if want a newer version. "
 
 setenv MALLOC_ARENA_MAX 1
 
