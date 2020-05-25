@@ -275,7 +275,8 @@ public class RICH{
 		TDirectory dirout = new TDirectory();
 		dirout.mkdir("/RICH/");
 		dirout.cd("/RICH/");
-		dirout.addDataSet(H_dt,H_dt_channel,H_FWHM);
+		dirout.addDataSet(H_dt,H_dt_channel);
+		dirout.addDataSet(H_FWHM);
 
 		if(!write_volatile){
 			if(runNum>0)dirout.writeFile("plots"+runNum+"/out_RICH"+runNum+".hipo");
