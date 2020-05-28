@@ -177,20 +177,32 @@ public class RICH{
 
 			int bin_max = (int) projY.getMaximumBin();
 			float rms=0.f;
+			float avg=0.f;
 
 			float[] hcontent;
 			hcontent = projY.getData();
+                        /* First get the average within +-7 bins around the maximum */
+                        int counter = 0;
+                        for (int c=bin_max-7;c<=bin_max+7;c++) {
+                                avg=avg+hcontent[c]*(float)projY.getDataX(c);
+                                counter=counter+(int)hcontent[c];
+				//if (p==80) System.out.println("x: "+projY.getDataX(c)+"y: "+hcontent[c]+" avg: "+avg);
+                        }
+
+                        if (counter!=0) avg = avg/counter;
+			//if (p==80) System.out.println("x: "+counter+" avg: "+avg);
+			
 			/* Calculate the RMS */
-			int counter = 0;
+			counter = 0;
 			for (int c=bin_max-7;c<=bin_max+7;c++) {
-				rms=rms+hcontent[c]*(float)(projY.getDataX(c)*projY.getDataX(c));
+				rms=rms+hcontent[c]*(float)((projY.getDataX(c)-avg)*(projY.getDataX(c)-avg));
 				counter=counter+(int)hcontent[c];
 			}
 
 			if (counter!=0) rms = (float)Math.sqrt(rms/counter);
 			//System.out.println("RMS correct: "+rms);
 
-  			/* Getting the FWHM */
+  			/* Calculate the FWHM */
 			int bin1 = 0;
 			int bin2 = 0;
 			/* The first bin above halfmax */
