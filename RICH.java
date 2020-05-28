@@ -19,6 +19,12 @@ import org.jlab.groot.base.GStyle;
 import org.jlab.utils.groups.IndexedTable;
 import org.jlab.detector.calib.utils.CalibrationConstants;
 import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.groot.base.DatasetAttributes;
+import org.jlab.groot.base.Attributes;
+import org.jlab.groot.math.StatNumber;
+import org.jlab.groot.ui.PaveText;
+import org.jlab.groot.data.IDataSet;
+import org.jlab.groot.base.PadAttributes;
 
 public class RICH{
 	boolean userTimeBased, write_volatile;
@@ -28,9 +34,13 @@ public class RICH{
 
 	public int nPMTS, nANODES;
 
+	public PaveText statBox = null;
+	public PadAttributes attr1;
+
 	public H2F H_dt_channel;
-	public H1F H_dt, H_FWHM, H_ProjY;
-  
+	public H1F H_dt, H_FWHM, H_ProjY, H_RMS;
+	public H1F[] H_dt_PMT;
+
 
 	public RICH(int reqR, float reqEb, boolean reqTimeBased, boolean reqwrite_volatile){
         	runNum = reqR;userTimeBased=reqTimeBased;
@@ -39,6 +49,9 @@ public class RICH{
 
 		nPMTS = 391;
 		nANODES = 64;
+
+		//statBox = new PaveText(2);
+		//attr1 = new PadAttributes();
 
 		trigger_bits = new boolean[32];
 
@@ -58,13 +71,28 @@ public class RICH{
 		H_FWHM = new H1F(String.format("H_RICH_FWHM"),histitle,nPMTS,0.5,0.5+nPMTS);
 		H_FWHM.setTitle(histitle);
 		H_FWHM.setTitleX("PMT number");
-		H_FWHM.setTitleY("FWHM");
+		H_FWHM.setTitleY("FWHM of (T_meas - T_calc) (ns)");
+
+		histitle = String.format("RICH RMS within +-7 bins around the Max");
+                H_RMS = new H1F(String.format("H_RICH_RMS"),histitle,nPMTS,0.5,0.5+nPMTS);
+                H_RMS.setTitle(histitle);
+                H_RMS.setTitleX("PMT number");
+                H_RMS.setTitleY("RMS of (T_meas - T_calc) (ns)");
 
 		histitle = String.format("Projection Y Test");
                 H_ProjY = new H1F(String.format("H_ProjY"),histitle,500,-150,50);
                 H_ProjY.setTitle(histitle);
                 H_ProjY.setTitleX("dT (ns)");
                 H_ProjY.setTitleY("events");
+
+		H_dt_PMT = new H1F[391];
+                for(int ic=0;ic<nPMTS;ic++){
+                        H_dt_PMT[ic] = new H1F(String.format("H_RICH_dt_PMT_%d",ic+1),String.format("H_RICH_dt_PMT_%d",ic+1),500, -150, 50);
+                        H_dt_PMT[ic].setTitle(String.format("dT, PMT=%d",ic+1));
+                        H_dt_PMT[ic].setTitleX("dT (ns)");
+                        H_dt_PMT[ic].setTitleY("counts");
+			H_dt_PMT[ic].setOptStat("1111111");
+                }
 		    
 	}
         public void getPhotons(DataBank part, DataBank hadr, DataBank phot, DataBank hits){
@@ -116,8 +144,11 @@ public class RICH{
 
 	public void FillFWHMHistogram() {
 
+		H_FWHM.reset();
+		H_RMS.reset();
 		for (int p=0; p<nPMTS; p++) {
 			String name = "Y Projection";
+			H_dt_PMT[p].reset();
 
 			int a1 = p*nANODES + 1;
     			int a2 = a1 + nANODES - 1;
@@ -135,7 +166,8 @@ public class RICH{
 					//System.out.println("x: "+x+"y: "+y+" "+H_dt_channel.getBinContent(x,y));
             			}
             		projY.setBinContent(y,height);
-			//if (p == 80) H_ProjY.setBinContent(y, height);
+			if (p == 80) H_ProjY.setBinContent(y, height);
+			H_dt_PMT[p].setBinContent(y,height);
         		}
 
 
@@ -143,10 +175,20 @@ public class RICH{
 			int halfmax = (int) projY.getBinContent(projY.getMaximumBin())/2;
 			int nbins = projY.getXaxis().getNBins();
 
+			int bin_max = (int) projY.getMaximumBin();
+			float rms=0.f;
+
 			float[] hcontent;
 			hcontent = projY.getData();
-			for (int c=0;c<nbins;c++) {
+			/* Calculate the RMS */
+			int counter = 0;
+			for (int c=bin_max-7;c<=bin_max+7;c++) {
+				rms=rms+hcontent[c]*(float)(projY.getDataX(c)*projY.getDataX(c));
+				counter=counter+(int)hcontent[c];
 			}
+
+			if (counter!=0) rms = (float)Math.sqrt(rms/counter);
+			//System.out.println("RMS correct: "+rms);
 
   			/* Getting the FWHM */
 			int bin1 = 0;
@@ -159,9 +201,10 @@ public class RICH{
 			for (int c=bin1+1;c<nbins;c++) {
 				if (hcontent[c]<=halfmax) {bin2=c-1; break;}
 			}	
-      			double fwhm = projY.getDataX(bin2+1) - projY.getDataX(bin1); //If bin1 = 70 and bin2 = 74, the FWHM is 5 bins, but bin2-bin1 yields only 4, thus (bin2+1) is used in the first term of the difference
+      			double fwhm = projY.getDataX(bin2) - projY.getDataX(bin1); //If bin1 = 70 and bin2 = 74, the FWHM is 5 bins, but bin2-bin1 yields only 4, thus (bin2+1) is used in the first term of the difference
 			//if (p == 80) System.out.println(p+" "+fwhm+" bin1: "+bin1+" bin2: "+bin2+" halfmax: "+halfmax);
       			H_FWHM.fill(p+1,fwhm);
+			H_RMS.fill(p+1,rms);
 		}
 		
 	}
@@ -197,14 +240,16 @@ public class RICH{
 	}
         public void plot() {
 		EmbeddedCanvas can_RICH  = new EmbeddedCanvas();
-		can_RICH.setSize(3500,6000);
-                can_RICH.divide(1,3);
+		can_RICH.setSize(3500,10000);
+                can_RICH.divide(1,5);
                 can_RICH.setAxisTitleSize(18);
                 can_RICH.setAxisFontSize(18);
                 can_RICH.setTitleSize(18);
                 can_RICH.cd(0);can_RICH.draw(H_dt);
 		can_RICH.cd(1);can_RICH.draw(H_dt_channel);
 		can_RICH.cd(2);can_RICH.draw(H_FWHM);
+		can_RICH.cd(3);can_RICH.draw(H_dt_PMT[80]);
+		can_RICH.cd(4);can_RICH.draw(H_RMS);
                 if(runNum>0){
                         if(!write_volatile)can_RICH.save(String.format("plots"+runNum+"/RICH.png"));
                         if(write_volatile)can_RICH.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/RICH.png"));
@@ -213,6 +258,27 @@ public class RICH{
                 else{
                         can_RICH.save(String.format("plots/RICH.png"));
                         System.out.println(String.format("saved plots/RICH.png"));
+                }
+		EmbeddedCanvas can_RICH_PMT  = new EmbeddedCanvas();
+                can_RICH_PMT.setSize(10000,4000);
+                can_RICH_PMT.divide(20,20);
+                can_RICH_PMT.setAxisTitleSize(18);
+                can_RICH_PMT.setAxisFontSize(18);
+                can_RICH_PMT.setTitleSize(18);
+		for(int ic=0;ic<nPMTS;ic++){
+                        can_RICH_PMT.cd(ic);can_RICH_PMT.draw(H_dt_PMT[ic]); 
+			//can_RICH_PMT.getPad(ic).attr1.statBox.setStatBoxOffsetY(1);
+			//can_RICH_PMT.getPad(ic).attr1.statBox.setStatBoxOffsetY(0);
+			//can_RICH_PMT.getPad(ic).setStatBoxOffsetY(1);
+                }
+                if(runNum>0){
+                        if(!write_volatile)can_RICH_PMT.save(String.format("plots"+runNum+"/RICH_PMT_DeltaT.png"));
+                        if(write_volatile)can_RICH_PMT.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/RICH_PMT_DeltaT.png"));
+                        System.out.println(String.format("saved plots"+runNum+"/RICH_PMT_DeltaT.png"));
+                }
+                else{
+                        can_RICH_PMT.save(String.format("plots/RICH_PMT_DeltaT.png"));
+                        System.out.println(String.format("saved plots/RICH_PMT_DeltaT.png"));
                 }
 
 	}
@@ -277,6 +343,7 @@ public class RICH{
 		dirout.cd("/RICH/");
 		dirout.addDataSet(H_dt,H_dt_channel);
 		dirout.addDataSet(H_FWHM);
+		dirout.addDataSet(H_RMS);
 
 		if(!write_volatile){
 			if(runNum>0)dirout.writeFile("plots"+runNum+"/out_RICH"+runNum+".hipo");
