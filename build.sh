@@ -1,6 +1,6 @@
 #!/bin/csh
 
-set my_java = "6c.5.7"
+set my_java = "6.5.9"
 set java_path = "/group/clas12/packages/coatjava"
 setenv COATJAVA ${java_path}/${my_java}/
 echo "COATJAVA version is set to the defaul $my_java. Update this script, if want a newer version. "
