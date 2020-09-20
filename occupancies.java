@@ -1,4 +1,3 @@
-
 import java.io.*;
 import java.util.*;
 
@@ -170,11 +169,11 @@ public class occupancies {
 		H_BST_R2_theta = new H2F("H_BST_R2_theta","H_BST_R2_theta",100,0,90,100,5,25);
 		H_BST_R2_theta.setTitle("BST R2 vs e^- #theta");
 		H_BST_R2_theta.setTitleY("e^- #theta (^o)");
-		H_BST_R2_theta.setTitleX("R1 #theta (^o)");
+		H_BST_R2_theta.setTitleX("R2 #theta (^o)");
 		H_BST_R3_theta = new H2F("H_BST_R3_theta","H_BST_R3_theta",100,0,90,100,5,25);
 		H_BST_R3_theta.setTitle("BST R3 vs e^- #theta");
 		H_BST_R3_theta.setTitleY("e^- #theta (^o)");
-		H_BST_R3_theta.setTitleX("R1 #theta (^o)");
+		H_BST_R3_theta.setTitleX("R3 #theta (^o)");
 		H_BMT_R1_theta = new H2F("H_BMT_R1_theta","H_BMT_R1_theta",100,0,90,100,5,25);
 		H_BMT_R1_theta.setTitle("BMT R1 vs e^- #theta");
 		H_BMT_R1_theta.setTitleY("e^- #theta (^o)");
@@ -182,11 +181,11 @@ public class occupancies {
 		H_BMT_R2_theta = new H2F("H_BMT_R2_theta","H_BMT_R2_theta",100,0,90,100,5,25);
 		H_BMT_R2_theta.setTitle("BMT R2 vs e^- #theta");
 		H_BMT_R2_theta.setTitleY("e^- #theta (^o)");
-		H_BMT_R2_theta.setTitleX("R1 #theta (^o)");
+		H_BMT_R2_theta.setTitleX("R2 #theta (^o)");
 		H_BMT_R3_theta = new H2F("H_BMT_R3_theta","H_BMT_R3_theta",100,0,90,100,5,25);
 		H_BMT_R3_theta.setTitle("BMT R3 vs e^- #theta");
 		H_BMT_R3_theta.setTitleY("e^- #theta (^o)");
-		H_BMT_R3_theta.setTitleX("R1 #theta (^o)");
+		H_BMT_R3_theta.setTitleX("R3 #theta (^o)");
 		H_BST_R1_phi = new H2F("H_BST_R1_phi","H_BST_R1_phi",100,-180,180,100,-180,180);
 		H_BST_R1_phi.setTitle("BST R1 vs e^- #phi");
 		H_BST_R1_phi.setTitleX("e^- #phi (^o)");
@@ -194,11 +193,11 @@ public class occupancies {
 		H_BST_R2_phi = new H2F("H_BST_R2_phi","H_BST_R2_phi",100,-180,180,100,-180,180);
 		H_BST_R2_phi.setTitle("BST R2 vs e^- #phi");
 		H_BST_R2_phi.setTitleX("e^- #phi (^o)");
-		H_BST_R2_phi.setTitleY("R1 #phi (^o)");
+		H_BST_R2_phi.setTitleY("R2 #phi (^o)");
 		H_BST_R3_phi = new H2F("H_BST_R3_phi","H_BST_R3_phi",100,-180,180,100,-180,180);
 		H_BST_R3_phi.setTitle("BST R3 vs e^- #phi");
 		H_BST_R3_phi.setTitleX("e^- #phi (^o)");
-		H_BST_R3_phi.setTitleY("R1 #phi (^o)");
+		H_BST_R3_phi.setTitleY("R3 #phi (^o)");
 		H_BMT_R1_phi = new H2F("H_BMT_R1_phi","H_BMT_R1_phi",100,-180,180,100,-180,180);
 		H_BMT_R1_phi.setTitle("BMT R1 vs e^- #phi");
 		H_BMT_R1_phi.setTitleX("e^- #phi (^o)");
@@ -206,11 +205,11 @@ public class occupancies {
 		H_BMT_R2_phi = new H2F("H_BMT_R2_phi","H_BMT_R2_phi",100,-180,180,100,-180,180);
 		H_BMT_R2_phi.setTitle("BMT R2 vs e^- #phi");
 		H_BMT_R2_phi.setTitleX("e^- #phi (^o)");
-		H_BMT_R2_phi.setTitleY("R1 #phi (^o)");
+		H_BMT_R2_phi.setTitleY("R2 #phi (^o)");
 		H_BMT_R3_phi = new H2F("H_BMT_R3_phi","H_BMT_R3_phi",100,-180,180,100,-180,180);
 		H_BMT_R3_phi.setTitle("BMT R3 vs e^- #phi");
 		H_BMT_R3_phi.setTitleX("e^- #phi (^o)");
-		H_BMT_R3_phi.setTitleY("R1 #phi (^o)");
+		H_BMT_R3_phi.setTitleY("R3 #phi (^o)");
 	}
 	public void MakeBST_hits(DataBank bank, DataBank hits){
 		H_BST_multi.fill(hits.rows());
@@ -275,9 +274,9 @@ public class occupancies {
 				if(r==2)H_BST_R2_phi_z.fill(z,Math.toDegrees(Math.atan2(y,x)));
 				if(r==3)H_BST_R3_phi_z.fill(z,Math.toDegrees(Math.atan2(y,x)));
 				if(found_elec==1){
-					if(r==1)H_BST_R1_theta.fill(Math.toDegrees(Math.acos(z/Math.sqrt(x*x+y*x+z*z))),elec_th);
-					if(r==2)H_BST_R2_theta.fill(Math.toDegrees(Math.acos(z/Math.sqrt(x*x+y*x+z*z))),elec_th);
-					if(r==3)H_BST_R3_theta.fill(Math.toDegrees(Math.acos(z/Math.sqrt(x*x+y*x+z*z))),elec_th);
+					if(r==1)H_BST_R1_theta.fill(Math.toDegrees(Math.acos(z/Math.sqrt(x*x+y*y+z*z))),elec_th);
+					if(r==2)H_BST_R2_theta.fill(Math.toDegrees(Math.acos(z/Math.sqrt(x*x+y*y+z*z))),elec_th);
+					if(r==3)H_BST_R3_theta.fill(Math.toDegrees(Math.acos(z/Math.sqrt(x*x+y*y+z*z))),elec_th);
 					if(r==1)H_BST_R1_phi.fill(elec_ph,Math.toDegrees(Math.atan2(y,x)));
 					if(r==2)H_BST_R2_phi.fill(elec_ph,Math.toDegrees(Math.atan2(y,x)));
 					if(r==3)H_BST_R3_phi.fill(elec_ph,Math.toDegrees(Math.atan2(y,x)));
@@ -307,9 +306,9 @@ public class occupancies {
 				if(r==2)H_BMT_R2_phi_z.fill(z,Math.toDegrees(Math.atan2(y,x)));
 				if(r==3)H_BMT_R3_phi_z.fill(z,Math.toDegrees(Math.atan2(y,x)));
 				if(found_elec==1){
-					if(r==1)H_BMT_R1_theta.fill(Math.toDegrees(Math.acos(z/Math.sqrt(x*x+y*x+z*z))),elec_th);
-					if(r==2)H_BMT_R2_theta.fill(Math.toDegrees(Math.acos(z/Math.sqrt(x*x+y*x+z*z))),elec_th);
-					if(r==3)H_BMT_R3_theta.fill(Math.toDegrees(Math.acos(z/Math.sqrt(x*x+y*x+z*z))),elec_th);
+					if(r==1)H_BMT_R1_theta.fill(Math.toDegrees(Math.acos(z/Math.sqrt(x*x+y*y+z*z))),elec_th);
+					if(r==2)H_BMT_R2_theta.fill(Math.toDegrees(Math.acos(z/Math.sqrt(x*x+y*y+z*z))),elec_th);
+					if(r==3)H_BMT_R3_theta.fill(Math.toDegrees(Math.acos(z/Math.sqrt(x*x+y*y+z*z))),elec_th);
 					if(r==1)H_BMT_R1_phi.fill(elec_ph,Math.toDegrees(Math.atan2(y,x)));
 					if(r==2)H_BMT_R2_phi.fill(elec_ph,Math.toDegrees(Math.atan2(y,x)));
 					if(r==3)H_BMT_R3_phi.fill(elec_ph,Math.toDegrees(Math.atan2(y,x)));
