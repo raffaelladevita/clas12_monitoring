@@ -325,7 +325,8 @@ public class tof_monitor {
 	}
 
 	public void fillTOFCalibHists(DataBank part, DataBank sc, DataBank hits, DataBank trk){
-		for(int k=0;k<part.rows();k++) {
+		// 11 Oct 2020, Trigger particle should be excluded, i.e. start loop from second particle in REC::Particle
+		for(int k=1;k<part.rows();k++) {
 			byte charge = part.getByte("charge",k);
 			int pid = part.getInt("pid",k);
 			float px = part.getFloat("px",k);
