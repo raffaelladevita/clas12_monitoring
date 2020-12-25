@@ -225,6 +225,9 @@ public class central {
 		}
 	}
 
+	public void fillCTOFCalibHists(DataBank part, DataBank CTOFbank, DataBank scintillBank, DataBank trk){
+		
+	}
 
 	public void FillCVTCTOF(DataBank CVTbank, DataBank CTOFbank, DataBank partBank, DataBank scintillBank){
 		for(int iCTOF=0;iCTOF<CTOFbank.rows();iCTOF++){
@@ -314,8 +317,10 @@ public class central {
 						H_CTOF_edep_z.fill(z,edep_cor);
 						H_CTOF_path_mom.fill(mom,p);
 						H_CTOF_edep_pad_neg.fill(pad,edep_cor);
-						if(mom>0.4 && track_redchi2 <30 && CTOFTime!=-10.) { 
+						//Signed off by Dan on 29 April 2020;
+						if(mom>0.4 && track_redchi2 < 30 && CTOFTime!=-10.) { 
 							H_CVT_t_pad.fill(pad,CTOFTime);
+						//This is the CTOF vertex time difference histogram to be fitted and timelined
 							H_CVT_t_neg.fill(CTOFTime);
 							H_CVT_t[pad-1].fill(CTOFTime);
 							H_CVT_t[48].fill(CTOFTime);
@@ -330,13 +335,13 @@ public class central {
 							double thisTime =CTOFTime-RFT;
 							thisTime = (thisTime+(rf_large_integer+0.5)*rfPeriod) % rfPeriod;
 							thisTime = thisTime - rfPeriod/2;
-							H_CTOF_vt_pim.fill(thisTime,CTOFTime-STT);
+							H_CTOF_vt_pim.fill(thisTime,CTOFTime);
 							H_CTOF_edep_pim.fill(edep_cor);
 						}			
 					}
 					if (charge>0 && e_part_ind != -1) {
 						H_CTOF_edep_pad_pos.fill(pad,edep_cor);
-						if(mom>0.4 && track_redchi2 <30 && CTOFTime!=-10.) H_CVT_t_pos.fill(CTOFTime);
+						if(mom>0.4 && track_redchi2 < 30 && CTOFTime!=-10.) H_CVT_t_pos.fill(CTOFTime);
 						H_CTOF_pos_mass.fill(CTOFmass);
 					}
 					matched = true;

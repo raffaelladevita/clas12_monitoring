@@ -326,6 +326,7 @@ public class tof_monitor {
 
 	public void fillTOFCalibHists(DataBank part, DataBank sc, DataBank hits, DataBank trk){
 		// 11 Oct 2020, Trigger particle should be excluded, i.e. start loop from second particle in REC::Particle
+		// 22 Dec 2020, positrons added to p1a and p1b; momentum, energy deposition, and reduced track chi2 added per Daniel's request
 		for(int k=1;k<part.rows();k++) {
 			byte charge = part.getByte("charge",k);
 			int pid = part.getInt("pid",k);
@@ -387,10 +388,13 @@ public class tof_monitor {
 						}
 
 						// panel 1a and 1b, use e-, pi+, pi-
-						if (pid == 11 || pid == 211 || pid == -211){
+						// 22 Dec 2020: Cuts aligned with calib suite as per Dan's info
+						if (pid == 11 || pid == -11 || pid == 211 || pid == -211){
 							if (sc.getByte("layer",j)==1){
-								p1a_pad_dt_calib[sector-1].fill(pad,timediff);
-								p1a_dt_calib_all[sector-1].fill(timediff);
+								if (mom > 0.4 && mom < 10 && energy > 0.5 && reducedchi2 < 75) {
+									p1a_pad_dt_calib[sector-1].fill(pad,timediff);
+									p1a_dt_calib_all[sector-1].fill(timediff);
+								}
 								if (energy > 2.){
 									if (theta <= 11.) p1a_edep[sector-1][0].fill(energy);
 									if (theta > 11. && theta <=23) p1a_edep[sector-1][1].fill(energy);
@@ -398,8 +402,10 @@ public class tof_monitor {
 								}
 							}
 							if (sc.getByte("layer",j)==2){
-								p1b_pad_dt_calib[sector-1].fill(pad,timediff);
-								p1b_dt_calib_all[sector-1].fill(timediff);
+								if (mom > 0.4 && mom < 10 && energy > 0.5 && reducedchi2 < 75) {
+									p1b_pad_dt_calib[sector-1].fill(pad,timediff);
+									p1b_dt_calib_all[sector-1].fill(timediff);
+								}
 								if (energy > 2.){
 									if (theta <= 11.) p1b_edep[sector-1][0].fill(energy);
 									if (theta > 11. && theta <=23) p1b_edep[sector-1][1].fill(energy);
@@ -409,6 +415,7 @@ public class tof_monitor {
 						}
 
 						// panel 2, use p, pi+, p-; cuts are from calibration suite
+						// 22 Dec 2020: Cuts aligned with calib suite as per Dan's info 
 						if (pid == 2212 || pid == 211 || pid == -211) {
 							if (sc.getByte("layer",j)==3){
 								if (energy > 0.5 && vz > -10. && vz < 5.0 && mom > 0.4 && mom <10. && reducedchi2 < 5000.) {
