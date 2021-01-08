@@ -38,8 +38,8 @@ public class tof_monitor {
 	public H1F[][] p1a_edep, p1b_edep;
 	public H1F[] p2_edep, p1a_tdcadc_dt, p1b_tdcadc_dt, p2_tdcadc_dt;
 	public H2F[] p1a_pad_dt, p1b_pad_dt, p2_pad_dt;
-	public H2F[] p1a_pad_dt_calib, p1b_pad_dt_calib, p2_pad_dt_calib;
-	public H1F[] p1a_dt_calib_all, p1b_dt_calib_all, p2_dt_calib_all;
+	public H2F[] p1a_pad_dt_calib, p1b_pad_dt_calib, p2_pad_dt_calib, p1a_pad_dt_4nstrack, p1b_pad_dt_4nstrack;
+	public H1F[] p1a_dt_calib_all, p1b_dt_calib_all, p2_dt_calib_all, p1a_dt_4nstrack_all, p1b_dt_4nstrack_all;
 	public H2F[][] DC_residuals_trkDoca;
 	public H1F[][] DC_residuals, DC_time;
 	public F1D[][] f_time_invertedS;
@@ -114,9 +114,13 @@ public class tof_monitor {
 		p2_pad_dt = new H2F[6];
 		p1a_pad_dt_calib = new H2F[6];
 		p1b_pad_dt_calib = new H2F[6];
+		p1a_pad_dt_4nstrack = new H2F[6];
+                p1b_pad_dt_4nstrack = new H2F[6];
 		p2_pad_dt_calib = new H2F[6];
 		p1a_dt_calib_all = new H1F[6];
 		p1b_dt_calib_all = new H1F[6];
+		p1a_dt_4nstrack_all = new H1F[6];
+                p1b_dt_4nstrack_all = new H1F[6];
 		p2_dt_calib_all = new H1F[6];
 		p1a_edep = new H1F[6][3];
 		p1b_edep = new H1F[6][3];
@@ -198,6 +202,22 @@ public class tof_monitor {
 			p2_dt_calib_all[s].setTitle(String.format("p2 S%d FTOF vertex t - RFTime",s+1));
 			p2_dt_calib_all[s].setTitleX("FTOF vertex t - RFTime (ns)");
 			p2_dt_calib_all[s].setTitleY("counts");
+			p1a_pad_dt_4nstrack[s] = new H2F(String.format("p1a_pad_dt_notriggertrack_S%d",s+1),String.format("p1a_pad_dt_notriggertrack_S%d",s+1),25,0,25,160,-2.000,2.000);
+                        p1a_pad_dt_4nstrack[s].setTitle(String.format("p1a S%d FTOF vertex t - RFTime, No trigger track",s+1));
+                        p1a_pad_dt_4nstrack[s].setTitleX("paddle");
+                        p1a_pad_dt_4nstrack[s].setTitleY("FTOF vertex t - RFTime (ns)");
+                        p1b_pad_dt_4nstrack[s] = new H2F(String.format("p1b_pad_dt_notriggertrack_S%d",s+1),String.format("p1b_pad_dt_notriggertrack_S%d",s+1),65,0,65,160,-2.000,2.000);
+                        p1b_pad_dt_4nstrack[s].setTitle(String.format("p1b S%d FTOF vertex t - RFTime, No trigger track",s+1));
+                        p1b_pad_dt_4nstrack[s].setTitleX("paddle");
+                        p1b_pad_dt_4nstrack[s].setTitleY("FTOF vertex t - RFTime (ns)");
+			p1a_dt_4nstrack_all[s] = new H1F(String.format("p1a_dt_notriggertrack_S%d",s+1),String.format("p1a_dt_notriggertrack_S%d",s+1),160,-2.000,2.000);
+                        p1a_dt_4nstrack_all[s].setTitle(String.format("p1a S%d FTOF vertex t - RFTime, No trigger track",s+1));
+                        p1a_dt_4nstrack_all[s].setTitleX("FTOF vertex t - RFTime (ns)");
+                        p1a_dt_4nstrack_all[s].setTitleY("counts");
+                        p1b_dt_4nstrack_all[s] = new H1F(String.format("p1b_dt_notriggertrack_S%d",s+1),String.format("p1b_dt_notriggertrack_S%d",s+1),160,-2.000,2.000);
+                        p1b_dt_4nstrack_all[s].setTitle(String.format("p1b S%d FTOF vertex t - RFTime, No trigger track",s+1));
+                        p1b_dt_4nstrack_all[s].setTitleX("FTOF vertex t - RFTime (ns)");
+                        p1b_dt_4nstrack_all[s].setTitleY("counts");
 
 			float[] DCcellsizeSL = {0.9f,0.9f,1.3f,1.3f,2.0f,2.0f};
 		
@@ -327,7 +347,8 @@ public class tof_monitor {
 	public void fillTOFCalibHists(DataBank part, DataBank sc, DataBank hits, DataBank trk){
 		// 11 Oct 2020, Trigger particle should be excluded, i.e. start loop from second particle in REC::Particle
 		// 22 Dec 2020, positrons added to p1a and p1b; momentum, energy deposition, and reduced track chi2 added per Daniel's request
-		for(int k=1;k<part.rows();k++) {
+		// 8 Jan 2021, another set of histograms added - does not contain the trigger track (k=0). These histos are used to track 4-ns offsets. In the timeline, only the centroid of the distribution should be included. The calibration monitoring histos are changed to contain the trigger track.
+		for(int k=0;k<part.rows();k++) {
 			byte charge = part.getByte("charge",k);
 			int pid = part.getInt("pid",k);
 			float px = part.getFloat("px",k);
@@ -388,12 +409,16 @@ public class tof_monitor {
 						}
 
 						// panel 1a and 1b, use e-, pi+, pi-
-						// 22 Dec 2020: Cuts aligned with calib suite as per Dan's info
+						// 22 Dec 2020: Cuts aligned with calib suite as per Dan's info, e+ added
 						if (pid == 11 || pid == -11 || pid == 211 || pid == -211){
 							if (sc.getByte("layer",j)==1){
 								if (mom > 0.4 && mom < 10 && energy > 0.5 && reducedchi2 < 75) {
 									p1a_pad_dt_calib[sector-1].fill(pad,timediff);
 									p1a_dt_calib_all[sector-1].fill(timediff);
+									if (k!=0) {
+										p1a_pad_dt_4nstrack[sector-1].fill(pad,timediff);
+                                                                        	p1a_dt_4nstrack_all[sector-1].fill(timediff);
+									}
 								}
 								if (energy > 2.){
 									if (theta <= 11.) p1a_edep[sector-1][0].fill(energy);
@@ -405,6 +430,10 @@ public class tof_monitor {
 								if (mom > 0.4 && mom < 10 && energy > 0.5 && reducedchi2 < 75) {
 									p1b_pad_dt_calib[sector-1].fill(pad,timediff);
 									p1b_dt_calib_all[sector-1].fill(timediff);
+									if (k!=0) {
+                                                                                p1b_pad_dt_4nstrack[sector-1].fill(pad,timediff);
+                                                                                p1b_dt_4nstrack_all[sector-1].fill(timediff);
+                                                                        }
 								}
 								if (energy > 2.){
 									if (theta <= 11.) p1b_edep[sector-1][0].fill(energy);
@@ -707,6 +736,29 @@ public class tof_monitor {
 			System.out.println(String.format("saved plots/TOF_calib.png"));
 		}
 
+		EmbeddedCanvas can_TOF_4nstrack = new EmbeddedCanvas();
+                can_TOF_4nstrack.setSize(3000,5000);
+                can_TOF_4nstrack.divide(6,13);
+                can_TOF_4nstrack.setAxisTitleSize(18);
+                can_TOF_4nstrack.setAxisFontSize(18);
+                can_TOF_4nstrack.setTitleSize(18);
+                for(int s=0;s<6;s++){
+                        can_TOF_4nstrack.cd(s);can_TOF_4nstrack.draw(p1a_pad_dt_4nstrack[s]);
+                        can_TOF_4nstrack.cd(s+6);can_TOF_4nstrack.draw(p1a_dt_4nstrack_all[s]);
+                        can_TOF_4nstrack.cd(s+12);can_TOF_4nstrack.draw(p1b_pad_dt_4nstrack[s]);
+                        can_TOF_4nstrack.cd(s+18);can_TOF_4nstrack.draw(p1b_dt_4nstrack_all[s]);
+                }
+
+                if(runNum>0){
+                                if(!write_volatile)can_TOF_4nstrack.save(String.format("plots"+runNum+"/TOF_4nstrack.png"));
+                                if(write_volatile)can_TOF_4nstrack.save(String.format("/volatile/clas12/rga/spring18/plots"+runNum+"/TOF_4nstrack.png"));
+                                System.out.println(String.format("saved plots"+runNum+"/TOF_4nstrack.png"));
+                }
+                else{
+                        can_TOF_occ.save(String.format("plots/TOF_4nstrack.png"));
+                        System.out.println(String.format("saved plots/TOF_4nstrack.png"));
+                }
+
 		EmbeddedCanvas can_TOF_ADCTDC = new EmbeddedCanvas();
 		can_TOF_ADCTDC.setSize(3000,3000);
 		can_TOF_ADCTDC.divide(6,3);
@@ -797,6 +849,7 @@ public class tof_monitor {
 		for(int s=0;s<6;s++){
 			dirout.addDataSet(p1a_pad_vt[s],p1b_pad_vt[s],p2_pad_vt[s],p1a_pad_dt[s],p1b_pad_dt[s],p2_pad_dt[s]);
 			dirout.addDataSet(p1a_pad_dt_calib[s],p1b_pad_dt_calib[s],p2_pad_dt_calib[s],p1a_dt_calib_all[s],p1b_dt_calib_all[s],p2_dt_calib_all[s],p2_edep[s]); 
+			dirout.addDataSet(p1a_pad_dt_4nstrack[s],p1b_pad_dt_4nstrack[s],p1a_dt_4nstrack_all[s],p1b_dt_4nstrack_all[s]);
 			dirout.addDataSet(p1a_tdcadc_dt[s], p1b_tdcadc_dt[s], p2_tdcadc_dt[s]);
 			for (int i=0;i<3;i++) {
 				dirout.addDataSet(p1a_edep[s][i],p1b_edep[s][i]);
