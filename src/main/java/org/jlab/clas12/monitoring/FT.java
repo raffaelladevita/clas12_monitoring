@@ -1,3 +1,4 @@
+package org.jlab.clas12.monitoring;
 import java.io.*;
 import java.util.*;
 
@@ -16,7 +17,6 @@ import org.jlab.groot.data.TDirectory;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.clas.physics.LorentzVector;
 import org.jlab.groot.base.GStyle;
-import org.clas.viewer.AnalysisMonitor;
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.physics.Particle;
 import org.jlab.groot.group.DataGroup;
