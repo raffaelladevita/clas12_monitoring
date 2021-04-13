@@ -1,3 +1,4 @@
+package org.jlab.clas12.monitoring;
 import java.io.*;
 import java.util.*;
 
