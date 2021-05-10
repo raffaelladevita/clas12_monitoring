@@ -52,6 +52,7 @@ public class tof_monitor {
 	public IndexedTable InverseTranslationTable;
 	public IndexedTable calibrationTranslationTable;
 	public IndexedTable rfTable, rfTableOffset;
+	public IndexedTable ftofTable, ctofTable;
 	public ConstantsManager ccdb;
 
 	public tof_monitor(int reqrunNum, boolean reqTimeBased, boolean reqwrite_volatile) {
@@ -59,7 +60,7 @@ public class tof_monitor {
 	
 		rfPeriod = 4.008f;
 	   	ccdb = new ConstantsManager();
-	   	ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset"}));
+	   	ccdb.init(Arrays.asList(new String[]{"/daq/tt/fthodo","/calibration/eb/rf/config","/calibration/eb/rf/offset","/calibration/ftof/time_jitter"}));
 	   	rfTable = ccdb.getConstants(runNum,"/calibration/eb/rf/config");
 	   	if (rfTable.hasEntry(1, 1, 1)){
 	   		System.out.println(String.format("RF period from ccdb for run %d: %f",runNum,rfTable.getDoubleValue("clock",1,1,1)));
@@ -73,8 +74,15 @@ public class tof_monitor {
 	   		System.out.println(String.format("RF1 offset from ccdb for run %d: %f",runNum,rfoffset1));
 	   		System.out.println(String.format("RF2 offset from ccdb for run %d: %f",runNum,rfoffset2));
 		}
+		phase_offset = 0;
+		ftofTable = ccdb.getConstants(runNum,"/calibration/ftof/time_jitter");
+		if (ftofTable.hasEntry(0, 0, 0)){
+			phase_offset = (int)ftofTable.getDoubleValue("phase",0,0,0);
+			System.out.println(String.format("Phase Offset %d: %d",runNum,phase_offset));
+		}
 		p1a_counter_thickness = 5.0f; //cm
-		phase_offset = 3; //RGA Fall 2018, RGB Spring 2019, RGA Spring 2019
+		//phase_offset = 3; //RGA Fall 2018, RGB Spring 2019, RGA Spring 2019
+		//phase_offset = 1; //Engineering Run, RGA Spring 2018 
 		p1b_counter_thickness = 6.0f; //cm
 		p2_counter_thickness = 5.0f; //cm
 			
@@ -253,17 +261,17 @@ public class tof_monitor {
 		   	p2_edep[s].setTitleX("E (MeV)");
 		   	p2_edep[s].setTitleY("counts");
 
-			p1a_tdcadc_dt[s] =  new H1F(String.format("p1a_tdcadc_dt_S%d",s+1),"p1a_tdcadc",2250,-30.000,60.000);
+			p1a_tdcadc_dt[s] =  new H1F(String.format("p1a_tdcadc_dt_S%d",s+1),"p1a_tdcadc",15750,-30.000,600.000);
 			p1a_tdcadc_dt[s].setTitle(String.format("p1a t_tdc-t_fadc, S%d",s+1));
 			p1a_tdcadc_dt[s].setTitleX("t_tdc-t_fadc (ns)");
 			p1a_tdcadc_dt[s].setTitleY("counts");
 
-			p1b_tdcadc_dt[s] =  new H1F(String.format("p1b_tdcadc_dt_S%d",s+1),"p1a_tdcadc",2250,-30.000,60.000);
+			p1b_tdcadc_dt[s] =  new H1F(String.format("p1b_tdcadc_dt_S%d",s+1),"p1a_tdcadc",15750,-30.000,600.000);
 			p1b_tdcadc_dt[s].setTitle(String.format("p1b t_tdc-t_fadc, S%d",s+1));
 			p1b_tdcadc_dt[s].setTitleX("t_tdc-t_fadc (ns)");
 			p1b_tdcadc_dt[s].setTitleY("counts");
 
-			p2_tdcadc_dt[s] =  new H1F(String.format("p2_tdcadc_dt_S%d",s+1),"p1a_tdcadc",2250,-30.000,60.000);
+			p2_tdcadc_dt[s] =  new H1F(String.format("p2_tdcadc_dt_S%d",s+1),"p1a_tdcadc",15750,-30.000,600.000);
 			p2_tdcadc_dt[s].setTitle(String.format("p2 t_tdc-t_fadc, S%d",s+1));
 			p2_tdcadc_dt[s].setTitleX("t_tdc-t_fadc (ns)");
 			p2_tdcadc_dt[s].setTitleY("counts"); 
