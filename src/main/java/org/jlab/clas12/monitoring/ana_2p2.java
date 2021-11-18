@@ -44,7 +44,7 @@ public class ana_2p2 {
 		tof_monitor ana_tof = new tof_monitor(runNum,useTB,useVolatile);
 		central ana_cen = new central(runNum,useTB,useVolatile);
 		occupancies ana_occ = new occupancies(runNum,useVolatile);
-		HTCC ana_htc = new HTCC(runNum,EB,useTB,useVolatile);
+		HTCC ana_htc = new HTCC(runNum,useVolatile);
 		LTCC ana_ltc = new LTCC(runNum,EB,useTB,useVolatile);
 		RICH ana_rich = new RICH(runNum,EB,useTB,useVolatile);
 		cndCheckPlots ana_cnd = new cndCheckPlots(runNum,useTB,useVolatile);		
