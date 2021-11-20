@@ -307,15 +307,15 @@ public class tof_monitor {
 			float trkDoca = DCB.getFloat("trkDoca",r);
 			float timeResidual = DCB.getFloat("timeResidual",r);
 			float time = DCB.getFloat("time",r);
-			float field = DCB.getFloat("B",r);
+			// float field = DCB.getFloat("B",r); //removing per DC experts' request
 			if(s>-1&&s<6&&sl>-1&&sl<6){
-				boolean otherregions = (sl<2 || sl>3);
-				boolean region2 = ((sl==2||sl==3) && field<0.5);
-				if (otherregions||region2) {
+				// boolean otherregions = (sl<2 || sl>3);
+				// boolean region2 = ((sl==2||sl==3) && field<0.5);
+				// if (otherregions||region2) {
 					DC_residuals_trkDoca[s][sl].fill(trkDoca,timeResidual);
 					DC_residuals[s][sl].fill(timeResidual);
 					DC_time[s][sl].fill(time);
-				}
+				// }
 			}
 			else System.out.println("sector "+(s+1)+" superlayer "+(sl+1));
 		}
