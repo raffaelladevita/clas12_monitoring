@@ -124,7 +124,7 @@ public class HTCC {
     public void plot() {
         List<F1D> timeIndPMT = new ArrayList();
         for (int t = 0; t < 48; t++) {
-            timeIndPMT.add(new F1D("timeIndPMT" + t, "[amp]*gaus(x,[mean],[sigma])", lowTime, -highTime));
+            timeIndPMT.add(new F1D("timeIndPMT" + t, "[amp]*gaus(x,[mean],[sigma])", lowTime, highTime));
             timeIndPMT.get(t).setParameter(0, 500);
             timeIndPMT.get(t).setParameter(1, -0.0);
             timeIndPMT.get(t).setParameter(2, 0.7);
