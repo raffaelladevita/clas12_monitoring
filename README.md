@@ -22,7 +22,7 @@ For example, the run 11127 of rg-b can be monitored in following steps.
 
 The first step is to create the list of files to be monitored, and the second one is to run the compiled codes for monitoring. Change 11127 to the wanted run number. The last two arguments are the maximum event numbers to monitor, and the beam energy (10.4 GeV for example).
 
-The class ana_2p2 calls all java codes in [src/main/java/org/jlab/clas12/monitoring]. If it is enough to create updates in a specific detector monitoring, one can run the relevant code only. For example, for DC and TOF monitoring, please use org.jlab.clas12.monitoring.tof_monitoring.
+The class ana_2p2 runs [all source codes](src/main/java/org/jlab/clas12/monitoring). If it is enough to create updates in a specific detector monitoring, one can run the relevant code only. For example, for DC and TOF monitoring, please use org.jlab.clas12.monitoring.tof_monitoring.
 
 Currently, each detector is related to the following class names.
 
