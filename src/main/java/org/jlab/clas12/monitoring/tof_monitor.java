@@ -353,10 +353,11 @@ public class tof_monitor {
 		}	
 	}
 
-	public void fillTOFCalibHists(DataBank part, DataBank sc, DataBank hits, DataBank trk){
+	public void fillTOFCalibHists(DataBank part, DataBank sc, DataBank scextras, DataBank trk){
 		// 11 Oct 2020, Trigger particle should be excluded, i.e. start loop from second particle in REC::Particle
 		// 22 Dec 2020, positrons added to p1a and p1b; momentum, energy deposition, and reduced track chi2 added per Daniel's request
 		// 8 Jan 2021, another set of histograms added - does not contain the trigger track (k=0). These histos are used to track 4-ns offsets. In the timeline, only the centroid of the distribution should be included. The calibration monitoring histos are changed to contain the trigger track.
+		// 18 Jan 2022, energy/path is now taken from REC::ScintExtras, FTOF::Hits is not used anymore
 		for(int k=0;k<part.rows();k++) {
 			byte charge = part.getByte("charge",k);
 			int pid = part.getInt("pid",k);
@@ -368,6 +369,7 @@ public class tof_monitor {
 			float mom = (float)Math.sqrt(px*px+py*py+pz*pz);
 			float theta = (float)Math.toDegrees(Math.acos(pz/mom));
 			float reducedchi2 = 10000.f;
+	                float energy = -100.f;
 
 			for (int j=0;j<trk.rows();j++) {
 				if (trk.getShort("pindex",j)==k) {
@@ -378,8 +380,7 @@ public class tof_monitor {
 			for (int j=0;j<sc.rows();j++) {
 				if (sc.getShort("pindex",j)==k) {
 					if (sc.getByte("detector",j)==12 && e_part_ind != -1) {
-						float energy = sc.getFloat("energy",j);
-						float path = hits.getFloat("pathLengthThruBar",sc.getShort("index",j));
+						float dedx = scextras.getFloat("dedx",j);
 						int pad = sc.getInt("component", j);
 						int sector = sc.getInt("sector",j);		
 						float time = sc.getFloat("time", j);
@@ -408,13 +409,13 @@ public class tof_monitor {
 						timediff = (float) (time - flighttime) - vt;
 
 						if (sc.getByte("layer",j)==1){
-							energy = energy*p1a_counter_thickness/path;
+							energy = dedx*p1a_counter_thickness;
 						}
 						if (sc.getByte("layer",j)==2){
-							energy = energy*p1b_counter_thickness/path;
+							energy = dedx*p1b_counter_thickness;
 						}
 						if (sc.getByte("layer",j)==3){
-							energy = energy*p2_counter_thickness/path;
+							energy = dedx*p2_counter_thickness;
 						}
 
 						// panel 1a and 1b, use e-, pi+, pi-
@@ -597,7 +598,7 @@ public class tof_monitor {
 	public void processEvent(DataEvent event) {
 		hasRF = false;
 		e_part_ind = -1;
-		DataBank trackDetBank = null, hitBank = null, partBank = null, tofhits = null, scintillator = null;
+		DataBank trackDetBank = null, hitBank = null, partBank = null, tofhits = null, scintillator = null, scintextras = null;
 		DataBank tofadc = null, toftdc = null, track = null;
 		if(userTimeBased){
 			if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
@@ -614,6 +615,7 @@ public class tof_monitor {
 			if(event.hasBank("RECHB::Track"))track = event.getBank("REC::Track");
 		}
 
+		if(event.hasBank("REC::ScintExtras")) scintextras = event.getBank("REC::ScintExtras");
 		if(event.hasBank("FTOF::hits")) tofhits = event.getBank("FTOF::hits");
 		if(event.hasBank("FTOF::adc")) tofadc = event.getBank("FTOF::adc");
 		if(event.hasBank("FTOF::tdc")) toftdc = event.getBank("FTOF::tdc");
@@ -623,7 +625,7 @@ public class tof_monitor {
 		if(!hasRF)return;
 		if(partBank!=null) e_part_ind = makeElectron(partBank);
 		if(event.hasBank("FTOF::hits") && trackDetBank!=null)fillTOFHists(event.getBank("FTOF::hits") , trackDetBank);
-		if (partBank!=null && scintillator!=null && tofhits!=null && track!=null) fillTOFCalibHists(partBank,scintillator,tofhits,track);
+		if (partBank!=null && scintillator!=null && scintextras!=null && track!=null) fillTOFCalibHists(partBank,scintillator,scintextras,track);
 		if(userTimeBased && hitBank!=null)fillDC(hitBank);
 		if(toftdc!=null && tofadc!=null) fillTOFadctdcHists(tofadc,toftdc);
 	}
