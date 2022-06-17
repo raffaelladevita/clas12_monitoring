@@ -145,7 +145,13 @@ public class tof_monitor {
 		p2_tdcadc_dt = new H1F[6];
 		DC_residuals_trkDoca = new H2F[6][6];
 		DC_residuals = new H1F[6][6];
+		DC_residuals_trkDoca_rescut = new H2F[6][6];
+		DC_residuals_rescut = new H1F[6][6];
+		DC_residuals_trkDoca_nocut = new H2F[6][6];
+		DC_residuals_nocut = new H1F[6][6];
 		DC_time = new H1F[6][6];
+		DC_time_rescut = new H1F[6][6];
+		DC_time_nocut = new H1F[6][6];
 		f_time_invertedS = new F1D[6][6];
 
 		mean_tdiff = new float[6];
@@ -291,7 +297,7 @@ public class tof_monitor {
 				DC_residuals_trkDoca_nocut[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
 				DC_residuals_trkDoca_nocut[s][sl].setTitleX("DOCA (cm)");
 				DC_residuals_trkDoca_nocut[s][sl].setTitleY("residual (cm)");
-				DC_residuals_trkDoca_rescut[s][sl] = new H2F(String.format("DC_residuals_trkDoca_rescut_%d_%d",s+1,sl+1),String.format("DC_residuals_trkDoca_rescut_%d_%d",s+1,sl+1),100,0,DCcellsizeSL[sl],100,0.5,0.5);
+				DC_residuals_trkDoca_rescut[s][sl] = new H2F(String.format("DC_residuals_trkDoca_rescut_%d_%d",s+1,sl+1),String.format("DC_residuals_trkDoca_rescut_%d_%d",s+1,sl+1),100,0,DCcellsizeSL[sl],100,-0.5,0.5);
 				DC_residuals_trkDoca_rescut[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
 				DC_residuals_trkDoca_rescut[s][sl].setTitleX("DOCA (cm)");
 				DC_residuals_trkDoca_rescut[s][sl].setTitleY("residual (cm)");
@@ -301,7 +307,7 @@ public class tof_monitor {
 				DC_residuals_nocut[s][sl] = new H1F(String.format("DC_residuals_nocut_%d_%d",s+1,sl+1),String.format("DC_residuals_nocut_%d_%d",s+1,sl+1),100,-1,1);
 				DC_residuals_nocut[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
 				DC_residuals_nocut[s][sl].setTitleX("residual (cm)");
-				DC_residuals_rescut[s][sl] = new H1F(String.format("DC_residuals_rescut_%d_%d",s+1,sl+1),String.format("DC_residuals_rescut_%d_%d",s+1,sl+1),100,0.5,0.5);
+				DC_residuals_rescut[s][sl] = new H1F(String.format("DC_residuals_rescut_%d_%d",s+1,sl+1),String.format("DC_residuals_rescut_%d_%d",s+1,sl+1),100,-0.5,0.5);
 				DC_residuals_rescut[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
 				DC_residuals_rescut[s][sl].setTitleX("residual (cm)");
 				DC_time[s][sl] = new H1F(String.format("DC_Time_%d_%d",s+1,sl+1),String.format("DC_Time_%d_%d",s+1,sl+1),200,-100,1000);
