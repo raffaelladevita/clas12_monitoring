@@ -3,6 +3,8 @@ package org.jlab.clas12.monitoring;
 import java.io.*;
 import java.util.*;
 
+import javax.xml.parsers.DocumentBuilder;
+
 import org.jlab.groot.math.*;
 import org.jlab.groot.data.H1F;
 import org.jlab.groot.data.H2F;
@@ -43,6 +45,10 @@ public class tof_monitor {
 	public H1F[] p1a_dt_calib_all, p1b_dt_calib_all, p2_dt_calib_all, p1a_dt_4nstrack_all, p1b_dt_4nstrack_all;
 	public H2F[][] DC_residuals_trkDoca;
 	public H1F[][] DC_residuals, DC_time;
+	public H2F[][] DC_residuals_trkDoca_nocut;
+	public H1F[][] DC_residuals_nocut, DC_time_nocut;	
+	public H2F[][] DC_residuals_trkDoca_rescut;
+	public H1F[][] DC_residuals_rescut, DC_time_rescut;
 	public F1D[][] f_time_invertedS;
 
 	public float p1a_counter_thickness, p1b_counter_thickness, p2_counter_thickness; 
@@ -139,7 +145,13 @@ public class tof_monitor {
 		p2_tdcadc_dt = new H1F[6];
 		DC_residuals_trkDoca = new H2F[6][6];
 		DC_residuals = new H1F[6][6];
+		DC_residuals_trkDoca_rescut = new H2F[6][6];
+		DC_residuals_rescut = new H1F[6][6];
+		DC_residuals_trkDoca_nocut = new H2F[6][6];
+		DC_residuals_nocut = new H1F[6][6];
 		DC_time = new H1F[6][6];
+		DC_time_rescut = new H1F[6][6];
+		DC_time_nocut = new H1F[6][6];
 		f_time_invertedS = new F1D[6][6];
 
 		mean_tdiff = new float[6];
@@ -281,13 +293,35 @@ public class tof_monitor {
 				DC_residuals_trkDoca[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
 				DC_residuals_trkDoca[s][sl].setTitleX("DOCA (cm)");
 				DC_residuals_trkDoca[s][sl].setTitleY("residual (cm)");
+				DC_residuals_trkDoca_nocut[s][sl] = new H2F(String.format("DC_residuals_trkDoca_nocut_%d_%d",s+1,sl+1),String.format("DC_residuals_trkDoca_nocut_%d_%d",s+1,sl+1),100,0,DCcellsizeSL[sl],100,-1,1);
+				DC_residuals_trkDoca_nocut[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
+				DC_residuals_trkDoca_nocut[s][sl].setTitleX("DOCA (cm)");
+				DC_residuals_trkDoca_nocut[s][sl].setTitleY("residual (cm)");
+				DC_residuals_trkDoca_rescut[s][sl] = new H2F(String.format("DC_residuals_trkDoca_rescut_%d_%d",s+1,sl+1),String.format("DC_residuals_trkDoca_rescut_%d_%d",s+1,sl+1),100,0,DCcellsizeSL[sl],100,-0.5,0.5);
+				DC_residuals_trkDoca_rescut[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
+				DC_residuals_trkDoca_rescut[s][sl].setTitleX("DOCA (cm)");
+				DC_residuals_trkDoca_rescut[s][sl].setTitleY("residual (cm)");
 				DC_residuals[s][sl] = new H1F(String.format("DC_residuals_%d_%d",s+1,sl+1),String.format("DC_residuals_%d_%d",s+1,sl+1),100,-1,1);
 				DC_residuals[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
 				DC_residuals[s][sl].setTitleX("residual (cm)");
+				DC_residuals_nocut[s][sl] = new H1F(String.format("DC_residuals_nocut_%d_%d",s+1,sl+1),String.format("DC_residuals_nocut_%d_%d",s+1,sl+1),100,-1,1);
+				DC_residuals_nocut[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
+				DC_residuals_nocut[s][sl].setTitleX("residual (cm)");
+				DC_residuals_rescut[s][sl] = new H1F(String.format("DC_residuals_rescut_%d_%d",s+1,sl+1),String.format("DC_residuals_rescut_%d_%d",s+1,sl+1),100,-0.5,0.5);
+				DC_residuals_rescut[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
+				DC_residuals_rescut[s][sl].setTitleX("residual (cm)");
 				DC_time[s][sl] = new H1F(String.format("DC_Time_%d_%d",s+1,sl+1),String.format("DC_Time_%d_%d",s+1,sl+1),200,-100,1000);
 			   	DC_time[s][sl].setTitle(String.format("DC Time S%d SL%d",s+1,sl+1));
 			   	DC_time[s][sl].setTitleX("time (ns)");
 				DC_time[s][sl].setLineWidth(4);
+				DC_time_nocut[s][sl] = new H1F(String.format("DC_Time_nocut_%d_%d",s+1,sl+1),String.format("DC_Time_nocut_%d_%d",s+1,sl+1),200,-100,1000);
+			   	DC_time_nocut[s][sl].setTitle(String.format("DC Time S%d SL%d",s+1,sl+1));
+			   	DC_time_nocut[s][sl].setTitleX("time (ns)");
+				DC_time_nocut[s][sl].setLineWidth(4);
+				DC_time_rescut[s][sl] = new H1F(String.format("DC_Time_rescut_%d_%d",s+1,sl+1),String.format("DC_Time_rescut_%d_%d",s+1,sl+1),200,-100,1000);
+			   	DC_time_rescut[s][sl].setTitle(String.format("DC Time S%d SL%d",s+1,sl+1));
+			   	DC_time_rescut[s][sl].setTitleX("time (ns)");
+				DC_time_rescut[s][sl].setLineWidth(4);
 				f_time_invertedS[s][sl] = new F1D(String.format("Inverted_S_%d_%d",s+1,sl+1),"[p0]/(1+exp(-[p1]*(x-[p2])))",-100,1000);
 				f_time_invertedS[s][sl].setOptStat("111111");
 			}
@@ -300,22 +334,54 @@ public class tof_monitor {
 		{"name":"trkDoca",	  "id":10,  "type":"float", "info":"track doca of the hit (in cm)"},
 		{"name":"timeResidual", "id":11,  "type":"float", "info":"time residual of the hit (in cm)"},
 	 */
-	public void fillDC(DataBank DCB){
+	public void fillDC(DataBank DCB, DataBank RunConfig){
 		for(int r=0;r<DCB.rows();r++){
 			int s = DCB.getInt("sector",r)-1;
 			int sl = DCB.getInt("superlayer",r)-1;
 			float trkDoca = DCB.getFloat("trkDoca",r);
 			float timeResidual = DCB.getFloat("timeResidual",r);
 			float time = DCB.getFloat("time",r);
+			double betacutvalue = 0.9;
+			double fitresidualcut = 1000; //microns
+			
+			//Determine alpha cut
+			double alphacutvalue = 30;
+		    double bFieldVal = (double) DCB.getFloat("B", r);
+		    int polarity = (int)Math.signum(RunConfig.getFloat("torus",0));	
+	        // alpha in the bank is corrected for B field.  To fill the alpha bin use the uncorrected value
+	        double theta0 = Math.toDegrees(Math.acos(1-0.02*bFieldVal));
+	        double alphaRadUncor = DCB.getFloat("Alpha", r)+ polarity*theta0;
+	        boolean alphacutpass = false;
+	        if(alphaRadUncor> -1*alphacutvalue &&  alphaRadUncor< alphacutvalue) {
+	            alphacutpass = true;
+	        }
+			
 			// float field = DCB.getFloat("B",r); //removing per DC experts' request
 			if(s>-1&&s<6&&sl>-1&&sl<6){
 				// boolean otherregions = (sl<2 || sl>3);
 				// boolean region2 = ((sl==2||sl==3) && field<0.5);
 				// if (otherregions||region2) {
+		
+				//Fill Histograms with no extra cut
+				DC_residuals_trkDoca_nocut[s][sl].fill(trkDoca,timeResidual);
+				DC_residuals_nocut[s][sl].fill(timeResidual);
+				DC_time_nocut[s][sl].fill(time);
+				
+				//Add extra cuts on hits from DC4gui. TrkID, beta, alphacut, TFlight (maybe PID?, needs REC::Event here)
+				if (DCB.getByte("trkID", r) > 0 && DCB.getFloat("beta", r) > betacutvalue &&
+					 DCB.getFloat("TFlight",r) > 0 && alphacutpass == true
+						)
+				{
 					DC_residuals_trkDoca[s][sl].fill(trkDoca,timeResidual);
 					DC_residuals[s][sl].fill(timeResidual);
-					DC_time[s][sl].fill(time);
-				// }
+					DC_time[s][sl].fill(time);					
+				//Apply also fitresidual cut, factor 0.0001 to convert to cm from microns
+					if (DCB.getFloat("fitresidual",r) < 0.0001 * fitresidualcut) {
+						DC_residuals_trkDoca_rescut[s][sl].fill(trkDoca,timeResidual);
+						DC_residuals_rescut[s][sl].fill(timeResidual);
+						DC_time_rescut[s][sl].fill(time);
+					}						
+				}
 			}
 			else System.out.println("sector "+(s+1)+" superlayer "+(sl+1));
 		}
@@ -599,7 +665,7 @@ public class tof_monitor {
 		hasRF = false;
 		e_part_ind = -1;
 		DataBank trackDetBank = null, hitBank = null, partBank = null, tofhits = null, scintillator = null, scintextras = null;
-		DataBank tofadc = null, toftdc = null, track = null;
+		DataBank tofadc = null, toftdc = null, track = null, configbank = null;
 		if(userTimeBased){
 			if(event.hasBank("TimeBasedTrkg::TBTracks"))trackDetBank = event.getBank("TimeBasedTrkg::TBTracks");
 			if(event.hasBank("TimeBasedTrkg::TBHits")){hitBank = event.getBank("TimeBasedTrkg::TBHits");}
@@ -621,12 +687,15 @@ public class tof_monitor {
 		if(event.hasBank("FTOF::tdc")) toftdc = event.getBank("FTOF::tdc");
 		
 		if(event.hasBank("RUN::rf"))fillRFTime(event.getBank("RUN::rf"));
-		if(event.hasBank("RUN::config"))timestamp = event.getBank("RUN::config").getLong("timestamp",0);
+		if(event.hasBank("RUN::config")) {
+			timestamp = event.getBank("RUN::config").getLong("timestamp",0);
+			configbank = event.getBank("RUN::config");
+		}
 		if(!hasRF)return;
 		if(partBank!=null) e_part_ind = makeElectron(partBank);
 		if(event.hasBank("FTOF::hits") && trackDetBank!=null)fillTOFHists(event.getBank("FTOF::hits") , trackDetBank);
 		if (partBank!=null && scintillator!=null && scintextras!=null && track!=null) fillTOFCalibHists(partBank,scintillator,scintextras,track);
-		if(userTimeBased && hitBank!=null)fillDC(hitBank);
+		if(userTimeBased && hitBank!=null && event.hasBank("RUN::config"))fillDC(hitBank, configbank);
 		if(toftdc!=null && tofadc!=null) fillTOFadctdcHists(tofadc,toftdc);
 	}
 
@@ -870,6 +939,8 @@ public class tof_monitor {
 		dirout.cd("/dc/");
 		for(int s=0;s<6;s++)for(int sl=0;sl<6;sl++){
 			dirout.addDataSet(DC_residuals_trkDoca[s][sl],DC_time[s][sl]);
+			dirout.addDataSet(DC_residuals_trkDoca_rescut[s][sl],DC_time_rescut[s][sl]);
+			dirout.addDataSet(DC_residuals_trkDoca_nocut[s][sl],DC_time_nocut[s][sl]);
 		}
 		if(write_volatile)if(runNum>0)dirout.writeFile("/volatile/clas12/rga/spring18/plots"+runNum+"/out_TOF_"+runNum+".hipo");
 
