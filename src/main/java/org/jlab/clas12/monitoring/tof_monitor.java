@@ -395,7 +395,7 @@ public class tof_monitor {
 						DC_time_odd[s][sl].fill(time);	
 						}
 				//Apply also fitresidual cut, factor 0.0001 to convert to cm from microns
-					if (DCB.getFloat("fitresidual",r) < 0.0001 * fitresidualcut) {
+					if (DCB.getFloat("fitResidual",r) < 0.0001 * fitresidualcut) {
 						DC_residuals_trkDoca_rescut[s][sl].fill(trkDoca,timeResidual);
 						DC_residuals_rescut[s][sl].fill(timeResidual);
 						DC_time_rescut[s][sl].fill(time);
