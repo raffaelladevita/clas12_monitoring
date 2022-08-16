@@ -44,7 +44,7 @@ public class tof_monitor {
 	public H2F[] p1a_pad_dt_calib, p1b_pad_dt_calib, p2_pad_dt_calib, p1a_pad_dt_4nstrack, p1b_pad_dt_4nstrack;
 	public H1F[] p1a_dt_calib_all, p1b_dt_calib_all, p2_dt_calib_all, p1a_dt_4nstrack_all, p1b_dt_4nstrack_all;
 	public H2F[][] DC_residuals_trkDoca;
-	public H1F[][] DC_residuals, DC_time;
+	public H1F[][] DC_residuals, DC_time, DC_time_even, DC_time_odd;
 	public H2F[][] DC_residuals_trkDoca_nocut;
 	public H1F[][] DC_residuals_nocut, DC_time_nocut;	
 	public H2F[][] DC_residuals_trkDoca_rescut;
@@ -150,6 +150,8 @@ public class tof_monitor {
 		DC_residuals_trkDoca_nocut = new H2F[6][6];
 		DC_residuals_nocut = new H1F[6][6];
 		DC_time = new H1F[6][6];
+		DC_time_even = new H1F[6][6];
+		DC_time_odd = new H1F[6][6];
 		DC_time_rescut = new H1F[6][6];
 		DC_time_nocut = new H1F[6][6];
 		f_time_invertedS = new F1D[6][6];
@@ -314,6 +316,14 @@ public class tof_monitor {
 			   	DC_time[s][sl].setTitle(String.format("DC Time S%d SL%d",s+1,sl+1));
 			   	DC_time[s][sl].setTitleX("time (ns)");
 				DC_time[s][sl].setLineWidth(4);
+				DC_time_even[s][sl] = new H1F(String.format("DC_Time_even_%d_%d",s+1,sl+1),String.format("DC_Time_even_%d_%d",s+1,sl+1),200,-100,1000);
+			   	DC_time_even[s][sl].setTitle(String.format("DC Time S%d SL%d",s+1,sl+1));
+			   	DC_time_even[s][sl].setTitleX("time (ns)");
+				DC_time_even[s][sl].setLineWidth(4);
+				DC_time_odd[s][sl] = new H1F(String.format("DC_Time_odd_%d_%d",s+1,sl+1),String.format("DC_Time_odd_%d_%d",s+1,sl+1),200,-100,1000);
+			   	DC_time_odd[s][sl].setTitle(String.format("DC Time S%d SL%d",s+1,sl+1));
+			   	DC_time_odd[s][sl].setTitleX("time (ns)");
+				DC_time_odd[s][sl].setLineWidth(4);
 				DC_time_nocut[s][sl] = new H1F(String.format("DC_Time_nocut_%d_%d",s+1,sl+1),String.format("DC_Time_nocut_%d_%d",s+1,sl+1),200,-100,1000);
 			   	DC_time_nocut[s][sl].setTitle(String.format("DC Time S%d SL%d",s+1,sl+1));
 			   	DC_time_nocut[s][sl].setTitleX("time (ns)");
@@ -356,6 +366,8 @@ public class tof_monitor {
 	            alphacutpass = true;
 	        }
 			
+	        long timestamp = RunConfig.getLong("timestamp", 0);
+	        
 			// float field = DCB.getFloat("B",r); //removing per DC experts' request
 			if(s>-1&&s<6&&sl>-1&&sl<6){
 				// boolean otherregions = (sl<2 || sl>3);
@@ -374,7 +386,14 @@ public class tof_monitor {
 				{
 					DC_residuals_trkDoca[s][sl].fill(trkDoca,timeResidual);
 					DC_residuals[s][sl].fill(timeResidual);
-					DC_time[s][sl].fill(time);					
+					DC_time[s][sl].fill(time);	
+					
+					if( timestamp%2 == 0) {//even time stamps
+						DC_time_even[s][sl].fill(time);	
+					}
+					else {//odd time stamps
+						DC_time_odd[s][sl].fill(time);	
+						}
 				//Apply also fitresidual cut, factor 0.0001 to convert to cm from microns
 					if (DCB.getFloat("fitResidual",r) < 0.0001 * fitresidualcut) {
 						DC_residuals_trkDoca_rescut[s][sl].fill(trkDoca,timeResidual);
@@ -939,6 +958,7 @@ public class tof_monitor {
 		dirout.cd("/dc/");
 		for(int s=0;s<6;s++)for(int sl=0;sl<6;sl++){
 			dirout.addDataSet(DC_residuals_trkDoca[s][sl],DC_time[s][sl]);
+			dirout.addDataSet(DC_time_even[s][sl],DC_time_odd[s][sl]);			
 			dirout.addDataSet(DC_residuals_trkDoca_rescut[s][sl],DC_time_rescut[s][sl]);
 			dirout.addDataSet(DC_residuals_trkDoca_nocut[s][sl],DC_time_nocut[s][sl]);
 		}
