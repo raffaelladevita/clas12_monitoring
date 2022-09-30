@@ -2,6 +2,7 @@ package org.jlab.clas12.monitoring;
 
 import java.io.*;
 import java.util.*;
+import org.jlab.clas.pdg.PhysicsConstants;
 
 import org.jlab.groot.math.*;
 import org.jlab.groot.data.H1F;
@@ -245,12 +246,13 @@ public class HTCC {
                     for (int j = 0; j < recDeteHTCC.rows(); j++) {
                         if (recDeteHTCC.getShort("pindex", j) == loopE && recDeteHTCC.getByte("detector", j) == 15) {
                             double nphe = recDeteHTCC.getFloat("nphe", j);
-                            double thetaHTCC = Math.toDegrees(recHTCC.getFloat("theta", recDeteHTCC.getInt("pindex", j)));
-                            double phiHTCC = Math.toDegrees(recHTCC.getFloat("phi", recDeteHTCC.getInt("pindex", j)));
+                            double thetaHTCC = Math.toDegrees(recHTCC.getFloat("theta", recDeteHTCC.getInt("index", j)));
+                            double phiHTCC = Math.toDegrees(recHTCC.getFloat("phi", recDeteHTCC.getInt("index", j)));
                             double timeCC = recDeteHTCC.getFloat("time", j);
+                            double pathCC = recDeteHTCC.getFloat("path", j);
                             npeAll.fill(nphe);
                             if (returnNHits(thetaHTCC, phiHTCC) == 1) {
-                                double deltaTimeCC = timeCC - startTime;
+                                double deltaTimeCC = timeCC - pathCC/PhysicsConstants.speedOfLight() - startTime;
                                 halfSector = returnHalfSector(phiHTCC);
                                 ring = returnRing(thetaHTCC);
                                 pmt = returnPMT(ring, halfSector);
