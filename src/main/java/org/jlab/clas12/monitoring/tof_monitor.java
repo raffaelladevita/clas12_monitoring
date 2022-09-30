@@ -350,6 +350,7 @@ public class tof_monitor {
 			int sl = DCB.getInt("superlayer",r)-1;
 			float trkDoca = DCB.getFloat("trkDoca",r);
 			float timeResidual = DCB.getFloat("timeResidual",r);
+			float dDoca = DCB.getFloat("dDoca",r);
 			float time = DCB.getFloat("time",r);
 			double betacutvalue = 0.9;
 			double fitresidualcut = 1000; //microns
@@ -375,8 +376,8 @@ public class tof_monitor {
 				// if (otherregions||region2) {
 		
 				//Fill Histograms with no extra cut
-				DC_residuals_trkDoca_nocut[s][sl].fill(trkDoca,timeResidual);
-				DC_residuals_nocut[s][sl].fill(timeResidual);
+				DC_residuals_trkDoca_nocut[s][sl].fill(trkDoca,timeResidual+dDoca);
+				DC_residuals_nocut[s][sl].fill(timeResidual+dDoca);
 				DC_time_nocut[s][sl].fill(time);
 				
 				//Add extra cuts on hits from DC4gui. TrkID, beta, alphacut, TFlight (maybe PID?, needs REC::Event here)
@@ -384,8 +385,8 @@ public class tof_monitor {
 					 DCB.getFloat("TFlight",r) > 0 && alphacutpass == true
 						)
 				{
-					DC_residuals_trkDoca[s][sl].fill(trkDoca,timeResidual);
-					DC_residuals[s][sl].fill(timeResidual);
+					DC_residuals_trkDoca[s][sl].fill(trkDoca,timeResidual+dDoca);
+					DC_residuals[s][sl].fill(timeResidual+dDoca);
 					DC_time[s][sl].fill(time);	
 					
 					if( timestamp%2 == 0) {//even time stamps
@@ -396,8 +397,8 @@ public class tof_monitor {
 						}
 				//Apply also fitresidual cut, factor 0.0001 to convert to cm from microns
 					if (DCB.getFloat("fitResidual",r) < 0.0001 * fitresidualcut) {
-						DC_residuals_trkDoca_rescut[s][sl].fill(trkDoca,timeResidual);
-						DC_residuals_rescut[s][sl].fill(timeResidual);
+						DC_residuals_trkDoca_rescut[s][sl].fill(trkDoca,timeResidual+dDoca);
+						DC_residuals_rescut[s][sl].fill(timeResidual+dDoca);
 						DC_time_rescut[s][sl].fill(time);
 					}						
 				}
