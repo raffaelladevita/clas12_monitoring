@@ -291,25 +291,25 @@ public class tof_monitor {
 			p2_tdcadc_dt[s].setTitleY("counts"); 
 
 			for(int sl=0;sl<6;sl++){
-				DC_residuals_trkDoca[s][sl] = new H2F(String.format("DC_residuals_trkDoca_%d_%d",s+1,sl+1),String.format("DC_residuals_trkDoca_%d_%d",s+1,sl+1),100,0,DCcellsizeSL[sl],100,-1,1);
+				DC_residuals_trkDoca[s][sl] = new H2F(String.format("DC_residuals_trkDoca_%d_%d",s+1,sl+1),String.format("DC_residuals_trkDoca_%d_%d",s+1,sl+1),100,0,DCcellsizeSL[sl],400,-0.5,0.5);
 				DC_residuals_trkDoca[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
 				DC_residuals_trkDoca[s][sl].setTitleX("DOCA (cm)");
 				DC_residuals_trkDoca[s][sl].setTitleY("residual (cm)");
-				DC_residuals_trkDoca_nocut[s][sl] = new H2F(String.format("DC_residuals_trkDoca_nocut_%d_%d",s+1,sl+1),String.format("DC_residuals_trkDoca_nocut_%d_%d",s+1,sl+1),100,0,DCcellsizeSL[sl],100,-1,1);
+				DC_residuals_trkDoca_nocut[s][sl] = new H2F(String.format("DC_residuals_trkDoca_nocut_%d_%d",s+1,sl+1),String.format("DC_residuals_trkDoca_nocut_%d_%d",s+1,sl+1),100,0,DCcellsizeSL[sl],400,-0.5,0.5);
 				DC_residuals_trkDoca_nocut[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
 				DC_residuals_trkDoca_nocut[s][sl].setTitleX("DOCA (cm)");
 				DC_residuals_trkDoca_nocut[s][sl].setTitleY("residual (cm)");
-				DC_residuals_trkDoca_rescut[s][sl] = new H2F(String.format("DC_residuals_trkDoca_rescut_%d_%d",s+1,sl+1),String.format("DC_residuals_trkDoca_rescut_%d_%d",s+1,sl+1),100,0,DCcellsizeSL[sl],100,-0.5,0.5);
+				DC_residuals_trkDoca_rescut[s][sl] = new H2F(String.format("DC_residuals_trkDoca_rescut_%d_%d",s+1,sl+1),String.format("DC_residuals_trkDoca_rescut_%d_%d",s+1,sl+1),100,0,DCcellsizeSL[sl],400,-0.5,0.5);
 				DC_residuals_trkDoca_rescut[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
 				DC_residuals_trkDoca_rescut[s][sl].setTitleX("DOCA (cm)");
 				DC_residuals_trkDoca_rescut[s][sl].setTitleY("residual (cm)");
-				DC_residuals[s][sl] = new H1F(String.format("DC_residuals_%d_%d",s+1,sl+1),String.format("DC_residuals_%d_%d",s+1,sl+1),100,-1,1);
+				DC_residuals[s][sl] = new H1F(String.format("DC_residuals_%d_%d",s+1,sl+1),String.format("DC_residuals_%d_%d",s+1,sl+1),400,-0.5,0.5);
 				DC_residuals[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
 				DC_residuals[s][sl].setTitleX("residual (cm)");
-				DC_residuals_nocut[s][sl] = new H1F(String.format("DC_residuals_nocut_%d_%d",s+1,sl+1),String.format("DC_residuals_nocut_%d_%d",s+1,sl+1),100,-1,1);
+				DC_residuals_nocut[s][sl] = new H1F(String.format("DC_residuals_nocut_%d_%d",s+1,sl+1),String.format("DC_residuals_nocut_%d_%d",s+1,sl+1),400,-0.5,0.5);
 				DC_residuals_nocut[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
 				DC_residuals_nocut[s][sl].setTitleX("residual (cm)");
-				DC_residuals_rescut[s][sl] = new H1F(String.format("DC_residuals_rescut_%d_%d",s+1,sl+1),String.format("DC_residuals_rescut_%d_%d",s+1,sl+1),100,-0.5,0.5);
+				DC_residuals_rescut[s][sl] = new H1F(String.format("DC_residuals_rescut_%d_%d",s+1,sl+1),String.format("DC_residuals_rescut_%d_%d",s+1,sl+1),400,-0.5,0.5);
 				DC_residuals_rescut[s][sl].setTitle(String.format("DC residuals S%d SL%d",s+1,sl+1));
 				DC_residuals_rescut[s][sl].setTitleX("residual (cm)");
 				DC_time[s][sl] = new H1F(String.format("DC_Time_%d_%d",s+1,sl+1),String.format("DC_Time_%d_%d",s+1,sl+1),200,-100,1000);
@@ -350,6 +350,7 @@ public class tof_monitor {
 			int sl = DCB.getInt("superlayer",r)-1;
 			float trkDoca = DCB.getFloat("trkDoca",r);
 			float timeResidual = DCB.getFloat("timeResidual",r);
+			float dDoca = DCB.getFloat("dDoca",r);
 			float time = DCB.getFloat("time",r);
 			double betacutvalue = 0.9;
 			double fitresidualcut = 1000; //microns
@@ -375,8 +376,8 @@ public class tof_monitor {
 				// if (otherregions||region2) {
 		
 				//Fill Histograms with no extra cut
-				DC_residuals_trkDoca_nocut[s][sl].fill(trkDoca,timeResidual);
-				DC_residuals_nocut[s][sl].fill(timeResidual);
+				DC_residuals_trkDoca_nocut[s][sl].fill(trkDoca,timeResidual+dDoca);
+				DC_residuals_nocut[s][sl].fill(timeResidual+dDoca);
 				DC_time_nocut[s][sl].fill(time);
 				
 				//Add extra cuts on hits from DC4gui. TrkID, beta, alphacut, TFlight (maybe PID?, needs REC::Event here)
@@ -384,8 +385,8 @@ public class tof_monitor {
 					 DCB.getFloat("TFlight",r) > 0 && alphacutpass == true
 						)
 				{
-					DC_residuals_trkDoca[s][sl].fill(trkDoca,timeResidual);
-					DC_residuals[s][sl].fill(timeResidual);
+					DC_residuals_trkDoca[s][sl].fill(trkDoca,timeResidual+dDoca);
+					DC_residuals[s][sl].fill(timeResidual+dDoca);
 					DC_time[s][sl].fill(time);	
 					
 					if( timestamp%2 == 0) {//even time stamps
@@ -396,8 +397,8 @@ public class tof_monitor {
 						}
 				//Apply also fitresidual cut, factor 0.0001 to convert to cm from microns
 					if (DCB.getFloat("fitResidual",r) < 0.0001 * fitresidualcut) {
-						DC_residuals_trkDoca_rescut[s][sl].fill(trkDoca,timeResidual);
-						DC_residuals_rescut[s][sl].fill(timeResidual);
+						DC_residuals_trkDoca_rescut[s][sl].fill(trkDoca,timeResidual+dDoca);
+						DC_residuals_rescut[s][sl].fill(timeResidual+dDoca);
 						DC_time_rescut[s][sl].fill(time);
 					}						
 				}

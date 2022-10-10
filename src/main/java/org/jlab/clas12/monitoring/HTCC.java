@@ -22,7 +22,7 @@ public class HTCC {
     List<H1F> hiNphePMTOneHit = new ArrayList();
     List<H1F> hiTimePMTOneHit = new ArrayList();
     H1F timeAll;
-    H1F npeAll;
+    H1F npheAll;
     static int nBinsTime = 4000;
     static double lowTime = -500;
     static double highTime = 500;
@@ -49,8 +49,8 @@ public class HTCC {
         timeAll.setTitle("Combined HTCC timing");
         timeAll.setTitleX("Time, ns");
 
-        npeAll = new H1F("npeAll", "npeAll", 50, 0, 50);
-        npeAll.setOptStat(110);
+        npheAll = new H1F("npheAll", "npheAll", 50, 0, 50);
+        npheAll.setOptStat(110);
     }
 
     int returnSector(double phi) {
@@ -167,7 +167,7 @@ public class HTCC {
         allC.setSize(1200, 600);
         allC.divide(2,1);
         allC.cd(0);
-        allC.draw(npeAll);
+        allC.draw(npheAll);
         allC.setSize(600, 600);
         allC.cd(1);
         allC.draw(timeAll);
@@ -250,7 +250,7 @@ public class HTCC {
                             double phiHTCC = Math.toDegrees(recHTCC.getFloat("phi", recDeteHTCC.getInt("index", j)));
                             double timeCC = recDeteHTCC.getFloat("time", j);
                             double pathCC = recDeteHTCC.getFloat("path", j);
-                            npeAll.fill(nphe);
+                            npheAll.fill(nphe);
                             if (returnNHits(thetaHTCC, phiHTCC) == 1) {
                                 double deltaTimeCC = timeCC - pathCC/PhysicsConstants.speedOfLight() - startTime;
                                 halfSector = returnHalfSector(phiHTCC);
@@ -350,7 +350,7 @@ public class HTCC {
         for (int s = 0; s < 48; s++) {
             dirout.addDataSet(hiNphePMTOneHit.get(s),hiTimePMTOneHit.get(s));
         }
-        dirout.addDataSet(timeAll, npeAll);
+        dirout.addDataSet(timeAll, npheAll);
 
         if (!write_volatile) {
             if (runNumber > 0) {
