@@ -2966,7 +2966,8 @@ public class monitor2p2GeV {
 			//System.out.printf(" %f = %f\n",mom,Math.sqrt( pz*pz + momt*momt ));
 
 			//checkpoint_central
-			int q = bank.getInt("q", k);
+			if(ndf<2 || chi2/ndf>30 || momt<0.2) continue;
+                        int q = bank.getInt("q", k);
 			H_CVT_charge.fill(q);
 			H_CVT_d0.fill(d0);
 			H_CVT_vz_mom.fill(mom,z0);
@@ -4861,7 +4862,7 @@ public class monitor2p2GeV {
                 System.setProperty("java.awt.headless", "true");
 		GStyle.setPalette("kRainBow");
                 int count = 0;
-		int runNum = 0;
+		int runNum = 5038;
 		boolean useTB = true;
 		boolean useVolatile = false;
 		String filelist = "list_of_files.txt";
@@ -4887,6 +4888,7 @@ public class monitor2p2GeV {
 		}catch(IOException e){
 			e.printStackTrace();
 		}
+                toProcessFileNames.add("/Users/devita/rec_clas_015864.evio.00040.hipo");
 		int progresscount=0;int filetot = toProcessFileNames.size();
 		for (String runstrg : toProcessFileNames) if(count<maxevents){
 			progresscount++;
