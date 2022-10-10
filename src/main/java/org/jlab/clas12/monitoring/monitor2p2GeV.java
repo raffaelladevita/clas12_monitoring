@@ -1041,10 +1041,10 @@ public class monitor2p2GeV {
 		H_CVT_z_neg = new H1F("H_CVT_z_neg","H_CVT_z_neg",100,-25,25);
 		H_CVT_z_neg.setTitle("CVT z vertex for negatives");
 		H_CVT_z_neg.setTitleX("z (cm)");
-		H_CVT_d0_pos = new H1F("H_CVT_d0_pos","H_CVT_d0_pos",100,-2.5,2.5);
+		H_CVT_d0_pos = new H1F("H_CVT_d0_pos","H_CVT_d0_pos",100,-1.0, 1.0);
 		H_CVT_d0_pos.setTitle("CVT d0 vertex for positives");
 		H_CVT_d0_pos.setTitleX("d0 (cm)");
-		H_CVT_d0_neg = new H1F("H_CVT_d0_neg","H_CVT_d0_neg",100,-2.5,2.5);
+		H_CVT_d0_neg = new H1F("H_CVT_d0_neg","H_CVT_d0_neg",100,-1.0, 1.0);
 		H_CVT_d0_neg.setTitle("CVT d0 vertex for negatives");
 		H_CVT_d0_neg.setTitleX("d0 (cm)");
 		H_CVT_e_corr_vz = new H2F("H_CVT_e_corr_vz","H_CVT_e_corr_vz",100,-25,25,100,-25,25);
@@ -2946,18 +2946,19 @@ public class monitor2p2GeV {
 			float tandip = bank.getFloat("tandip", k);
 			float phi0 = bank.getFloat("phi0", k);
 			float z0 = bank.getFloat("z0", k);
-			float d0 = ubank.getFloat("d0", k);
+			float d0 = bank.getFloat("d0", k);
 			float chi2 = bank.getFloat("chi2", k);
 			float pathlength = bank.getFloat("pathlength", k);
 			int ndf = bank.getInt("ndf", k);
-                	//double p = bank.getFloat("p", loop);
-                	//double pt = bank.getFloat("pt", loop);
-                	//double pz = pt * tandip;
-                	//double py = pt * Math.sin(phi0);
-                	//double px = pt * Math.cos(phi0);
                 	double vx = -d0 * Math.sin(phi0);
                 	double vy = d0 * Math.cos(phi0);
+                        int q = bank.getInt("q", k);
 
+                        float ptU   = ubank.getFloat("pt", k);
+                        float d0U   = ubank.getFloat("d0", k);
+			float chi2U = ubank.getFloat("chi2", k);
+			int   ndfU  = ubank.getInt("ndf", k);
+                	
 			//double theta = Math.toDegrees(Math.acos(tandip * pt / p));
 
 			phi0 = (float)Math.toDegrees(phi0);
@@ -2966,8 +2967,12 @@ public class monitor2p2GeV {
 			//System.out.printf(" %f = %f\n",mom,Math.sqrt( pz*pz + momt*momt ));
 
 			//checkpoint_central
-			if(ndf<2 || chi2/ndf>30 || momt<0.2) continue;
-                        int q = bank.getInt("q", k);
+			if(ndfU>2 && chi2U/ndfU<30 && ptU>0.2) {
+                            if(q>0)
+                                H_CVT_d0_pos.fill(d0U);
+                            else
+                                H_CVT_d0_neg.fill(d0U);
+                        }
 			H_CVT_charge.fill(q);
 			H_CVT_d0.fill(d0);
 			H_CVT_vz_mom.fill(mom,z0);
@@ -2977,13 +2982,11 @@ public class monitor2p2GeV {
 				tracksPos++;
 				H_CVT_chi2_pos.fill(chi2);
 				H_CVT_z_pos.fill(z0);
-				H_CVT_d0_pos.fill(d0);
 			}
 			else if (q < 0){
 				tracksNeg++;
 				H_CVT_chi2_neg.fill(chi2);
 				H_CVT_z_neg.fill(z0);
-				H_CVT_d0_neg.fill(d0);
 			}
 			hndf.fill(ndf);
 			hp.fill(mom);
