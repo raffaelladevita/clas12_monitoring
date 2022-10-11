@@ -107,7 +107,7 @@ public class monitor2p2GeV {
 
 	public H2F H_CVT_ft, H_CVT_pt, H_CVT_pf, H_CVT_zf, H_CVT_zp, H_CVT_zt;
 	public H1F H_CVT_p, H_CVT_t, H_CVT_f, H_CVT_z, H_CVT_chi2, H_CVT_ndf, H_CVT_pathlength;
-	public H1F H_CVT_z_pos, H_CVT_z_neg, H_CVT_d0_pos, H_CVT_d0_neg, H_CVT_chi2_pos, H_CVT_chi2_neg;
+	public H1F H_CVT_z_pos, H_CVT_z_neg, H_CVT_d0_pos, H_CVT_d0_neg, H_CVT_absd0_pos, H_CVT_absd0_neg, H_CVT_chi2_pos, H_CVT_chi2_neg;
 	public H1F H_CVT_d0, H_CVT_charge;
 	public H2F H_CVT_vz_mom, H_CVT_vz_phi, H_CVT_vz_theta, H_CVT_vx_vy, H_CVT_vx_vz, H_CVT_vz_vy;
 	public H1F H_CVT_mom, H_CVT_theta, H_CVT_phi, H_CVT_vz, H_CVT_vx, H_CVT_vy;
@@ -1041,12 +1041,18 @@ public class monitor2p2GeV {
 		H_CVT_z_neg = new H1F("H_CVT_z_neg","H_CVT_z_neg",100,-25,25);
 		H_CVT_z_neg.setTitle("CVT z vertex for negatives");
 		H_CVT_z_neg.setTitleX("z (cm)");
-		H_CVT_d0_pos = new H1F("H_CVT_d0_pos","H_CVT_d0_pos",100,-1.0, 1.0);
+		H_CVT_d0_pos = new H1F("H_CVT_d0_pos","H_CVT_d0_pos",200,-1.0, 1.0);
 		H_CVT_d0_pos.setTitle("CVT d0 vertex for positives");
 		H_CVT_d0_pos.setTitleX("d0 (cm)");
-		H_CVT_d0_neg = new H1F("H_CVT_d0_neg","H_CVT_d0_neg",100,-1.0, 1.0);
+		H_CVT_d0_neg = new H1F("H_CVT_d0_neg","H_CVT_d0_neg",200,-1.0, 1.0);
 		H_CVT_d0_neg.setTitle("CVT d0 vertex for negatives");
 		H_CVT_d0_neg.setTitleX("d0 (cm)");
+		H_CVT_absd0_pos = new H1F("H_CVT_absd0_pos","H_CVT_absd0_pos",400, 0.0, 2.0);
+		H_CVT_absd0_pos.setTitle("CVT |d0| vertex for positives");
+		H_CVT_absd0_pos.setTitleX("|d0| (cm)");
+		H_CVT_absd0_neg = new H1F("H_CVT_absd0_neg","H_CVT_absd0_neg",400, 0.0, 2.0);
+		H_CVT_absd0_neg.setTitle("CVT |d0| vertex for negatives");
+		H_CVT_absd0_neg.setTitleX("|d0| (cm)");
 		H_CVT_e_corr_vz = new H2F("H_CVT_e_corr_vz","H_CVT_e_corr_vz",100,-25,25,100,-25,25);
 		H_CVT_e_corr_vz.setTitle("Vertex correlation");
 		H_CVT_e_corr_vz.setTitleX("vz e (cm)");
@@ -2968,10 +2974,14 @@ public class monitor2p2GeV {
 
 			//checkpoint_central
 			if(ndfU>2 && chi2U/ndfU<30 && ptU>0.2) {
-                            if(q>0)
+                            if(q>0) {
                                 H_CVT_d0_pos.fill(d0U);
-                            else
+                                H_CVT_absd0_pos.fill(Math.abs(d0U));
+                            }
+                            else {
                                 H_CVT_d0_neg.fill(d0U);
+                                H_CVT_absd0_neg.fill(Math.abs(d0U));
+                            }
                         }
 			H_CVT_charge.fill(q);
 			H_CVT_d0.fill(d0);
@@ -4807,7 +4817,7 @@ public class monitor2p2GeV {
 		dirout.mkdir("/cvt/");
 		dirout.cd("/cvt/");
 		dirout.addDataSet(H_CVT_chi2,H_CVT_ndf,H_CVT_ft,H_CVT_pt,H_CVT_pf,H_CVT_zf,H_CVT_zp,H_CVT_zt,H_CVT_e_corr_vz);
-		dirout.addDataSet(H_CVT_z, H_CVT_z_pos, H_CVT_z_neg, H_CVT_d0_pos, H_CVT_d0_neg, H_CVT_chi2_pos, H_CVT_chi2_neg);
+		dirout.addDataSet(H_CVT_z, H_CVT_z_pos, H_CVT_z_neg, H_CVT_d0_pos, H_CVT_d0_neg, H_CVT_absd0_pos, H_CVT_absd0_neg, H_CVT_chi2_pos, H_CVT_chi2_neg);
 		dirout.addDataSet(hbstOccupancy,hbmtOccupancy,htrks,hpostrks,hnegtrks,hndf,hchi2norm,hp,hpt,hpathlen,hbstOnTrkLayers,hbmtOnTrkLayers,hpostrks_rat, hnegtrks_rat); //checkpoint_central
 		dirout.mkdir("/RF/"); // saving pi_RFtime1's
 		dirout.cd("/RF/");
